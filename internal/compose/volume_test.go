@@ -1,25 +1,54 @@
 package compose_test
 
 import (
+	"fmt"
 	"orca/internal/compose"
-	"orca/testdata"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
-func TestLoadMain(t *testing.T) {
+var defaultVol = compose.VolumeSpec{Name: "docker_defaultvol"}
+var localvol = compose.VolumeSpec{
+	Name:   "docker_localvol",
+	Driver: "local",
+	DriverOpts: map[string]string{
+		"type": "none", "o": "bind", "device": "/src/test"}}
+var externalvol = compose.VolumeSpec{
+	Name: "externalvol", External: true,
+}
+var cachevol = compose.VolumeSpec{
+	Name:   "docker_localvol",
+	Driver: "local",
+	DriverOpts: map[string]string{
+		"type": "tmpfs"}}
 
-	var data string = testdata.TestDataCompose
+func TestVolumeSpec_NeedsOrcaOverlay(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		data []byte
+		spec compose.VolumeSpec
+		want bool
 	}{
-		// TODO: Add test cases.
-		{"test", []byte(data)},
+		{"default",defaultVol,true},
+		{"local",localvol,true},
+{"external",externalvol,false},
+{"cache",cachevol,false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			compose.VolumeProcess(tt.data)
+			// TODO: construct the receiver type.
+			got := tt.spec.NeedsOrcaOverlay()
+			if tt.want!=got{
+				t.Errorf("something wrong,")
+			}
+				if got {
+					fmt.Println("need to create")
+					tt.spec.ApplyLocalBind("/workspace/volumeroot")
+					spew.Dump(tt.spec)
+				} else {
+					fmt.Println("dont need create")
+				}
 		})
 	}
 }

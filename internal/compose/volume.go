@@ -1,80 +1,66 @@
 package compose
 
 import (
-	"fmt"
-	"orca/internal/yamlparser"
-	"os"
-
-	"github.com/davecgh/go-spew/spew"
-	"gopkg.in/yaml.v3"
+	"orca/internal/ostools"
+	"path/filepath"
 )
 
-
-//	Node → Struct 変換で使用（判定用）
+// composeのボリュームオプションstruct
 type VolumeSpec struct {
-	Driver     string            `yaml:"driver,omitempty"`
-	DriverOpts map[string]string `yaml:"driver_opts,omitempty"`
-	External   bool              `yaml:"external,omitempty"`
-	Labels     map[string]string `yaml:"labels,omitempty"`
-	Name       string            `yaml:"name,omitempty"`
-}
-type VolStruct map[string]VolumeSpec
-
-// ローカルバインドボリュームであればパスを返す
-func (v VolumeSpec) AssertLocalBind() (string, bool) {
-	isLocalDriver := v.Driver == "local" || v.Driver == ""
-	isTypeNone := v.DriverOpts["type"] == "none"
-	isBind := v.DriverOpts["o"] == "bind"
-	device := v.DriverOpts["device"]
-	conclusion := isLocalDriver && isTypeNone && isBind
-	return device, conclusion
-
+	Driver     string            `yaml:"driver"`
+	DriverOpts map[string]string `yaml:"driver_opts"`
+	External   bool              `yaml:"external"`
+	Labels     map[string]string `yaml:"labels"`
+	Name       string            `yaml:"name"`
 }
 
-// local+bind+deviceが存在しないケース
-func (v VolumeSpec) NeedsOrcaCreate() bool {
-	device, isLocal := v.AssertLocalBind()
-	if !isLocal {
+// Orcaがボリュームをオーバーレイする必要があるか
+//
+// （local+bind+deviceが存在しないケース
+func (v *VolumeSpec) NeedsOrcaOverlay() bool {
+
+	if v.External {
 		return false
 	}
-	// device が存在しない判定
-	if _, err := os.Stat(device); os.IsNotExist(err) {
+
+	// case 1: driver未定義 → defaultの local
+	if v.Driver == "" {
 		return true
+	}
+
+	// case 2: driver=local かつ driver_optsなし
+	if v.Driver == "local" && len(v.DriverOpts) == 0 {
+		return true
+	}
+
+	// case 3: driver=local + bind but deviceのパスが存在しない
+	if v.Driver == "local" {
+		t := v.DriverOpts["type"]
+		o := v.DriverOpts["o"]
+		dev := v.DriverOpts["device"]
+		if t == "none" && o == "bind" {
+			if !ostools.DirExists(dev) {
+				return true
+			}
+		}
 	}
 	return false
 }
 
-func (v VolStruct) FromNode(volNode *yaml.Node) *VolStruct {
-	volStruct := VolStruct{}
-	yamlparser.NodeToStruct(volNode, &volStruct)
-	return &volStruct
+// Orcaがボリュームをオプションで上書きする
+//
+// とりあえずはローカルバインド作成用
+func (v *VolumeSpec) applyOrcaOverlay(spec VolumeSpec) {
+	// 最低限の local + bind に強制
+	v.Driver = spec.Driver
+	v.DriverOpts = spec.DriverOpts
 }
 
-// name のボリュームを path にバインドするローカルボリュームに置き換え
-func OverlayLocalVolume(node *yaml.Node, name string, path string) {
-	spec := VolumeSpec{
-		Driver: "local",
-		DriverOpts: map[string]string{
-			"o":      "bind",
-			"type":   "none",
-			"device": path + "/" + name,
-		},
+// ローカルバインドをオーバーレイ
+func (v *VolumeSpec) ApplyLocalBind(volume_root string) {
+	opts := map[string]string{
+		"type": "none", "o": "bind", "device": filepath.Join(volume_root, v.Name),
 	}
-	yamlparser.OverlayNode(node, name, spec)
-}
-
-func VolumeProcess(data []byte) {
-	root, _ := yamlparser.ParseYamlToNode(data)
-
-	// volumesノードを取得
-	_, volNode := yamlparser.FindMapKey(root, "volumes")
-	// structに落とし込み
-	volStruct := VolStruct{}.FromNode(volNode)
-	spew.Dump(volStruct)
-	// overlay 実行
-	//TODO: オーバーレイの条件式と具体実装
-
-	// 出力
-	out, _ := yaml.Marshal(&root)
-	fmt.Println(string(out)) //TODO: 出力の統合
+	spec := VolumeSpec{Driver: "local", DriverOpts: opts}
+	v.applyOrcaOverlay(spec)
 }
