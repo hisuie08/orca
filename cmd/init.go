@@ -6,26 +6,57 @@ package cmd
 import (
 	"fmt"
 	"orca/internal/config"
-	"orca/internal/ostools"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
-	Use:   "init",
-	Short: "create orca.yml",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		current, _ := os.Getwd()
-		orcaFile := current + "/orca.yml"
-		if !ostools.FileExisists(orcaFile) {
-			fmt.Printf("creating orca.yml\n")
-			config.Create(orcaFile)
-			fmt.Printf("%v created.\nyou can launch orca\n", orcaFile)
+	Use:   "init [cluster-name]",
+	Short: "Initialize an orca cluster in current directory",
+	Args:  cobra.MaximumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return err
 		}
+
+		clusterName := ""
+		if len(args) == 1 {
+			clusterName = args[0]
+		}
+
+		return runInit(cwd, clusterName)
 	},
+}
+
+func runInit(baseDir, clusterName string) error {
+	path := filepath.Join(baseDir, config.OrcaYamlFile)
+
+	if _, err := os.Stat(path); err == nil {
+		return fmt.Errorf("orca.yml already exists")
+	} else if !os.IsNotExist(err) {
+		return err
+	}
+
+	cfg := config.NewDefaultConfig(clusterName)
+	if err:=writeConfig(path, cfg);err!=nil{
+		return err
+	}
+	fmt.Printf("%v was created successfully\n",path);
+	return nil
+}
+
+func writeConfig(path string, cfg *config.OrcaConfig) error {
+	data, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(path, data, 0644)
 }
 
 func init() {

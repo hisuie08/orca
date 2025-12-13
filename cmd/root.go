@@ -4,8 +4,6 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-	"orca/internal/config"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -24,20 +22,6 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		wd, _ := os.Getwd()
-		file := wd + "/orca.yml"
-		orcaConfig, err := config.LoadF(file)
-		config.OrcaConfig = orcaConfig
-		// orca.ymlがないときはinitとhelp以外のコマンドは封印
-		if err != nil && cmd.Name() != "init" && cmd.Name() != "help" {
-			fmt.Println("orca.yml file does not exist.")
-			fmt.Println("use")
-			fmt.Println("orca init")
-			fmt.Println("to create orca.yml")
-			os.Exit(0)
-		}
-	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
