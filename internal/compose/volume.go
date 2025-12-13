@@ -16,9 +16,8 @@ type VolumeSpec struct {
 
 // Orcaがボリュームをオーバーレイする必要があるか
 //
-// local+bind+deviceが存在しないケース
+// local+bind + deviceが存在しないケース
 func (v *VolumeSpec) NeedsOrcaOverlay() bool {
-
 	if v.External {
 		return false
 	}
@@ -33,8 +32,8 @@ func (v *VolumeSpec) NeedsOrcaOverlay() bool {
 		return true
 	}
 
-	// case 3: driver=local + bind but deviceのパスが存在しない
-	if v.Driver == "local" {
+	// case 3: driver=local + bind だが deviceのパスが存在しない
+	if v.Driver == "local" && len(v.DriverOpts) > 0 {
 		t := v.DriverOpts["type"]
 		o := v.DriverOpts["o"]
 		dev := v.DriverOpts["device"]
@@ -47,21 +46,23 @@ func (v *VolumeSpec) NeedsOrcaOverlay() bool {
 	return false
 }
 
-// Orcaがボリュームをオプションで上書きする
-//
-// とりあえずはローカルバインド作成専用
-func (v *VolumeSpec) applyOrcaOverlay(spec VolumeSpec) {
-	v.Driver = spec.Driver
-	v.DriverOpts = spec.DriverOpts
-}
-
 // ローカルバインドをオーバーレイ
 func (v *VolumeSpec) ApplyLocalBind(volume_root string) *VolumeSpec {
-	path := filepath.Join(volume_root, v.Name)
-	opts := map[string]string{
-		"type": "none", "o": "bind", "device": path,
+	var path string
+	if device, ok := v.DriverOpts["device"]; ok {
+		// もしユーザーが明示したバインド先があればそれを尊重
+		path = device
+	} else {
+		// Nameはdockerが解決してくれる
+		path = filepath.Join(volume_root, v.Name)
 	}
-	spec := VolumeSpec{Driver: "local", DriverOpts: opts}
-	v.applyOrcaOverlay(spec)
+	v.Driver = "local"
+	if v.DriverOpts == nil {
+		v.DriverOpts = map[string]string{}
+	}
+	v.DriverOpts["type"] = "none"
+	v.DriverOpts["o"] = "bind"
+	v.DriverOpts["device"] = path
+
 	return v
 }

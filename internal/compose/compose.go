@@ -24,15 +24,5 @@ func ParseCompose(data []byte) (*ComposeSpec, error) {
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, orca.OrcaError("compose Parse Error", err)
 	}
-	// map型のセクションだけnilチェック
-	for _, v := range cfg.Volumes {
-		if v.DriverOpts == nil {
-			v.DriverOpts = make(map[string]string)
-		}
-		// ラベルをいじる時はここをアンコメント
-		// if v.Labels==nil{
-		// 	v.Labels=make(map[string]string)
-		// }
-	}
 	return &cfg, nil
 }
