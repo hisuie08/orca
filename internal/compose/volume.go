@@ -66,3 +66,12 @@ func (v *VolumeSpec) ApplyLocalBind(volume_root string) *VolumeSpec {
 
 	return v
 }
+
+func (v *VolumeSpec)ApplyExternal()*VolumeSpec{
+	v.Driver=""
+	for k := range v.DriverOpts {
+		delete(v.DriverOpts, k)
+	}
+	v.External=true
+	return v
+}
