@@ -108,7 +108,7 @@ func Test_parseConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var gotErr error
-			got := NewConfig()
+			got := newConfig()
 			gotErr = defaults.Set(got)
 			got.Resolve("/test/dir/orca")
 			if err := got.parseConfig(tt.data); err != nil {
@@ -143,12 +143,12 @@ func TestOrcaConfig_Resolve(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"test1","/path/to/test1",false},
-		{"test2","/path/to/test2",false},
+		{"test1", "/path/to/test1", false},
+		{"test2", "/path/to/test2", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewConfig()
+			c := newConfig()
 			gotErr := c.Resolve(tt.baseDir)
 			if gotErr != nil {
 				if !tt.wantErr {
@@ -159,8 +159,8 @@ func TestOrcaConfig_Resolve(t *testing.T) {
 			if tt.wantErr {
 				t.Fatal("Resolve() succeeded unexpectedly")
 			}
-			if c.Name!=nil {
-				t.Logf("\n%v\n",*c.Name)
+			if c.Name != nil {
+				t.Logf("\n%v\n", *c.Name)
 			}
 		})
 	}
