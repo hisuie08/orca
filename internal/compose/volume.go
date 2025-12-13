@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-// composeのボリュームオプションstruct
+// composeのボリュームオプション構造体
 type VolumeSpec struct {
 	Driver     string            `yaml:"driver"`
 	DriverOpts map[string]string `yaml:"driver_opts"`
@@ -16,7 +16,7 @@ type VolumeSpec struct {
 
 // Orcaがボリュームをオーバーレイする必要があるか
 //
-// （local+bind+deviceが存在しないケース
+// local+bind+deviceが存在しないケース
 func (v *VolumeSpec) NeedsOrcaOverlay() bool {
 
 	if v.External {
@@ -49,18 +49,19 @@ func (v *VolumeSpec) NeedsOrcaOverlay() bool {
 
 // Orcaがボリュームをオプションで上書きする
 //
-// とりあえずはローカルバインド作成用
+// とりあえずはローカルバインド作成専用
 func (v *VolumeSpec) applyOrcaOverlay(spec VolumeSpec) {
-	// 最低限の local + bind に強制
 	v.Driver = spec.Driver
 	v.DriverOpts = spec.DriverOpts
 }
 
 // ローカルバインドをオーバーレイ
-func (v *VolumeSpec) ApplyLocalBind(volume_root string) {
+func (v *VolumeSpec) ApplyLocalBind(volume_root string) *VolumeSpec {
+	path := filepath.Join(volume_root, v.Name)
 	opts := map[string]string{
-		"type": "none", "o": "bind", "device": filepath.Join(volume_root, v.Name),
+		"type": "none", "o": "bind", "device": path,
 	}
 	spec := VolumeSpec{Driver: "local", DriverOpts: opts}
 	v.applyOrcaOverlay(spec)
+	return v
 }
