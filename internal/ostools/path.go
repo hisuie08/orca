@@ -1,19 +1,8 @@
 package ostools
 
 import (
-	"fmt"
 	"os"
-	"strings"
 )
-
-// パスからファル読み取り
-func LoadFile(path string) ([]byte, error) {
-	if data, err := os.ReadFile(path); err != nil {
-		return nil, fmt.Errorf("file read error: %w", err)
-	} else {
-		return data, nil
-	}
-}
 
 func pathExists(path string, expectDir bool) bool {
 	if f, err := os.Stat(path); err == nil {
@@ -27,12 +16,6 @@ func DirExists(path string) bool {
 }
 func FileExisists(path string) bool {
 	return pathExists(path, false)
-}
-
-// 現在のディレクトリ名を取得
-func DirName(path string) string {
-	split := strings.Split(path, "/")
-	return split[len(split)-1]
 }
 
 // サブディレクトリを走査

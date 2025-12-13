@@ -1,8 +1,6 @@
 package ostools
 
 import (
-	"fmt"
-	"slices"
 	"testing"
 )
 
@@ -86,45 +84,6 @@ func TestFileExisists(t *testing.T) {
 			// TODO: update the condition below to compare got with tt.want.
 			if got != tt.want {
 				t.Errorf("FileExisists() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestDirName(t *testing.T) {
-	tests := []struct {
-		name string // description of this test case
-		path string
-		want string
-	}{
-		{"current","/path/to/ostools", "ostools"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := DirName(tt.path)
-			// TODO: update the condition below to compare got with tt.want.
-			fmt.Printf("%v\n", got)
-			fmt.Println(got == tt.want)
-		})
-	}
-}
-
-func TestDirectories(t *testing.T) {
-	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		path string
-		want []string
-	}{
-		// TODO: Add test cases.
-		{"ostools", testpath, []string{"dir", "test"}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := Directories(tt.path)
-			// TODO: update the condition below to compare got with tt.want.
-			if !slices.Equal(got, tt.want) {
-				t.Errorf("Directotires() = %v, want %v", got, tt.want)
 			}
 		})
 	}

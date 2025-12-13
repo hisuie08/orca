@@ -1,87 +1,100 @@
 package config
 
 import (
-	"fmt"
-	"orca/internal/ostools"
+	orca "orca/helper"
 	"os"
+	"path/filepath"
+	"sync"
 
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
 
-var OrcaConfig *OrcaYaml;
-type OrcaYaml struct {
-	Name     string             `yaml:"name"`
-	CacheDir string             `yaml:"cache_dir,omitempty"`
-	Volume   *VolumeConfigSpec  `yaml:"volume"`
-	Network  *NetworkConfigSpec `yaml:"network"`
+var (
+	orcaConfig OrcaConfig
+	configLock sync.RWMutex
+)
+
+const (
+	OrcaYamlFile string = "orca.yml"
+)
+
+type OrcaConfig struct {
+	Name    *string         `yaml:"name"`
+	Volume  *VolumeConfig  `yaml:"volume"`
+	Network *NetworkConfig `yaml:"network"`
 }
 
-type VolumeConfigSpec struct {
-	ChangeVolumeRoot bool   `yaml:"change_root" default:"false"`
-	MakeDirs         bool   `yaml:"make_dirs" default:"false"`
-	RootPath         string `yaml:"root_path"`
+type VolumeConfig struct {
+	VolumeRoot *string `yaml:"volume_root"`
+	EnsurePath bool   `yaml:"ensure_path" default:"true"`
 }
 
-type NetworkConfigSpec struct {
-	CreateOrcaNetwork bool   `yaml:"create_network" default:"true"`
-	NetworkName       string `yaml:"network_name"`
+type NetworkConfig struct {
+	Enabled  bool   `yaml:"enabled" default:"true"`
+	Internal bool   `yaml:"internal" default:"false"`
+	Name     *string `yaml:"name"`
 }
 
-// 動的にデフォルト値を設定する必要があるやつ
-func (o *OrcaYaml) SetDefaults() {
-	cd, _ := os.Getwd()
-	if defaults.CanUpdate(o.Name) {
-		o.Name = ostools.DirName(cd)
+// configを作成
+func NewConfig() *OrcaConfig {
+	orcaConfig := &OrcaConfig{
+		Volume:  &VolumeConfig{},
+		Network: &NetworkConfig{},
 	}
-	if defaults.CanUpdate(o.CacheDir) {
-		o.CacheDir = cd + "/.orca"
-	}
-	if defaults.CanUpdate(o.Volume.RootPath) {
-		o.Volume.RootPath = cd + "/volumes"
-	}
-	if defaults.CanUpdate(o.Network.NetworkName) {
-		o.Network.NetworkName = ostools.DirName(cd) + "_network"
-	}
+	return orcaConfig
 }
 
-// 既存のorca.ymlを読み出す。
-//
-// ostool.LoadFile(ファイルパス)とかを渡す
-func Load(data []byte) (*OrcaYaml, error) {
-	orcaYaml := &OrcaYaml{}
-	yaml.Unmarshal(data, orcaYaml)
-	// セクション自体がなければ初期化
-	if orcaYaml.Network == nil {
-		orcaYaml.Network = &NetworkConfigSpec{}
+// テスト用に切り出したパース処理
+func (cfg *OrcaConfig) parseConfig(data []byte) error {
+	if err := yaml.Unmarshal(data, cfg); err != nil {
+		return orca.OrcaError("orca.yml unmarshal failed", err)
 	}
-	if orcaYaml.Volume == nil {
-		orcaYaml.Volume = &VolumeConfigSpec{}
-	}
-	// 値単位でデフォルトをセット
-	if err := defaults.Set(orcaYaml); err != nil {
-		return nil, fmt.Errorf("unexpected error: %w", err)
-	}
-
-	return orcaYaml, nil
+	return nil
 }
 
-func LoadF(path string) (*OrcaYaml, error) {
-	data, err := ostools.LoadFile(path)
-	if err == nil {
-		return Load(data)
+// Configの実行時に解決される値を解決する処理
+func (c *OrcaConfig) Resolve(baseDir string) error {
+    if c.Name == nil {
+        name := filepath.Base(baseDir)
+        c.Name = &name
+    }
+
+    if c.Network != nil && c.Network.Enabled {
+        if c.Network.Name == nil {
+            name := *c.Name + "_network"
+            c.Network.Name = &name
+        }
+    }
+    return nil
+}
+// ファイル読み込みからConfig構築
+func Load(path string) (*OrcaConfig, error) {
+	data, err := os.ReadFile(filepath.Join(path, OrcaYamlFile))
+	if err != nil {
+		return nil, orca.OrcaError("file read error", err)
 	}
-	return nil, err
+	cfg := NewConfig()
+	if err := cfg.parseConfig(data); err != nil {
+		return nil, err
+	}
+	// defaults適用
+	if err := defaults.Set(cfg); err != nil {
+		return nil, orca.OrcaError("default apply failed", err)
+	}
+	// pathをもとにして実行時解決部分の補完
+	if err := cfg.Resolve(path); err != nil {
+		return nil, orca.OrcaError("config resolve failed", err)
+	}
+	return cfg, nil
 }
 
 // ゼロからorca.ymlを生成するやつ
-func Create(path string) error {
-	orcaYaml := &OrcaYaml{
-		Network: &NetworkConfigSpec{},
-		Volume:  &VolumeConfigSpec{}}
-	if err := defaults.Set(orcaYaml); err != nil {
-		panic(err)
-	}
-	content, _ := yaml.Marshal(orcaYaml)
-	return ostools.ToFile(content, path)
+func NewDefaultConfig(clusterName string) *OrcaConfig {
+	cfg := NewConfig()
+	if clusterName != "" {
+    cfg.Name = &clusterName
+}
+	defaults.Set(cfg)
+	return cfg
 }
