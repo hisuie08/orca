@@ -1,57 +1,55 @@
 package ostools
 
 import (
-	"bytes"
 	"fmt"
+	orca "orca/helper"
 	"os/exec"
 )
 
-// Dockerコマンド実行用
-func run(args ...string) (string, error) {
-	cmd := exec.Command("docker", args...)
-
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return "", fmt.Errorf("docker %v failed: %v: %s",
-			args, err, stderr.String())
-	}
-
-	return out.String(), nil
+// コマンド実行用
+func run(c string, args ...string) (string, error) {
+	cmd := exec.Command(c, args...)
+	out, err := cmd.CombinedOutput()
+	op := fmt.Sprintf("%s %v failed: ", c, args)
+	return string(out), orca.OrcaError(op, err)
 }
 
 // Volume
-// 
+//
+// docker volume inspect <name>
 func VolumeExists(name string) bool {
-	_, err := run("volume", "inspect", name)
+	_, err := run("docker", "volume", "inspect", name)
 	return err == nil
 }
 
 // Network
+//
+// docker network inspect <name>
 func NetworkExists(name string) bool {
-	_, err := run("network", "inspect", name)
+	_, err := run("docker", "network", "inspect", name)
 	return err == nil
 }
 
-func CreateNetwork(name string, driver string) error {
-	if driver == "" {
-		driver = "bridge"
+// docker network create <name> <--internal>
+func CreateNetwork(name string, internal bool) error {
+	cmd := []string{"network", "create", name}
+	if internal {
+		cmd = append(cmd, "--internal")
 	}
-
-	_, err := run("network", "create", "--driver", driver, name)
+	_, err := run("docker", cmd...)
 	return err
 }
 
 // Compose
+//
+// docker compose --project-directory <dir> config
+func ComposeConfig(dir string) (string, error) {
+	return run("docker", "compose", "--project-directory", dir, "config")
+}
 
-// compose up -d -f <file>
-func ComposeUp(composeFile string, workdir string) error {
+// docker compose up -d -f <file>
+func ComposeUp(composeFile string) error {
 	cmd := exec.Command("docker", "compose", "-f", composeFile, "up", "-d")
-	cmd.Dir = workdir
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("compose up failed: %v: %s", err, out)
