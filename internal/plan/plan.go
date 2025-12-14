@@ -30,7 +30,3 @@ func GetComposes(orcaRoot string) ([]CollectedCompose, error) {
 	}
 	return result, nil
 }
-
-func PrintPlan() {
-
-}
