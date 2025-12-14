@@ -6,16 +6,9 @@ import (
 	"orca/internal/ostools"
 )
 
-type typeOverlay string
-
-const (
-	Replace typeOverlay = "replace"
-	Remove  typeOverlay = "remove"
-)
-
 func collectNeedOverlay(orcaRoot string, name string) (
-	map[typeOverlay][]string, error) {
-	result := make(map[typeOverlay][]string)
+	map[OverlayType][]string, error) {
+	result := make(map[OverlayType][]string)
 	composes, err := GetComposes(orcaRoot)
 	if err != nil {
 		return nil, orca.OrcaError("collect networks failed", err)

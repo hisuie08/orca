@@ -2,9 +2,51 @@ package plan
 
 import "orca/internal/compose"
 
-// Orcaの変更箇所記録用
+// 列挙型系
 
-// ボリューム
+type PlanStatus string
+
+const (
+	StatusOK    PlanStatus = "OK"
+	StatusWarn  PlanStatus = "WARN"
+	StatusError PlanStatus = "ERROR"
+)
+
+// CollectedSpec
+// From: 定義されていたcompose
+// Spec: 定義
+type CollectedVolume struct {
+	From string
+	Spec *compose.VolumeSpec
+}
+
+type CollectedCompose struct {
+	From string
+	Spec *compose.ComposeSpec
+}
+
+type CollectedNetwork struct {
+	From string
+	Spec *compose.NetworkSpec
+}
+
+// Network
+type OverlayType string
+
+const (
+	Replace OverlayType = "replace"
+	Remove  OverlayType = "remove"
+)
+
+type NetworkPlan struct {
+	Name       string
+	NeedCreate bool
+	Internal   bool
+	Removed    []string
+	Replaced   []string
+}
+
+// Volume
 type VolumeType string
 
 const (
@@ -29,50 +71,7 @@ type VolumePlan struct {
 	Warnings []string
 }
 
-// From: 定義されていたcompose
-// Spec: 定義
-type CollectedVolume struct {
-	From string
-	Spec *compose.VolumeSpec
-}
-
-type CollectedCompose struct {
-	From string
-	Spec *compose.ComposeSpec
-}
-
-type CollectedNetwork struct {
-	From string
-	Spec *compose.NetworkSpec
-}
-
-type NetworkPlan struct {
-	Name       string
-	NeedCreate bool
-	Internal   bool
-	Removed    []string
-	Replaced   []string
-}
-
 type OrcaPlan struct {
 	Volumes  []VolumePlan
 	Networks []NetworkPlan
-}
-
-func InitPlan(name string, orca_root string) *OrcaPlan {
-	return &OrcaPlan{
-		Volumes:  []VolumePlan{},
-		Networks: []NetworkPlan{}}
-}
-
-func (p *OrcaPlan) RegisterVolume(v VolumePlan) {
-	p.Volumes = append(p.Volumes, v)
-}
-func (p *OrcaPlan) RegisterNetwork(n NetworkPlan) {
-	p.Networks = append(p.Networks, n)
-}
-
-func (p *OrcaPlan) Dump() string {
-
-	return ""
 }

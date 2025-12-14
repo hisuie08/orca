@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+// Planning用Compose取得
 func GetComposes(orcaRoot string) ([]CollectedCompose, error) {
 	result := []CollectedCompose{}
 	dirs, err := ostools.Directories(orcaRoot)
@@ -28,4 +29,8 @@ func GetComposes(orcaRoot string) ([]CollectedCompose, error) {
 
 	}
 	return result, nil
+}
+
+func PrintPlan() {
+
 }
