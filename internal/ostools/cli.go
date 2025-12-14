@@ -43,8 +43,10 @@ func CreateNetwork(name string, internal bool) error {
 // Compose
 //
 // docker compose --project-directory <dir> config
-func ComposeConfig(dir string) (string, error) {
-	return run("docker", "compose", "--project-directory", dir, "config")
+func ComposeConfig(dir string) ([]byte, error) {
+	cmd := exec.Command("docker", "compose", "--project-directory", dir, "config")
+	return cmd.CombinedOutput()
+
 }
 
 // docker compose up -d -f <file>
