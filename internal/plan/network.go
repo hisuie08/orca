@@ -8,7 +8,9 @@ import (
 
 func BuildNetworkPlan(orcaRoot string,
 	cfg *config.NetworkConfig) (*NetworkPlan, error) {
-	plan := &NetworkPlan{}
+	plan := &NetworkPlan{
+		SharedName: *cfg.Name,
+	}
 	composes, err := GetComposes(orcaRoot)
 	if err != nil {
 		return nil, orca.OrcaError("collect networks failed", err)
