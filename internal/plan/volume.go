@@ -160,6 +160,7 @@ func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
 		typ = c.Gray("external")
 	}
 	stat := string(status)
+	// TODO: NeedMkDirを反映したstatusの細かい出し分け
 	switch status {
 	case StatusOK:
 		stat = c.Green(string(StatusOK))
@@ -176,7 +177,7 @@ func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
 }
 
 func PrintVolumePlanTable(plans []VolumePlan, w io.Writer, c *orca.Colorizer) {
-	title := "VOLUME PLAN"
+	title := "[VOLUME PLAN]"
 	headers := []string{"NAME", "TYPE", "USED BY", "BIND PATH", "STATUS"}
 
 	rows := make([][]string, 0, len(plans))

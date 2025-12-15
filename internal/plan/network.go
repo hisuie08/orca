@@ -42,9 +42,9 @@ func BuildNetworkPlan(orcaRoot string,
 }
 
 func PrintNetworkPlan(p NetworkPlan, w io.Writer, c *orca.Colorizer) {
-	title := "NETWORK PLAN"
+	title := "[NETWORK PLAN]"
 	fmt.Fprintf(w, "%s\n", title)
-	fmt.Fprintf(w, "Shared network: %s\n", p.SharedName)
+	fmt.Fprintf(w, "SHARED NETWORK: %s\n", p.SharedName)
 
 	// compose名でソート
 	composes := make([]string, 0, len(p.Actions))
@@ -59,7 +59,7 @@ func PrintNetworkPlan(p NetworkPlan, w io.Writer, c *orca.Colorizer) {
 			continue
 		}
 
-		fmt.Fprintf(w, "[%s]\n", compose)
+		fmt.Fprintf(w, "- %s\n", compose)
 
 		for _, a := range actions {
 			switch a.Type {
@@ -71,6 +71,6 @@ func PrintNetworkPlan(p NetworkPlan, w io.Writer, c *orca.Colorizer) {
 				fmt.Fprintf(w, "  %s network  → %s (name conflict)\n", label, a.Network)
 			}
 		}
-		fmt.Fprintln(w)
 	}
+	fmt.Fprintln(w)
 }

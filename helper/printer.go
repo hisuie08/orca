@@ -41,7 +41,7 @@ func PrintTable(w io.Writer, title string, headers []string, rows [][]string) {
 func printRow(w io.Writer, cols []string, widths []int) {
 	for i, c := range cols {
 		vis := visibleLen(c)
-		pad := max(widths[i] - vis, 0)
+		pad := max(widths[i]-vis, 0)
 		fmt.Fprint(w, c)
 		fmt.Fprint(w, strings.Repeat(" ", pad))
 		fmt.Fprint(w, "  ")
