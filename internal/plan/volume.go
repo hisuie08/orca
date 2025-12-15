@@ -45,7 +45,7 @@ func groupVolumes(vols []CollectedVolume) map[string][]CollectedVolume {
 }
 
 // ボリュームのPlanを構築する
-func buildPlan(
+func buildVolPlan(
 	groups map[string][]CollectedVolume,
 	cfg *config.VolumeConfig,
 ) []VolumePlan {
@@ -136,11 +136,11 @@ func BuildVolumePlan(orcaRoot string, cfg *config.VolumeConfig) (
 		return nil, err
 	} else {
 		group := groupVolumes(collect)
-		return buildPlan(group, cfg), nil
+		return buildVolPlan(group, cfg), nil
 	}
 }
 
-func toPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
+func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
 	status := StatusOK
 	if len(plan.Warnings) > 0 {
 		status = StatusWarn
@@ -181,7 +181,7 @@ func PrintVolumePlanTable(plans []VolumePlan, w io.Writer, c *orca.Colorizer) {
 
 	rows := make([][]string, 0, len(plans))
 	for _, p := range plans {
-		rows = append(rows, toPlanRow(p, c))
+		rows = append(rows, toVolPlanRow(p, c))
 	}
 	orca.PrintTable(w, title, headers, rows)
 
