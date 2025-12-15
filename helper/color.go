@@ -1,14 +1,14 @@
 package orca
 
 import (
-	"fmt"
 	"io"
 	"os"
 
 	"golang.org/x/term"
 )
+
 // 色文字用
-type StringColor string
+type StringColor = string
 
 const (
 	ColorReset  StringColor = "\033[0m"
@@ -23,30 +23,34 @@ type Colorizer struct {
 	Enabled bool
 }
 
-func NewColorizer(w io.Writer) Colorizer {
-	return Colorizer{Enabled: IsTTY(w)}
+func NewColorizer(w io.Writer) *Colorizer {
+	return &Colorizer{Enabled: IsTTY(w)}
 }
-func (c Colorizer) Color(s string, col StringColor) string {
+func (c *Colorizer) Color(s string, col StringColor) string {
 	if !c.Enabled {
 		return s
 	}
-	return fmt.Sprintf("%s%s%s", col, s, ColorReset)
+	return col + s + ColorReset
 }
 
-func (c Colorizer) Red(s string) string {
+func (c *Colorizer) Red(s string) string {
 	return c.Color(s, ColorRed)
 }
 
-func (c Colorizer) Yellow(s string) string {
+func (c *Colorizer) Yellow(s string) string {
 	return c.Color(s, ColorYellow)
 }
 
-func (c Colorizer) Green(s string) string {
+func (c *Colorizer) Green(s string) string {
 	return c.Color(s, ColorGreen)
 }
 
-func (c Colorizer) Gray(s string) string {
+func (c *Colorizer) Gray(s string) string {
 	return c.Color(s, ColorGray)
+}
+
+func (c *Colorizer) Blue(s string) string {
+	return c.Color(s, ColorBlue)
 }
 
 func IsTTY(w io.Writer) bool {

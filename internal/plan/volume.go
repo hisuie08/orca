@@ -2,10 +2,12 @@ package plan
 
 import (
 	"fmt"
+	"io"
 	orca "orca/helper"
 	"orca/internal/config"
 	"orca/internal/ostools"
 	"path/filepath"
+	"strings"
 )
 
 // volumeをかき集める
@@ -136,4 +138,51 @@ func BuildVolumePlan(orcaRoot string, cfg *config.VolumeConfig) (
 		group := groupVolumes(collect)
 		return buildPlan(group, cfg), nil
 	}
+}
+
+func toPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
+	status := StatusOK
+	if len(plan.Warnings) > 0 {
+		status = StatusWarn
+	}
+
+	bind := plan.BindPath
+	if bind == "" {
+		bind = "-"
+	}
+	typ := string(plan.Type)
+	switch plan.Type {
+	case VolumeShared:
+		typ = c.Blue("shared")
+	case VolumeLocal:
+		typ = c.Green("local")
+	case VolumeExternal:
+		typ = c.Gray("external")
+	}
+	stat := string(status)
+	switch status {
+	case StatusOK:
+		stat = c.Green(string(StatusOK))
+	case StatusWarn:
+		stat = c.Yellow(string(StatusWarn))
+	}
+	return []string{
+		plan.Name,
+		typ,
+		strings.Join(plan.UsedBy, ","),
+		bind,
+		stat,
+	}
+}
+
+func PrintVolumePlanTable(plans []VolumePlan, w io.Writer, c *orca.Colorizer) {
+	title := "VOLUME PLAN"
+	headers := []string{"NAME", "TYPE", "USED BY", "BIND PATH", "STATUS"}
+
+	rows := make([][]string, 0, len(plans))
+	for _, p := range plans {
+		rows = append(rows, toPlanRow(p, c))
+	}
+	orca.PrintTable(w, title, headers, rows)
+
 }

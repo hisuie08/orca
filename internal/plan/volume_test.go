@@ -1,9 +1,12 @@
 package plan
 
 import (
+	"io"
+	orca "orca/helper"
 	"orca/internal/config"
 	"orca/internal/ostools"
 	"orca/testdata"
+	"os"
 	"testing"
 
 	"gopkg.in/yaml.v3"
@@ -40,6 +43,32 @@ func TestBuildVolumePlan(t *testing.T) {
 				c_, _ := yaml.Marshal(got)
 				ostools.CreateFile(testdata.TestPath+"/plan.yml", c_)
 			}
+		})
+	}
+}
+
+func TestPrintVolumePlanTable(t *testing.T) {
+	// 検証済みモックデータ
+	cfg := &config.OrcaConfig{
+		Volume: &config.VolumeConfig{
+			EnsurePath: true,
+			VolumeRoot: &testdata.TestPath,
+		},
+	}
+	buildPlan, _ := BuildVolumePlan(testdata.TestPath, cfg.Volume)
+
+	tests := []struct {
+		name  string
+		plans []VolumePlan
+		w     io.Writer
+	}{
+		// TODO: Add test cases.
+		{"test", buildPlan, os.Stdout},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			PrintVolumePlanTable(tt.plans, tt.w, &orca.Colorizer{Enabled: true})
 		})
 	}
 }
