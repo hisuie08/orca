@@ -29,9 +29,7 @@ func BuildNetworkPlan(orcaRoot string,
 				action.Type = NetworkRemoveConflict
 				action.Message = fmt.Sprintf("network %s conflicts with shared network and will be removed", n.Name)
 			}
-			if action.Type == "" { // 変更がなければスキップ
-				continue
-			} else {
+			if action.Type != "" { // 変更があるときだけplanに追加
 				plan.Actions = append(plan.Actions, action)
 			}
 		}
