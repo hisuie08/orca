@@ -1,25 +1,26 @@
-package plan_test
+package plan
 
 import (
+	"io"
+	orca "orca/helper"
 	"orca/internal/config"
 	"orca/internal/ostools"
-	"orca/internal/plan"
 	"orca/testdata"
+	"os"
 	"testing"
 
 	"gopkg.in/yaml.v3"
 )
 
-var netname = "orcanet"
-var testConfig = &config.OrcaConfig{
-	Network: &config.NetworkConfig{
-		Enabled:  true,
-		Internal: false,
-		Name:     &netname,
-	},
-}
-
 func TestBuildNetworkPlan(t *testing.T) {
+	netname := "orcanet"
+	testcfg := &config.OrcaConfig{
+		Network: &config.NetworkConfig{
+			Enabled:  true,
+			Internal: false,
+			Name:     &netname,
+		},
+	}
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -28,11 +29,11 @@ func TestBuildNetworkPlan(t *testing.T) {
 		wantErr  bool
 	}{
 		// TODO: Add test cases.
-		{"test", testdata.TestPath, testConfig.Network, false},
+		{"test", testdata.TestPath, testcfg.Network, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := plan.BuildNetworkPlan(tt.orcaRoot, tt.cfg)
+			got, gotErr := BuildNetworkPlan(tt.orcaRoot, tt.cfg)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("BuildNetworkPlan() failed: %v", gotErr)
@@ -47,6 +48,33 @@ func TestBuildNetworkPlan(t *testing.T) {
 				c_, _ := yaml.Marshal(got)
 				ostools.CreateFile(testdata.TestPath+"/network.yml", c_)
 			}
+		})
+	}
+}
+
+func TestPrintNetworkPlan(t *testing.T) {
+
+	netname := "orcanet"
+	testcfg := &config.OrcaConfig{
+		Network: &config.NetworkConfig{
+			Enabled:  true,
+			Internal: false,
+			Name:     &netname,
+		},
+	}
+	buildPlan, _ := BuildNetworkPlan(testdata.TestPath, testcfg.Network)
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		p NetworkPlan
+		w io.Writer
+	}{
+		// TODO: Add test cases.
+		{"test", *buildPlan, os.Stdout},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			PrintNetworkPlan(tt.p, tt.w, &orca.Colorizer{Enabled: true})
 		})
 	}
 }

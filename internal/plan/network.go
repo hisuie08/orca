@@ -2,8 +2,10 @@ package plan
 
 import (
 	"fmt"
+	"io"
 	orca "orca/helper"
 	"orca/internal/config"
+	"sort"
 )
 
 func BuildNetworkPlan(orcaRoot string,
@@ -37,4 +39,38 @@ func BuildNetworkPlan(orcaRoot string,
 		}
 	}
 	return plan, nil
+}
+
+func PrintNetworkPlan(p NetworkPlan, w io.Writer, c *orca.Colorizer) {
+	title := "NETWORK PLAN"
+	fmt.Fprintf(w, "%s\n", title)
+	fmt.Fprintf(w, "Shared network: %s\n", p.SharedName)
+
+	// compose名でソート
+	composes := make([]string, 0, len(p.Actions))
+	for k := range p.Actions {
+		composes = append(composes, k)
+	}
+	sort.Strings(composes)
+
+	for _, compose := range composes {
+		actions := p.Actions[compose]
+		if len(actions) == 0 {
+			continue
+		}
+
+		fmt.Fprintf(w, "[%s]\n", compose)
+
+		for _, a := range actions {
+			switch a.Type {
+			case NetworkOverrideDefault:
+				label := c.Blue("override")
+				fmt.Fprintf(w, "  %s default → %s\n", label, p.SharedName)
+			case NetworkRemoveConflict:
+				label := c.Yellow("remove")
+				fmt.Fprintf(w, "  %s network  → %s (name conflict)\n", label, a.Network)
+			}
+		}
+		fmt.Fprintln(w)
+	}
 }
