@@ -32,7 +32,7 @@ type CollectedNetwork struct {
 
 type NetworkPlan struct {
 	SharedName string // orcaが使う共有ネットワーク名
-	Actions    []NetworkAction
+	Actions    map[string][]NetworkAction
 }
 
 type NetworkActionType = string
@@ -44,7 +44,6 @@ const (
 
 type NetworkAction struct {
 	Type    NetworkActionType
-	Compose string // どのcomposeディレクトリか
 	Network string // 対象ネットワーク名（default or 削除対象）
 	Message string // 人間向け補足
 }

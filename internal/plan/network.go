@@ -10,6 +10,7 @@ func BuildNetworkPlan(orcaRoot string,
 	cfg *config.NetworkConfig) (*NetworkPlan, error) {
 	plan := &NetworkPlan{
 		SharedName: *cfg.Name,
+		Actions:    map[string][]NetworkAction{},
 	}
 	composes, err := GetComposes(orcaRoot)
 	if err != nil {
@@ -18,7 +19,6 @@ func BuildNetworkPlan(orcaRoot string,
 	for _, c := range composes {
 		for k, n := range c.Spec.Networks {
 			action := NetworkAction{
-				Compose: c.From,
 				Network: k,
 			}
 			switch {
@@ -32,7 +32,7 @@ func BuildNetworkPlan(orcaRoot string,
 				action.Message = fmt.Sprintf("network %s conflicts with shared network and will be removed", n.Name)
 			}
 			if action.Type != "" { // 変更があるときだけplanに追加
-				plan.Actions = append(plan.Actions, action)
+				plan.Actions[c.From] = append(plan.Actions[c.From], action)
 			}
 		}
 	}
