@@ -41,7 +41,7 @@ func TestBuildVolumePlan(t *testing.T) {
 			if true {
 
 				c_, _ := yaml.Marshal(got)
-				ostools.CreateFile(testdata.TestPath+"/plan.yml", c_)
+				ostools.CreateFile(testdata.TestPath+"/volume.yml", c_)
 			}
 		})
 	}
