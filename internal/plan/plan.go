@@ -4,6 +4,7 @@ import (
 	orca "orca/helper"
 	"orca/internal/compose"
 	"orca/internal/ostools"
+	"os"
 	"path/filepath"
 )
 
@@ -14,6 +15,9 @@ func GetComposes(orcaRoot string) ([]CollectedCompose, error) {
 	if err != nil {
 		return nil, orca.OrcaError("collect volumes failed", err)
 	}
+	// HACK: 駆け上がり止めcompose
+	stopperCompose:=filepath.Join(orcaRoot,"compose.yml")
+	ostools.CreateFile(stopperCompose,[]byte{})
 	for _, dir := range dirs {
 		composeYml, cfgerr := ostools.ComposeConfig(dir)
 		if cfgerr != nil {
@@ -28,5 +32,6 @@ func GetComposes(orcaRoot string) ([]CollectedCompose, error) {
 		result = append(result, CollectedCompose{filepath.Base(dir), cmps})
 
 	}
+	os.Remove(stopperCompose) //駆け上がり止めcomposeの削除
 	return result, nil
 }
