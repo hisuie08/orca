@@ -2,17 +2,11 @@ package plan
 
 import "orca/internal/compose"
 
-// 列挙型系
-
-type PlanStatus string
-
-const (
-	StatusOK    PlanStatus = "OK"
-	StatusWarn  PlanStatus = "WARN"
-	StatusError PlanStatus = "ERROR"
-)
-
-// CollectedSpec
+// =================
+//
+//	CollectedSpec
+//
+// =================
 // From: 定義されていたcompose
 // Spec: 定義
 type CollectedVolume struct {
@@ -30,29 +24,50 @@ type CollectedNetwork struct {
 	Spec *compose.NetworkSpec
 }
 
-// Network
-type OverlayType string
-
-const (
-	Replace OverlayType = "replace"
-	Remove  OverlayType = "remove"
-)
+// ===========
+//
+//	Network
+//
+// ===========
 
 type NetworkPlan struct {
-	Name       string
-	NeedCreate bool
-	Internal   bool
-	Removed    []string
-	Replaced   []string
+	SharedName string // orcaが使う共有ネットワーク名
+	Actions    []NetworkAction
 }
 
-// Volume
+type NetworkActionType = string
+
+const (
+	NetworkOverrideDefault NetworkActionType = "override-default"
+	NetworkRemoveConflict  NetworkActionType = "remove-conflict"
+)
+
+type NetworkAction struct {
+	Type    NetworkActionType
+	Compose string // どのcomposeディレクトリか
+	Network string // 対象ネットワーク名（default or 削除対象）
+	Message string // 人間向け補足
+}
+
+// =========
+//
+//	Volume
+//
+// =========
 type VolumeType string
 
 const (
 	VolumeLocal    VolumeType = "local"
 	VolumeShared   VolumeType = "shared"
 	VolumeExternal VolumeType = "external"
+)
+
+type PlanStatus string
+
+const (
+	StatusOK    PlanStatus = "OK"
+	StatusWarn  PlanStatus = "WARN"
+	StatusError PlanStatus = "ERROR"
 )
 
 type VolumePlan struct {
@@ -71,7 +86,12 @@ type VolumePlan struct {
 	Warnings []string
 }
 
+// ===========
+//
+//	OrcaPlan
+//
+// ===========
 type OrcaPlan struct {
 	Volumes  []VolumePlan
-	Networks []NetworkPlan
+	Networks NetworkPlan
 }

@@ -1,50 +1,40 @@
 package plan
 
 import (
+	"fmt"
 	orca "orca/helper"
 	"orca/internal/config"
-	"orca/internal/ostools"
 )
 
-func collectNeedOverlay(orcaRoot string, name string) (
-	map[OverlayType][]string, error) {
-	result := make(map[OverlayType][]string)
+func BuildNetworkPlan(orcaRoot string,
+	cfg *config.NetworkConfig) (*NetworkPlan, error) {
+	plan := &NetworkPlan{}
 	composes, err := GetComposes(orcaRoot)
 	if err != nil {
 		return nil, orca.OrcaError("collect networks failed", err)
 	}
-	// ネットワークセクションのエントリを回収
 	for _, c := range composes {
 		for k, n := range c.Spec.Networks {
-			switch {
-			case k != "default" && n.Name == name:
-				// defaultでない競合する同名ネットワークがcompose内にあったら置換
-				result[Remove] = append(result[Remove], c.From)
-			case k == "default" && n.Name != name:
-				// defaultが共通ネットワークと違うなら置き換え
-				result[Replace] = append(result[Replace], c.From)
-			default:
+			action := NetworkAction{
+				Compose: c.From,
+				Network: k,
 			}
-
+			switch {
+			case k == "default" && n.Name != *cfg.Name:
+				// デフォルト上書き
+				action.Type = NetworkOverrideDefault
+				action.Message = "default network is overridden to use shared network orca_network"
+			case k != "default" && n.Name == *cfg.Name:
+				// 競合削除
+				action.Type = NetworkRemoveConflict
+				action.Message = fmt.Sprintf("network %s conflicts with shared network and will be removed", n.Name)
+			}
+			if action.Type == "" { // 変更がなければスキップ
+				continue
+			} else {
+				plan.Actions = append(plan.Actions, action)
+			}
 		}
 	}
-	return result, nil
-
-}
-func BuildNetworkPlan(orcaRoot string, cfg *config.NetworkConfig) (
-	*NetworkPlan, error) {
-	plan := &NetworkPlan{}
-	if !cfg.Enabled {
-		return plan, nil
-	}
-	plan.Name = *cfg.Name
-	exists := ostools.NetworkExists(*cfg.Name)
-	plan.NeedCreate = !exists
-	collect, err := collectNeedOverlay(orcaRoot, plan.Name)
-	if err != nil {
-		return nil, err
-	}
-	plan.Removed = collect[Remove]
-	plan.Replaced = collect[Replace]
-	return plan, err
+	return plan, nil
 }
