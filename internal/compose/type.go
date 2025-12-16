@@ -48,5 +48,6 @@ type CollectedCompose struct {
 
 type CollectedNetwork struct {
 	From string
+	Key string
 	Spec *NetworkSpec
 }

@@ -36,13 +36,26 @@ func CollectComposes(orcaRoot string) ([]CollectedCompose, error) {
 	return result, nil
 }
 
-
 func CollectVolumes(composes []CollectedCompose) []CollectedVolume {
 	result := []CollectedVolume{}
 	for _, c := range composes {
 		for _, v := range c.Spec.Volumes {
 			result = append(result, CollectedVolume{
 				From: filepath.Base(c.From),
+				Spec: v,
+			})
+		}
+	}
+	return result
+}
+
+func CollectNetworks(composes []CollectedCompose) []CollectedNetwork {
+	result := []CollectedNetwork{}
+	for _, c := range composes {
+		for k, v := range c.Spec.Networks {
+			result = append(result, CollectedNetwork{
+				From: filepath.Base(c.From),
+				Key:  k,
 				Spec: v,
 			})
 		}
