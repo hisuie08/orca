@@ -6,17 +6,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Orcaが読み出すComposeのルートセクション
-type ComposeSpec struct {
-	Volumes  VolumesSection  `yaml:"volumes"`
-	Networks NetworksSection `yaml:"networks"`
-}
-
-// Composeのトップレベルvolumesセクション
-type VolumesSection = map[string]*VolumeSpec
-
-// Composeのトップレベルnetworksセクション
-type NetworksSection = map[string]*NetworkSpec
 
 // Composeを読み出す関数
 func ParseCompose(data []byte) (*ComposeSpec, error) {

@@ -5,14 +5,7 @@ import (
 	"path/filepath"
 )
 
-// composeのボリュームオプション構造体
-type VolumeSpec struct {
-	Driver     string            `yaml:"driver"`
-	DriverOpts map[string]string `yaml:"driver_opts"`
-	External   bool              `yaml:"external"`
-	Labels     map[string]string `yaml:"labels"`
-	Name       string            `yaml:"name"`
-}
+
 
 // Orcaがボリュームをオーバーレイする必要があるか
 //

@@ -2,12 +2,7 @@ package compose
 
 import "orca/internal/config"
 
-// composeのネットワークオプション構造体
-type NetworkSpec struct {
-	Name     string `yaml:"name"`
-	Driver   string `yaml:"driver"`
-	External bool   `yaml:"external"`
-}
+
 
 func NeedNetworkOverlay(cfg *config.OrcaConfig) bool {
 	return cfg.Network.Enabled
