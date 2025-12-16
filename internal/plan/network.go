@@ -10,7 +10,7 @@ import (
 )
 
 func BuildNetworkPlan(networks []compose.CollectedNetwork,
-	cfg *config.NetworkConfig) (*NetworkPlan, error) {
+	cfg *config.NetworkConfig) *NetworkPlan {
 	plan := &NetworkPlan{
 		SharedName: *cfg.Name,
 		Actions:    map[string][]NetworkAction{},
@@ -33,7 +33,7 @@ func BuildNetworkPlan(networks []compose.CollectedNetwork,
 			plan.Actions[n.From] = append(plan.Actions[n.From], action)
 		}
 	}
-	return plan, nil
+	return plan
 }
 
 func PrintNetworkPlan(p NetworkPlan, w io.Writer, c *orca.Colorizer) {
