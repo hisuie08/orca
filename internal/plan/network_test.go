@@ -3,6 +3,7 @@ package plan
 import (
 	"io"
 	orca "orca/helper"
+	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/ostools"
 	"orca/testdata"
@@ -33,7 +34,10 @@ func TestBuildNetworkPlan(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := BuildNetworkPlan(tt.orcaRoot, tt.cfg)
+
+			comp, _ := compose.CollectComposes(testdata.TestPath)
+			nets := compose.CollectNetworks(comp)
+			got, gotErr := BuildNetworkPlan(nets, tt.cfg)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("BuildNetworkPlan() failed: %v", gotErr)
@@ -62,7 +66,9 @@ func TestPrintNetworkPlan(t *testing.T) {
 			Name:     &netname,
 		},
 	}
-	buildPlan, _ := BuildNetworkPlan(testdata.TestPath, testcfg.Network)
+	comp, _ := compose.CollectComposes(testdata.TestPath)
+	nets := compose.CollectNetworks(comp)
+	buildPlan, _ := BuildNetworkPlan(nets, testcfg.Network)
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.

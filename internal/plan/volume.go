@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	orca "orca/helper"
+	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/ostools"
 	"path/filepath"
@@ -11,27 +12,10 @@ import (
 )
 
 // volumeをかき集める
-func collectVolumes(orcaRoot string) ([]CollectedVolume, error) {
-	result := []CollectedVolume{}
-
-	composes, err := GetComposes(orcaRoot)
-	if err != nil {
-		return nil, orca.OrcaError("collect volumes failed", err)
-	}
-	for _, c := range composes {
-		for _, v := range c.Spec.Volumes {
-			result = append(result, CollectedVolume{
-				From: filepath.Base(c.From),
-				Spec: v,
-			})
-		}
-	}
-	return result, nil
-}
 
 // 名前基準にボリュームをグルーピングしなおし。重複やexternalの検出用
-func groupVolumes(vols []CollectedVolume) map[string][]CollectedVolume {
-	groups := make(map[string][]CollectedVolume)
+func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.CollectedVolume {
+	groups := make(map[string][]compose.CollectedVolume)
 	for _, v := range vols {
 		// orcaがオーバーレイする必要がないボリュームはスキップ
 		// 照合のためにexternalは一旦回収
@@ -46,7 +30,7 @@ func groupVolumes(vols []CollectedVolume) map[string][]CollectedVolume {
 
 // ボリュームのPlanを構築する
 func buildVolPlan(
-	groups map[string][]CollectedVolume,
+	groups map[string][]compose.CollectedVolume,
 	cfg *config.VolumeConfig,
 ) []VolumePlan {
 
@@ -130,14 +114,9 @@ func buildVolPlan(
 	return plans
 }
 
-func BuildVolumePlan(orcaRoot string, cfg *config.VolumeConfig) (
-	[]VolumePlan, error) {
-	if collect, err := collectVolumes(orcaRoot); err != nil {
-		return nil, err
-	} else {
-		group := groupVolumes(collect)
-		return buildVolPlan(group, cfg), nil
-	}
+func BuildVolumePlan(collect []compose.CollectedVolume, cfg *config.VolumeConfig) []VolumePlan {
+	group := groupVolumes(collect)
+	return buildVolPlan(group, cfg)
 }
 
 func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {

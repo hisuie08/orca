@@ -1,29 +1,5 @@
 package plan
 
-import "orca/internal/compose"
-
-// =================
-//
-//	CollectedSpec
-//
-// =================
-// From: 定義されていたcompose
-// Spec: 定義
-type CollectedVolume struct {
-	From string
-	Spec *compose.VolumeSpec
-}
-
-type CollectedCompose struct {
-	From string
-	Spec *compose.ComposeSpec
-}
-
-type CollectedNetwork struct {
-	From string
-	Spec *compose.NetworkSpec
-}
-
 // ===========
 //
 //	Network

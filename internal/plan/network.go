@@ -4,38 +4,33 @@ import (
 	"fmt"
 	"io"
 	orca "orca/helper"
+	"orca/internal/compose"
 	"orca/internal/config"
 	"sort"
 )
 
-func BuildNetworkPlan(orcaRoot string,
+func BuildNetworkPlan(networks []compose.CollectedNetwork,
 	cfg *config.NetworkConfig) (*NetworkPlan, error) {
 	plan := &NetworkPlan{
 		SharedName: *cfg.Name,
 		Actions:    map[string][]NetworkAction{},
 	}
-	composes, err := GetComposes(orcaRoot)
-	if err != nil {
-		return nil, orca.OrcaError("collect networks failed", err)
-	}
-	for _, c := range composes {
-		for k, n := range c.Spec.Networks {
-			action := NetworkAction{
-				Network: k,
-			}
-			switch {
-			case k == "default" && n.Name != *cfg.Name:
-				// デフォルト上書き
-				action.Type = NetworkOverrideDefault
-				action.Message = "default network is overridden to use shared network orca_network"
-			case k != "default" && n.Name == *cfg.Name:
-				// 競合削除
-				action.Type = NetworkRemoveConflict
-				action.Message = fmt.Sprintf("network %s conflicts with shared network and will be removed", n.Name)
-			}
-			if action.Type != "" { // 変更があるときだけplanに追加
-				plan.Actions[c.From] = append(plan.Actions[c.From], action)
-			}
+	for _, n := range networks {
+		action := NetworkAction{
+			Network: n.Key,
+		}
+		switch {
+		case n.Key == "default" && n.Spec.Name != *cfg.Name:
+			// デフォルト上書き
+			action.Type = NetworkOverrideDefault
+			action.Message = "default network is overridden to use shared network orca_network"
+		case n.Key != "default" && n.Spec.Name == *cfg.Name:
+			// 競合削除
+			action.Type = NetworkRemoveConflict
+			action.Message = fmt.Sprintf("network %s conflicts with shared network and will be removed", n.Spec.Name)
+		}
+		if action.Type != "" { // 変更があるときだけplanに追加
+			plan.Actions[n.From] = append(plan.Actions[n.From], action)
 		}
 	}
 	return plan, nil

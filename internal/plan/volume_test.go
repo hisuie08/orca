@@ -3,6 +3,7 @@ package plan
 import (
 	"io"
 	orca "orca/helper"
+	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/ostools"
 	"orca/testdata"
@@ -27,13 +28,9 @@ func TestBuildVolumePlan(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := BuildVolumePlan(tt.orcaRoot, tt.cfg)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("BuildVolumePlan() failed: %v", gotErr)
-				}
-				return
-			}
+			comp, _ := compose.CollectComposes(testdata.TestPath)
+			vol := compose.CollectVolumes(comp)
+			got := BuildVolumePlan(vol, tt.cfg)
 			if tt.wantErr {
 				t.Fatal("BuildVolumePlan() succeeded unexpectedly")
 			}
@@ -55,8 +52,10 @@ func TestPrintVolumePlanTable(t *testing.T) {
 			VolumeRoot: &testdata.TestPath,
 		},
 	}
-	buildPlan, _ := BuildVolumePlan(testdata.TestPath, cfg.Volume)
 
+	comp, _ := compose.CollectComposes(testdata.TestPath)
+	vol := compose.CollectVolumes(comp)
+	buildPlan := BuildVolumePlan(vol, cfg.Volume)
 	tests := []struct {
 		name  string
 		plans []VolumePlan
