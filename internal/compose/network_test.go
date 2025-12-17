@@ -1,1 +1,1 @@
-package compose
+package compose_test

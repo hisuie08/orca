@@ -1,41 +1,14 @@
-package compose
+package compose_test
 
 import (
+	"orca/internal/compose"
+	"orca/testdata"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
 )
 
-/*
-通常のcompose.yml読み出しではなく `docker compose config` の出力を受け取るので
-セクションは正規化される。ほぼ
-*/
-var testCompose = `
-volumes:
-  defaultvol:
-    name: docker_defaultvol
-  localvol:
-    name: docker_localvol
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /src/test
-  namedvol:
-    name: customname
-  externalvol:
-    external: true
-  cache:
-    driver: local
-    driver_opts:
-      type: tmpfs
-networks:
-  net:
-    driver: bridge
-  default:
-    name: main
-    external: true
-`
+
 
 func TestParseCompose(t *testing.T) {
 	tests := []struct {
@@ -45,11 +18,11 @@ func TestParseCompose(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"test", []byte(testCompose), false},
+		{"test", []byte(testdata.TestDataCompose), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := ParseCompose(tt.data)
+			got, gotErr := compose.ParseCompose(tt.data)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("ParseCompose() failed: %v", gotErr)
