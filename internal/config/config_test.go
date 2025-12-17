@@ -1,6 +1,7 @@
-package config
+package config_test
 
 import (
+	"orca/internal/config"
 	"os"
 	"testing"
 
@@ -48,9 +49,9 @@ func TestCreate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotErr := NewDefaultConfig(tt.path)
+			gotErr := config.NewDefaultConfig(tt.path)
 			// テストで作成したファイルの削除
-			defer os.Remove(tt.path + "/" + OrcaYamlFile)
+			defer os.Remove(tt.path + "/" + config.OrcaYamlFile)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("Create() failed: %v", gotErr)
@@ -75,7 +76,7 @@ func TestLoad(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := Load(tt.path)
+			got, gotErr := config.Load(tt.path)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("Load() failed: %v", gotErr)
@@ -108,10 +109,10 @@ func Test_parseConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var gotErr error
-			got := newConfig()
+			got := config.NewConfig()
 			gotErr = defaults.Set(got)
 			got.Resolve("/test/dir/orca")
-			if err := got.parseConfig(tt.data); err != nil {
+			if err := config.ParseConfig(got, tt.data); err != nil {
 				if !tt.wantErr {
 					t.Errorf("parseConfig() failed: %v", gotErr)
 				}
@@ -148,7 +149,7 @@ func TestOrcaConfig_Resolve(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := newConfig()
+			c := config.NewConfig()
 			gotErr := c.Resolve(tt.baseDir)
 			if gotErr != nil {
 				if !tt.wantErr {

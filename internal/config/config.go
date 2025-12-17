@@ -40,7 +40,7 @@ func newConfig() *OrcaConfig {
 }
 
 // テスト用に切り出したパース処理
-func (cfg *OrcaConfig) parseConfig(data []byte) error {
+func parseConfig(cfg *OrcaConfig,data []byte) error {
 	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return orca.OrcaError("orca.yml unmarshal failed", err)
 	}
@@ -70,7 +70,7 @@ func Load(orca_dir string) (*OrcaConfig, error) {
 		return nil, orca.OrcaError("file read error", err)
 	}
 	cfg := newConfig()
-	if err := cfg.parseConfig(data); err != nil {
+	if err := parseConfig(cfg,data); err != nil {
 		return nil, err
 	}
 	// defaults適用
