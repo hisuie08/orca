@@ -55,3 +55,17 @@ func printSeparator(w io.Writer, widths []int) {
 	}
 	fmt.Fprintln(w)
 }
+
+type Printer struct{
+	W io.Writer
+	C Colorizer
+}
+
+func NewPrinter(w io.Writer,c Colorizer)*Printer{
+	return &Printer{w,c}
+}
+
+func (d *Printer)PrintDRY(s string){
+	label:=d.C.Blue("[DRY-RUN]")
+	fmt.Fprintf(d.W,"%s %s",label,s)
+}
