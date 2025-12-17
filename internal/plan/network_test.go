@@ -37,13 +37,7 @@ func TestBuildNetworkPlan(t *testing.T) {
 
 			comp, _ := compose.CollectComposes(testdata.TestPath)
 			nets := compose.CollectNetworks(comp)
-			got, gotErr := BuildNetworkPlan(nets, tt.cfg)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("BuildNetworkPlan() failed: %v", gotErr)
-				}
-				return
-			}
+			got := BuildNetworkPlan(nets, tt.cfg)
 			if tt.wantErr {
 				t.Fatal("BuildNetworkPlan() succeeded unexpectedly")
 			}
@@ -68,7 +62,7 @@ func TestPrintNetworkPlan(t *testing.T) {
 	}
 	comp, _ := compose.CollectComposes(testdata.TestPath)
 	nets := compose.CollectNetworks(comp)
-	buildPlan, _ := BuildNetworkPlan(nets, testcfg.Network)
+	buildPlan := BuildNetworkPlan(nets, testcfg.Network)
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
