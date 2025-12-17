@@ -8,8 +8,6 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-
-
 func TestParseCompose(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
@@ -35,6 +33,39 @@ func TestParseCompose(t *testing.T) {
 			// TODO: update the condition below to compare got with tt.want.
 			if got != nil {
 				spew.Dump(got)
+			}
+		})
+	}
+}
+
+func TestCollectComposes(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		orcaRoot string
+		wantErr  bool
+	}{
+		// TODO: Add test cases.
+		{"test", testdata.TestPath, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cmps, gotErr := compose.ComposeMap(tt.orcaRoot)
+			got := compose.CollectComposes(*cmps)
+			vol := compose.CollectVolumes(*cmps)
+			nets := compose.CollectNetworks(*cmps)
+			if gotErr != nil {
+				if !tt.wantErr {
+					t.Errorf("CollectComposes() failed: %v", gotErr)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("CollectComposes() succeeded unexpectedly")
+			}
+			// TODO: update the condition below to compare got with tt.want.
+			if true {
+				testdata.SpewPrint(got, nets, vol)
 			}
 		})
 	}

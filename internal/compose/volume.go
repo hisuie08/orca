@@ -5,7 +5,18 @@ import (
 	"path/filepath"
 )
 
-
+func CollectVolumes(m map[string]*ComposeSpec) []CollectedVolume {
+	result := []CollectedVolume{}
+	for _, c := range MapToArray(m) {
+		for _, v := range c.Spec.Volumes {
+			result = append(result, CollectedVolume{
+				From: filepath.Base(c.From),
+				Spec: v,
+			})
+		}
+	}
+	return result
+}
 
 // Orcaがボリュームをオーバーレイする必要があるか
 //
@@ -37,34 +48,4 @@ func (v *VolumeSpec) NeedsOrcaOverlay() bool {
 		}
 	}
 	return false
-}
-
-// ローカルバインドをオーバーレイ
-func (v *VolumeSpec) ApplyLocalBind(volume_root string) *VolumeSpec {
-	var path string
-	if device, ok := v.DriverOpts["device"]; ok {
-		// もしユーザーが明示したバインド先があればそれを尊重
-		path = device
-	} else {
-		// Nameはdockerが解決してくれる
-		path = filepath.Join(volume_root, v.Name)
-	}
-	v.Driver = "local"
-	if v.DriverOpts == nil {
-		v.DriverOpts = map[string]string{}
-	}
-	v.DriverOpts["type"] = "none"
-	v.DriverOpts["o"] = "bind"
-	v.DriverOpts["device"] = path
-
-	return v
-}
-
-func (v *VolumeSpec)ApplyExternal()*VolumeSpec{
-	v.Driver=""
-	for k := range v.DriverOpts {
-		delete(v.DriverOpts, k)
-	}
-	v.External=true
-	return v
 }

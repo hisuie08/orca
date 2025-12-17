@@ -1,6 +1,6 @@
 package compose
 
-// Orcaが読み出すComposeのルートセクション
+// ComposeSpec Orcaが読み出すComposeのルートセクション
 type ComposeSpec struct {
 	Volumes  VolumesSection  `yaml:"volumes"`
 	Networks NetworksSection `yaml:"networks"`
@@ -23,31 +23,30 @@ type VolumeSpec struct {
 
 // composeのネットワークオプション構造体
 type NetworkSpec struct {
-	Name     string `yaml:"name"`
-	Driver   string `yaml:"driver"`
-	External bool   `yaml:"external"`
+	Name     string            `yaml:"name"`
+	Driver   string            `yaml:"driver"`
+	External bool              `yaml:"external"`
+	Labels   map[string]string `yaml:"labels"`
 }
-
 
 // =================
 //
 //	CollectedSpec
 //
 // =================
-// From: 定義されていたcompose
+// From:
 // Spec: 定義
-type CollectedVolume struct {
-	From string
-	Spec *VolumeSpec
+type Spec interface {
+	ComposeSpec | VolumeSpec | NetworkSpec
 }
 
-type CollectedCompose struct {
-	From string
-	Spec *ComposeSpec
+// CollectedSpec
+type CollectedSpec[T Spec] struct {
+	From string // 定義されていたcompose
+	Spec *T     // 定義
 }
+type CollectedVolume = CollectedSpec[VolumeSpec]
 
-type CollectedNetwork struct {
-	From string
-	Key string
-	Spec *NetworkSpec
-}
+type CollectedCompose = CollectedSpec[ComposeSpec]
+
+type CollectedNetwork = CollectedSpec[NetworkSpec]
