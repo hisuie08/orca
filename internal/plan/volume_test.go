@@ -1,4 +1,4 @@
-package plan
+package plan_test
 
 import (
 	"io"
@@ -6,6 +6,7 @@ import (
 	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/ostools"
+	"orca/internal/plan"
 	"orca/testdata"
 	"os"
 	"testing"
@@ -28,9 +29,10 @@ func TestBuildVolumePlan(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			comp, _ := compose.CollectComposes(testdata.TestPath)
-			vol := compose.CollectVolumes(comp)
-			got := BuildVolumePlan(vol, tt.cfg)
+
+			cmps, _ := compose.ComposeMap(testdata.TestPath)
+			vol := compose.CollectVolumes(*cmps)
+			got := plan.BuildVolumePlan(vol, tt.cfg)
 			if tt.wantErr {
 				t.Fatal("BuildVolumePlan() succeeded unexpectedly")
 			}
@@ -53,12 +55,12 @@ func TestPrintVolumePlanTable(t *testing.T) {
 		},
 	}
 
-	comp, _ := compose.CollectComposes(testdata.TestPath)
-	vol := compose.CollectVolumes(comp)
-	buildPlan := BuildVolumePlan(vol, cfg.Volume)
+	comp, _ := compose.ComposeMap(testdata.TestPath)
+	vol := compose.CollectVolumes(*comp)
+	buildPlan := plan.BuildVolumePlan(vol, cfg.Volume)
 	tests := []struct {
 		name  string
-		plans []VolumePlan
+		plans []plan.VolumePlan
 		w     io.Writer
 	}{
 		// TODO: Add test cases.
@@ -67,7 +69,7 @@ func TestPrintVolumePlanTable(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			PrintVolumePlanTable(tt.plans, tt.w, &orca.Colorizer{Enabled: true})
+			plan.PrintVolumePlanTable(tt.plans, tt.w, &orca.Colorizer{Enabled: true})
 		})
 	}
 }
