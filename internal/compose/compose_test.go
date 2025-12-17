@@ -2,10 +2,12 @@ package compose_test
 
 import (
 	"orca/internal/compose"
+	"orca/internal/ostools"
 	"orca/testdata"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
+	"gopkg.in/yaml.v3"
 )
 
 func TestParseCompose(t *testing.T) {
@@ -65,7 +67,12 @@ func TestCollectComposes(t *testing.T) {
 			}
 			// TODO: update the condition below to compare got with tt.want.
 			if true {
-				testdata.SpewPrint(got, nets, vol)
+				c,_:=yaml.Marshal(got)
+				v,_:=yaml.Marshal(vol)
+				n,_:=yaml.Marshal(nets)
+				ostools.CreateFile("./test_compose.yml",c)
+				ostools.CreateFile("./test_volume.yml",v)
+				ostools.CreateFile("./test_network.yml",n)
 			}
 		})
 	}

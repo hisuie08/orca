@@ -43,7 +43,7 @@ func TestBuildNetworkPlan(t *testing.T) {
 			// TODO: update the condition below to compare got with tt.want.
 			if true {
 				c_, _ := yaml.Marshal(got)
-				ostools.CreateFile(testdata.TestPath+"/network.yml", c_)
+				ostools.CreateFile("./test_network.yml", c_)
 			}
 		})
 	}
