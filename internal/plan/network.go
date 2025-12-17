@@ -10,8 +10,8 @@ import (
 )
 
 func BuildNetworkPlan(composes []compose.CollectedCompose,
-	cfg *config.NetworkConfig) *NetworkPlan {
-	plan := &NetworkPlan{
+	cfg *config.NetworkConfig) NetworkPlan {
+	plan := NetworkPlan{
 		SharedName: *cfg.Name,
 		Actions:    map[string][]NetworkAction{},
 	}

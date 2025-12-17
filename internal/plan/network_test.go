@@ -68,7 +68,7 @@ func TestPrintNetworkPlan(t *testing.T) {
 		w io.Writer
 	}{
 		// TODO: Add test cases.
-		{"test", *buildPlan, os.Stdout},
+		{"test", buildPlan, os.Stdout},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
