@@ -1,6 +1,7 @@
 package process
 
 import (
+	orca "orca/helper"
 	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/plan"
@@ -8,7 +9,7 @@ import (
 
 type mapCompose map[string]*compose.ComposeSpec
 
-func PlanProcess(orcaRoot string, cfg *config.OrcaConfig, show bool) error {
+func PlanProcess(orcaRoot string, cfg *config.OrcaConfig, printer *orca.Printer) error {
 	cfg.Resolve(orcaRoot)
 	// compose構成ロード
 	composeMap, err := compose.ComposeMap(orcaRoot)
@@ -35,6 +36,9 @@ func ApplyVolumePlan(m mapCompose, plans []plan.VolumePlan) error {
 	for _, p := range plans {
 		for _, u := range p.UsedBy {
 			for k, v := range m[u].Volumes {
+				// NOTE:
+				// docker compose config により volume > Name は一意に正規化されている。
+				// map key は保持していないため Name で線形探索する。
 				if v.Name == p.Name {
 					switch p.Type {
 					case plan.VolumeLocal:
