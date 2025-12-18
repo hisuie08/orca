@@ -57,7 +57,7 @@ func TestPrintVolumePlanTable(t *testing.T) {
 	comp, _ := compose.ComposeMap(testdata.TestPath)
 	vol := compose.CollectVolumes(*comp)
 	buildPlan := plan.BuildVolumePlan(vol, cfg.Volume)
-	printer := orca.NewPrinter(os.Stdout, *&orca.Colorizer{Enabled: true})
+	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	tests := []struct {
 		name  string
 		plans []plan.VolumePlan

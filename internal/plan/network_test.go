@@ -59,7 +59,7 @@ func TestPrintNetworkPlan(t *testing.T) {
 		},
 	}
 
-	printer := orca.NewPrinter(os.Stdout, *&orca.Colorizer{Enabled: true})
+	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	comp, _ := compose.ComposeMap(testdata.TestPath)
 	buildPlan := BuildNetworkPlan(compose.CollectComposes(*comp), testcfg.Network)
 	tests := []struct {
