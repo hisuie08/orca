@@ -71,9 +71,13 @@ func CreateFile(target string, content []byte) error {
 	return os.WriteFile(target, content, 0o644)
 }
 
+func CreateDir(target string) error {
+	return os.MkdirAll(target, 0o755)
+}
+
 // - target がなければ再帰的に作成
 // - ファイル末尾に「content+改行」追記
-func AppendFile(target string, content string) error {
+func AppendToFile(target string, content string) error {
 	if err := ensureParentDir(target); err != nil {
 		return err
 	}

@@ -170,7 +170,7 @@ func TestAppendFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotErr := AppendFile(tt.target, tt.content)
+			gotErr := AppendToFile(tt.target, tt.content)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("AppendFile() failed: %v", gotErr)

@@ -1,13 +1,19 @@
 /*
 Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 
-*//*
+*/ /*
 未実装
 */
 package cmd
 
 import (
 	"fmt"
+	"io"
+	orca "orca/helper"
+	"orca/internal/compose"
+	"orca/internal/config"
+	"orca/internal/plan"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -15,16 +21,39 @@ import (
 // planCmd represents the plan command
 var planCmd = &cobra.Command{
 	Use:   "plan",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "orcaがcomposeを管理する際変更される箇所を出力",
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("plan called")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		return runPlan(cwd, os.Stdout)
 	},
+}
+
+func runPlan(orcaRoot string, w io.Writer) error {
+	printer := orca.NewPrinter(w, *orca.NewColorizer(w))
+	cfg, err := config.Load(orcaRoot)
+	if err != nil {
+		return err
+	}
+	cfg.Resolve(orcaRoot)
+	cmp, err := compose.ComposeMap(orcaRoot)
+	if err != nil {
+		return err
+	}
+	vol := compose.CollectVolumes(*cmp)
+	net := compose.CollectComposes(*cmp)
+	volumePlan := plan.BuildVolumePlan(vol, cfg.Volume)
+
+	networkPlan := plan.BuildNetworkPlan(net, cfg.Network)
+	plan.PrintVolumePlanTable(volumePlan, printer)
+
+	fmt.Printf("\n")
+
+	plan.PrintNetworkPlan(networkPlan, printer)
+	return nil
 }
 
 func init() {
