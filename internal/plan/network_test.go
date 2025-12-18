@@ -1,7 +1,6 @@
 package plan
 
 import (
-	"io"
 	orca "orca/helper"
 	"orca/internal/compose"
 	"orca/internal/config"
@@ -59,20 +58,22 @@ func TestPrintNetworkPlan(t *testing.T) {
 			Name:     &netname,
 		},
 	}
+
+	printer := orca.NewPrinter(os.Stdout, *&orca.Colorizer{Enabled: true})
 	comp, _ := compose.ComposeMap(testdata.TestPath)
 	buildPlan := BuildNetworkPlan(compose.CollectComposes(*comp), testcfg.Network)
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		p NetworkPlan
-		w io.Writer
+		p       NetworkPlan
+		printer orca.Printer
 	}{
 		// TODO: Add test cases.
-		{"test", buildPlan, os.Stdout},
+		{"test", buildPlan, *printer},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			PrintNetworkPlan(tt.p, tt.w, &orca.Colorizer{Enabled: true})
+			PrintNetworkPlan(tt.p, &tt.printer)
 		})
 	}
 }

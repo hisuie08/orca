@@ -1,7 +1,6 @@
 package plan_test
 
 import (
-	"io"
 	orca "orca/helper"
 	"orca/internal/compose"
 	"orca/internal/config"
@@ -58,18 +57,19 @@ func TestPrintVolumePlanTable(t *testing.T) {
 	comp, _ := compose.ComposeMap(testdata.TestPath)
 	vol := compose.CollectVolumes(*comp)
 	buildPlan := plan.BuildVolumePlan(vol, cfg.Volume)
+	printer := orca.NewPrinter(os.Stdout, *&orca.Colorizer{Enabled: true})
 	tests := []struct {
 		name  string
 		plans []plan.VolumePlan
-		w     io.Writer
+		p     *orca.Printer
 	}{
 		// TODO: Add test cases.
-		{"test", buildPlan, os.Stdout},
+		{"test", buildPlan, printer},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			plan.PrintVolumePlanTable(tt.plans, tt.w, &orca.Colorizer{Enabled: true})
+			plan.PrintVolumePlanTable(tt.plans, printer)
 		})
 	}
 }

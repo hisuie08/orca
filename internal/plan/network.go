@@ -2,7 +2,6 @@ package plan
 
 import (
 	"fmt"
-	"io"
 	orca "orca/helper"
 	"orca/internal/compose"
 	"orca/internal/config"
@@ -39,11 +38,11 @@ func BuildNetworkPlan(composes []compose.CollectedCompose,
 	return plan
 }
 
-func PrintNetworkPlan(p NetworkPlan, w io.Writer, c *orca.Colorizer) {
+func PrintNetworkPlan(p NetworkPlan, printer *orca.Printer) {
 	title := "[NETWORK PLAN]"
-	fmt.Fprintf(w, "%s\n", title)
-	fmt.Fprintf(w, "SHARED NETWORK: %s\n", p.SharedName)
-	fmt.Fprintf(w, "Compose Changes: %d\n", len(p.Actions))
+	printer.Printf("%s\n", title)
+	printer.Printf("SHARED NETWORK: %s\n", p.SharedName)
+	printer.Printf("Compose Changes: %d\n", len(p.Actions))
 
 	// compose名でソート
 	composes := make([]string, 0, len(p.Actions))
@@ -58,18 +57,18 @@ func PrintNetworkPlan(p NetworkPlan, w io.Writer, c *orca.Colorizer) {
 			continue
 		}
 
-		fmt.Fprintf(w, "%s\n", compose)
+		printer.Printf("%s\n", compose)
 
 		for _, a := range actions {
 			switch a.Type {
 			case NetworkOverrideDefault:
-				label := c.Blue("override")
-				fmt.Fprintf(w, "  - %s %s → %s\n", label, a.Network, p.SharedName)
+				label := printer.C.Blue("override")
+				printer.Printf("  - %s %s → %s\n", label, a.Network, p.SharedName)
 			case NetworkRemoveConflict:
-				label := c.Yellow("remove")
-				fmt.Fprintf(w, "  - %s %s (name conflict)\n", label, a.Network)
+				label := printer.C.Yellow("remove")
+				printer.Printf("  - %s %s (name conflict)\n", label, a.Network)
 			}
 		}
 	}
-	fmt.Fprintln(w)
+	printer.Printf("")
 }

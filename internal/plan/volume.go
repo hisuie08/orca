@@ -2,7 +2,6 @@ package plan
 
 import (
 	"fmt"
-	"io"
 	orca "orca/helper"
 	"orca/internal/compose"
 	"orca/internal/config"
@@ -155,14 +154,14 @@ func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
 	}
 }
 
-func PrintVolumePlanTable(plans []VolumePlan, w io.Writer, c *orca.Colorizer) {
+func PrintVolumePlanTable(plans []VolumePlan, printer *orca.Printer) {
 	title := "[VOLUME PLAN]"
 	headers := []string{"NAME", "TYPE", "USED BY", "BIND PATH", "STATUS"}
 
 	rows := make([][]string, 0, len(plans))
 	for _, p := range plans {
-		rows = append(rows, toVolPlanRow(p, c))
+		rows = append(rows, toVolPlanRow(p, &printer.C))
 	}
-	orca.PrintTable(w, title, headers, rows)
+	printer.PrintTable(title, headers, rows)
 
 }

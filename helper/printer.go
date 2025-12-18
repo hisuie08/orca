@@ -17,26 +17,6 @@ func visibleLen(s string) int {
 func stripANSI(s string) string {
 	return ansiRegexp.ReplaceAllString(s, "")
 }
-func PrintTable(w io.Writer, title string, headers []string, rows [][]string) {
-	widths := make([]int, len(headers))
-	for i, h := range headers {
-		widths[i] = visibleLen(h)
-	}
-	for _, cols := range rows {
-		for i, c := range cols {
-			if visibleLen(c) > widths[i] {
-				widths[i] = visibleLen(c)
-			}
-		}
-	}
-
-	fmt.Fprintf(w, "%s\n", title)
-	printRow(w, headers, widths)
-	printSeparator(w, widths)
-	for _, r := range rows {
-		printRow(w, r, widths)
-	}
-}
 
 func printRow(w io.Writer, cols []string, widths []int) {
 	for i, c := range cols {
@@ -56,16 +36,58 @@ func printSeparator(w io.Writer, widths []int) {
 	fmt.Fprintln(w)
 }
 
-type Printer struct{
+type Printer struct {
 	W io.Writer
 	C Colorizer
 }
 
-func NewPrinter(w io.Writer,c Colorizer)*Printer{
-	return &Printer{w,c}
+func NewPrinter(w io.Writer, c Colorizer) *Printer {
+	return &Printer{w, c}
 }
 
-func (d *Printer)PrintDRY(s string){
-	label:=d.C.Blue("[DRY-RUN]")
-	fmt.Fprintf(d.W,"%s %s",label,s)
+func (p *Printer) PrintDRY(s string) {
+	label := p.C.Blue("[DRY-RUN]: ")
+	fmt.Fprintf(p.W, "%s %s", label, s)
+}
+
+func (p *Printer) Printf(format string, a ...any) {
+	fmt.Fprintf(p.W, format, a...)
+}
+
+// PrintTable はタイトルヘッダー付きの表出力
+func (p *Printer) PrintTable(title string, headers []string, rows [][]string) {
+	widths := make([]int, len(headers))
+
+	for i, h := range headers {
+		widths[i] = visibleLen(h)
+	}
+	for _, cols := range rows {
+		for i, c := range cols {
+			if visibleLen(c) > widths[i] {
+				widths[i] = visibleLen(c)
+			}
+		}
+	}
+
+	fmt.Fprintf(p.W, "%s\n", title)
+	printRow(p.W, headers, widths)
+	printSeparator(p.W, widths)
+	for _, r := range rows {
+		printRow(p.W, r, widths)
+	}
+}
+
+// PrintGrid はタイトルやヘッダー無しのシンプルな二次元配列を出力
+func (p *Printer) PrintGrid(rows [][]string) {
+	widths := make([]int, len(rows))
+	for _, cols := range rows {
+		for i, c := range cols {
+			if visibleLen(c) > widths[i] {
+				widths[i] = visibleLen(c)
+			}
+		}
+	}
+	for _, r := range rows {
+		printRow(p.W, r, widths)
+	}
 }
