@@ -10,7 +10,38 @@ import (
 	"strings"
 )
 
-// volumeをかき集める
+// Orcaがボリュームをオーバーレイする必要があるか
+//
+// local+bind + deviceが存在しないケース
+func NeedOverlay(v *compose.VolumeSpec) bool {
+
+	if v.External {
+		return false
+	}
+
+	// case 1: driver未定義 → defaultの local
+	if v.Driver == "" {
+		return true
+	}
+
+	// case 2: driver=local かつ driver_optsなし
+	if v.Driver == "local" && len(v.DriverOpts) == 0 {
+		return true
+	}
+
+	// case 3: driver=local + bind だが deviceのパスが存在しない
+	if v.Driver == "local" && len(v.DriverOpts) > 0 {
+		t := v.DriverOpts["type"]
+		o := v.DriverOpts["o"]
+		dev := v.DriverOpts["device"]
+		if t == "none" && o == "bind" {
+			if !ostools.DirExists(dev) {
+				return true
+			}
+		}
+	}
+	return false
+}
 
 // 名前基準にボリュームをグルーピングしなおし。重複やexternalの検出用
 func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.CollectedVolume {
@@ -18,7 +49,7 @@ func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.Collected
 	for _, v := range vols {
 		// orcaがオーバーレイする必要がないボリュームはスキップ
 		// 照合のためにexternalは一旦回収
-		if !v.Spec.NeedsOrcaOverlay() && !v.Spec.External {
+		if !NeedOverlay(v.Spec) && !v.Spec.External {
 			continue
 		}
 		name := v.Spec.Name
@@ -42,7 +73,7 @@ func buildVolPlan(
 		var customPath string
 		// グループ内のボリュームを検証
 		for _, v := range vols {
-			usedBy = append(usedBy, v.From)
+			usedBy = append(usedBy, v.From.Compose)
 			if v.Spec.External {
 				hasExternal = true
 			}

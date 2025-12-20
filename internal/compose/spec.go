@@ -46,8 +46,21 @@ type CollectedSpec[T any] struct {
 	From string // 定義されていたcompose
 	Spec T      // 定義
 }
-type CollectedVolume CollectedSpec[*VolumeSpec]
+type FromRef struct{
+	Compose string
+	Key string
+}
+type CollectedVolume struct {
+	From FromRef // 定義されていたcompose
+	Spec *VolumeSpec      // 定義
+}
 
-type CollectedCompose CollectedSpec[*ComposeSpec]
+type CollectedCompose struct {
+	From string // 定義されていたcompose
+	Spec *ComposeSpec      // 定義
+}
 
-type CollectedNetwork CollectedSpec[*NetworkSpec]
+type CollectedNetwork struct {
+	From FromRef // 定義されていたcompose
+	Spec *NetworkSpec      // 定義
+}
