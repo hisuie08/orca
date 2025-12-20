@@ -52,7 +52,7 @@ func TestCollectComposes(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmps, gotErr := compose.ComposeMap(tt.orcaRoot)
+			cmps, gotErr := compose.GetAllCompose(tt.orcaRoot)
 			got := compose.CollectComposes(*cmps)
 			vol := compose.CollectVolumes(*cmps)
 			nets := compose.CollectNetworks(*cmps)
@@ -67,12 +67,12 @@ func TestCollectComposes(t *testing.T) {
 			}
 			// TODO: update the condition below to compare got with tt.want.
 			if true {
-				c,_:=yaml.Marshal(got)
-				v,_:=yaml.Marshal(vol)
-				n,_:=yaml.Marshal(nets)
-				ostools.CreateFile("./test_compose.yml",c)
-				ostools.CreateFile("./test_volume.yml",v)
-				ostools.CreateFile("./test_network.yml",n)
+				c, _ := yaml.Marshal(got)
+				v, _ := yaml.Marshal(vol)
+				n, _ := yaml.Marshal(nets)
+				ostools.CreateFile("./test_compose.yml", c)
+				ostools.CreateFile("./test_volume.yml", v)
+				ostools.CreateFile("./test_network.yml", n)
 			}
 		})
 	}

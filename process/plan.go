@@ -12,7 +12,7 @@ type mapCompose map[string]*compose.ComposeSpec
 func PlanProcess(orcaRoot string, cfg *config.OrcaConfig, printer *orca.Printer) error {
 	cfg.Resolve(orcaRoot)
 	// compose構成ロード
-	composeMap, err := compose.ComposeMap(orcaRoot)
+	composeMap, err := compose.GetAllCompose(orcaRoot)
 	if err != nil {
 		return err
 	}

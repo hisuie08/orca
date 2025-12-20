@@ -9,16 +9,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func MapToArray[T Spec](m map[string]*T) []CollectedSpec[T] {
-	result := []CollectedSpec[T]{}
-	for k, v := range m {
-		result = append(result, CollectedSpec[T]{From: k, Spec: v})
-	}
-	return result
-}
+
+
 
 // 全てはここから始まる
-func ComposeMap(orcaRoot string) (composes *map[string]*ComposeSpec, err error) {
+func GetAllCompose(orcaRoot string) (composes *map[string]*ComposeSpec, err error) {
 	result := map[string]*ComposeSpec{}
 	dirs, err := ostools.Directories(orcaRoot)
 	if err != nil {
@@ -47,8 +42,11 @@ func ComposeMap(orcaRoot string) (composes *map[string]*ComposeSpec, err error) 
 }
 
 // 複数composeをかき集めるやつ
-func CollectComposes(m map[string]*ComposeSpec) []CollectedCompose {
-	result := MapToArray(m)
+func CollectComposes(m ComposeMap) []CollectedCompose {
+	result := []CollectedCompose{}
+	for k, v := range m {
+		result = append(result, CollectedCompose{From: k, Spec: v})
+	}
 	return result
 }
 

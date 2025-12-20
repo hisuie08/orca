@@ -29,7 +29,7 @@ func TestBuildVolumePlan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			cmps, _ := compose.ComposeMap(testdata.TestPath)
+			cmps, _ := compose.GetAllCompose(testdata.TestPath)
 			vol := compose.CollectVolumes(*cmps)
 			got := plan.BuildVolumePlan(vol, tt.cfg)
 			if tt.wantErr {
@@ -54,7 +54,7 @@ func TestPrintVolumePlanTable(t *testing.T) {
 		},
 	}
 
-	comp, _ := compose.ComposeMap(testdata.TestPath)
+	comp, _ := compose.GetAllCompose(testdata.TestPath)
 	vol := compose.CollectVolumes(*comp)
 	buildPlan := plan.BuildVolumePlan(vol, cfg.Volume)
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})

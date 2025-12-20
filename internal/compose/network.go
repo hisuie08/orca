@@ -4,7 +4,7 @@ import "path/filepath"
 
 func CollectNetworks(m map[string]*ComposeSpec) []CollectedNetwork {
 	result := []CollectedNetwork{}
-	for _, c := range MapToArray(m) {
+	for _, c := range Collect(m) {
 		for _, v := range c.Spec.Networks {
 			result = append(result, CollectedNetwork{
 				From: filepath.Base(c.From),
@@ -14,4 +14,3 @@ func CollectNetworks(m map[string]*ComposeSpec) []CollectedNetwork {
 	}
 	return result
 }
-

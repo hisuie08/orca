@@ -7,7 +7,7 @@ import (
 
 func CollectVolumes(m map[string]*ComposeSpec) []CollectedVolume {
 	result := []CollectedVolume{}
-	for _, c := range MapToArray(m) {
+	for _, c := range Collect(m) {
 		for _, v := range c.Spec.Volumes {
 			result = append(result, CollectedVolume{
 				From: filepath.Base(c.From),

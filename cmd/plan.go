@@ -39,7 +39,7 @@ func runPlan(orcaRoot string, w io.Writer) error {
 		return err
 	}
 	cfg.Resolve(orcaRoot)
-	cmp, err := compose.ComposeMap(orcaRoot)
+	cmp, err := compose.GetAllCompose(orcaRoot)
 	if err != nil {
 		return err
 	}
