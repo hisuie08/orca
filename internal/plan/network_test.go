@@ -34,15 +34,15 @@ func TestBuildNetworkPlan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			comp, _ := compose.GetAllCompose(testdata.TestPath)
-			got := BuildNetworkPlan(compose.CollectComposes(*comp), tt.cfg)
+			comp, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
+			got := BuildNetworkPlan(comp.CollectComposes(), tt.cfg)
 			if tt.wantErr {
 				t.Fatal("BuildNetworkPlan() succeeded unexpectedly")
 			}
 			// TODO: update the condition below to compare got with tt.want.
 			if true {
 				c_, _ := yaml.Marshal(got)
-				ostools.CreateFile("./test_network.yml", c_)
+				ostools.CreateFile(t.TempDir()+"/test_network.yml", c_)
 			}
 		})
 	}
@@ -60,8 +60,8 @@ func TestPrintNetworkPlan(t *testing.T) {
 	}
 
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
-	comp, _ := compose.GetAllCompose(testdata.TestPath)
-	buildPlan := BuildNetworkPlan(compose.CollectComposes(*comp), testcfg.Network)
+	comp, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
+	buildPlan := BuildNetworkPlan(comp.CollectComposes(), testcfg.Network)
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.

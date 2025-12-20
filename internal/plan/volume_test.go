@@ -4,13 +4,10 @@ import (
 	orca "orca/helper"
 	"orca/internal/compose"
 	"orca/internal/config"
-	"orca/internal/ostools"
 	"orca/internal/plan"
 	"orca/testdata"
 	"os"
 	"testing"
-
-	"gopkg.in/yaml.v3"
 )
 
 func TestBuildVolumePlan(t *testing.T) {
@@ -29,17 +26,15 @@ func TestBuildVolumePlan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			cmps, _ := compose.GetAllCompose(testdata.TestPath)
-			vol := compose.CollectVolumes(*cmps)
+			cmps, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
+			vol := cmps.CollectVolumes()
 			got := plan.BuildVolumePlan(vol, tt.cfg)
 			if tt.wantErr {
 				t.Fatal("BuildVolumePlan() succeeded unexpectedly")
 			}
 			// TODO: update the condition below to compare got with tt.want.
-			if true {
-
-				c_, _ := yaml.Marshal(got)
-				ostools.CreateFile("./test_volume.yml", c_)
+			if got == nil {
+				t.Error("Error got nil")
 			}
 		})
 	}
@@ -54,8 +49,8 @@ func TestPrintVolumePlanTable(t *testing.T) {
 		},
 	}
 
-	comp, _ := compose.GetAllCompose(testdata.TestPath)
-	vol := compose.CollectVolumes(*comp)
+	comp, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
+	vol := comp.CollectVolumes()
 	buildPlan := plan.BuildVolumePlan(vol, cfg.Volume)
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	tests := []struct {
