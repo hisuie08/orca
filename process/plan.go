@@ -7,23 +7,21 @@ import (
 	"orca/internal/plan"
 )
 
-type mapCompose map[string]*compose.ComposeSpec
-
 func PlanProcess(orcaRoot string, cfg *config.OrcaConfig, printer *orca.Printer) error {
 	cfg.Resolve(orcaRoot)
 	// compose構成ロード
-	composeMap, err := compose.GetAllCompose(orcaRoot)
+	composeMap, err := compose.GetAllCompose(orcaRoot, compose.FakeInspector{})
 	if err != nil {
 		return err
 	}
 	// VolumePlan構築と適用
-	volumes := compose.CollectVolumes(*composeMap)
+	volumes := composeMap.CollectVolumes()
 	volPlans := plan.BuildVolumePlan(volumes, cfg.Volume)
 	if err := ApplyVolumePlan(*composeMap, volPlans); err != nil {
 		return err
 	}
 	// NetworkPlan構築と適用
-	netPlan := plan.BuildNetworkPlan(compose.CollectComposes(*composeMap), cfg.Network)
+	netPlan := plan.BuildNetworkPlan(composeMap.CollectComposes(), cfg.Network)
 	if err := ApplyNetworkPlan(*composeMap, netPlan); err != nil {
 		return err
 	}
@@ -32,7 +30,7 @@ func PlanProcess(orcaRoot string, cfg *config.OrcaConfig, printer *orca.Printer)
 }
 
 // Volume
-func ApplyVolumePlan(m mapCompose, plans []plan.VolumePlan) error {
+func ApplyVolumePlan(m compose.ComposeMap, plans []plan.VolumePlan) error {
 	for _, p := range plans {
 		for _, u := range p.UsedBy {
 			for k, v := range m[u].Volumes {
@@ -79,7 +77,7 @@ func ApplyExternal(v *compose.VolumeSpec) *compose.VolumeSpec {
 }
 
 // Network
-func ApplyNetworkPlan(m mapCompose, plans plan.NetworkPlan) error {
+func ApplyNetworkPlan(m compose.ComposeMap, plans plan.NetworkPlan) error {
 	for c, actions := range plans.Actions {
 		for _, action := range actions {
 			switch action.Type {
