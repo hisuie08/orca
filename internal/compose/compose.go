@@ -3,46 +3,37 @@ package compose
 import (
 	orca "orca/helper"
 	"orca/internal/ostools"
-	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
-
-
-
 // 全てはここから始まる
-func GetAllCompose(orcaRoot string) (composes *map[string]*ComposeSpec, err error) {
-	result := map[string]*ComposeSpec{}
+func GetAllCompose(orcaRoot string,
+	i ComposeInspector) (composes *ComposeMap, err error) {
+	result := ComposeMap{}
 	dirs, err := ostools.Directories(orcaRoot)
 	if err != nil {
-		return nil, orca.OrcaError("collect compose failed", err)
+		return nil, err
 	}
-	// HACK: 駆け上がり止めcompose
-	stopperCompose := filepath.Join(orcaRoot, "compose.yml")
-	ostools.CreateFile(stopperCompose, []byte{})
 	for _, dir := range dirs {
-		composeYml, err := ostools.ComposeConfig(dir)
+		data, err := i.Config(dir)
 		if err != nil {
-			// compose configが失敗したディレクトリはスキップ
-			// （compose.ymlが存在しない等）
 			continue
 		}
-		cmps, err := ParseCompose(composeYml)
-		if err != nil {
-			return nil, orca.OrcaError("compose parse failed", err)
+
+		spec := &ComposeSpec{}
+		if err := yaml.Unmarshal(data, spec); err != nil {
+			return nil, orca.OrcaError("compose Parse Error", err)
 		}
 
-		from := filepath.Base(dir)
-		result[from] = cmps
+		result[filepath.Base(dir)] = spec
 	}
-	os.Remove(stopperCompose) //駆け上がり止めcomposeの削除
 	return &result, nil
 }
 
 // 複数composeをかき集めるやつ
-func CollectComposes(m ComposeMap) []CollectedCompose {
+func (m ComposeMap) CollectComposes() []CollectedCompose {
 	result := []CollectedCompose{}
 	for k, v := range m {
 		result = append(result, CollectedCompose{From: k, Spec: v})
@@ -50,11 +41,28 @@ func CollectComposes(m ComposeMap) []CollectedCompose {
 	return result
 }
 
-// Composeを読み出す関数
-func ParseCompose(data []byte) (*ComposeSpec, error) {
-	cfg := ComposeSpec{}
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, orca.OrcaError("compose Parse Error", err)
+func (m ComposeMap) CollectNetworks() []CollectedNetwork {
+	result := []CollectedNetwork{}
+	for name, c := range m {
+		for k, v := range c.Networks {
+			result = append(result, CollectedNetwork{
+				From: FromRef{Compose: name, Key: k},
+				Spec: v,
+			})
+		}
 	}
-	return &cfg, nil
+	return result
+}
+
+func (m ComposeMap) CollectVolumes() []CollectedVolume {
+	result := []CollectedVolume{}
+	for name, c := range m {
+		for k, v := range c.Volumes {
+			result = append(result, CollectedVolume{
+				From: FromRef{Compose: name, Key: k},
+				Spec: v,
+			})
+		}
+	}
+	return result
 }
