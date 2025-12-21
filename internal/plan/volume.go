@@ -3,6 +3,7 @@ package plan
 import (
 	"fmt"
 	orca "orca/helper"
+	"orca/infra/inspector"
 	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/ostools"
@@ -62,6 +63,7 @@ func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.Collected
 func buildVolPlan(
 	groups map[string][]compose.CollectedVolume,
 	cfg *config.ResolvedVolume,
+	i inspector.VolumeInspector,
 ) []VolumePlan {
 
 	plans := []VolumePlan{}
@@ -83,7 +85,7 @@ func buildVolPlan(
 			}
 		}
 
-		exists := ostools.VolumeExists(name)
+		exists := i.VolumeExists(name)
 
 		plan := VolumePlan{
 			Name:     name,
@@ -133,7 +135,7 @@ func buildVolPlan(
 			!cfg.EnsurePath:
 			warningMsg := fmt.Sprintf("bind path %s does not exist and ensure_path=false", plan.BindPath)
 			plan.Warnings = append(plan.Warnings, warningMsg)
-		case plan.Type == VolumeExternal && !ostools.VolumeExists(plan.Name):
+		case plan.Type == VolumeExternal && !i.VolumeExists(plan.Name):
 			// externalだけどplan時点でボリュームが存在しないとき
 			warningMsg := fmt.Sprintf("external volume %s does not exist", plan.Name)
 			plan.Warnings = append(plan.Warnings, warningMsg)
@@ -144,9 +146,12 @@ func buildVolPlan(
 	return plans
 }
 
-func BuildVolumePlan(collect []compose.CollectedVolume, cfg *config.ResolvedVolume) []VolumePlan {
+func BuildVolumePlan(
+	collect []compose.CollectedVolume,
+	cfg *config.ResolvedVolume,
+	i inspector.VolumeInspector) []VolumePlan {
 	group := groupVolumes(collect)
-	return buildVolPlan(group, cfg)
+	return buildVolPlan(group, cfg, i)
 }
 
 func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
