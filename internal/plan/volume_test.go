@@ -11,17 +11,18 @@ import (
 )
 
 func TestBuildVolumePlan(t *testing.T) {
-	testdata.TestConfig.Resolve(testdata.TestPath)
+	def, _, _ := testdata.TestYaml()
+	config.LoadConfig("def", config.FakeConfigReader{Want: def})
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
 		orcaRoot string
-		cfg      *config.VolumeConfig
+		cfg      *config.ResolvedVolume
 
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"test", testdata.TestPath, testdata.TestConfig.Volume, false},
+		{"test", testdata.TestPath, (*config.ResolvedVolume)(testdata.TestConfig.Volume), false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -42,8 +43,8 @@ func TestBuildVolumePlan(t *testing.T) {
 
 func TestPrintVolumePlanTable(t *testing.T) {
 	// 検証済みモックデータ
-	cfg := &config.OrcaConfig{
-		Volume: &config.VolumeConfig{
+	cfg := &config.ResolvedConfig{
+		Volume: config.ResolvedVolume{
 			EnsurePath: true,
 			VolumeRoot: &testdata.TestPath,
 		},
@@ -51,7 +52,7 @@ func TestPrintVolumePlanTable(t *testing.T) {
 
 	comp, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
 	vol := comp.CollectVolumes()
-	buildPlan := plan.BuildVolumePlan(vol, cfg.Volume)
+	buildPlan := plan.BuildVolumePlan(vol, &cfg.Volume)
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	tests := []struct {
 		name  string
