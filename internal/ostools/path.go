@@ -71,6 +71,14 @@ func CreateFile(target string, content []byte) error {
 	return os.WriteFile(target, content, 0o644)
 }
 
+func ReadFile(target string) ([]byte, error) {
+	data, err := os.ReadFile(target)
+	if err != nil {
+		return nil, orca.OrcaError("file read error", err)
+	}
+	return data, nil
+}
+
 func CreateDir(target string) error {
 	return os.MkdirAll(target, 0o755)
 }
