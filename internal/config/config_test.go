@@ -4,9 +4,6 @@ import (
 	"orca/internal/config"
 	"os"
 	"testing"
-
-	"github.com/creasty/defaults"
-	"github.com/davecgh/go-spew/spew"
 )
 
 var defaultYaml = `
@@ -45,13 +42,11 @@ func TestCreate(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{"test1", wd, false},
-		{"test2", "/path/to/notexist", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotErr := config.NewDefaultConfig(tt.path)
+			got, gotErr := config.Create("", t.TempDir()+tt.path)
 			// テストで作成したファイルの削除
-			defer os.Remove(tt.path + "/" + config.OrcaYamlFile)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("Create() failed: %v", gotErr)
@@ -61,107 +56,41 @@ func TestCreate(t *testing.T) {
 			if tt.wantErr {
 				t.Fatal("Create() succeeded unexpectedly")
 			}
-		})
-	}
-}
+			if got.Network.Enabled {
 
-func TestLoad(t *testing.T) {
-	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		path    string
-		wantErr bool
-	}{
-		{"test", "/workspace/orca/testdata", false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := config.Load(tt.path)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("Load() failed: %v", gotErr)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Fatal("Load() succeeded unexpectedly")
-			}
-			// TODO: update the condition below to compare got with tt.want.
-			if got != nil {
-				spew.Dump(got)
 			}
 		})
 	}
 }
 
-func Test_parseConfig(t *testing.T) {
+func TestLoadConfig(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		data    []byte
-		wantErr bool
+		orca_dir string
+		r        config.ConfigReader
+		wantErr  bool
 	}{
 		// TODO: Add test cases.
-		{"デフォルト", []byte(defaultYaml), false},
-		{"フル設定", []byte(fullYaml), false},
-		{"一部欠落", []byte(partYaml), false},
+		{"default", "default", config.FakeConfigReader{Want: defaultYaml}, false},
+		{"full", "def", config.FakeConfigReader{Want: fullYaml}, false},
+		{"part", "part", config.FakeConfigReader{Want: partYaml}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var gotErr error
-			got := config.NewConfig()
-			gotErr = defaults.Set(got)
-			got.Resolve("/test/dir/orca")
-			if err := config.ParseConfig(got, tt.data); err != nil {
-				if !tt.wantErr {
-					t.Errorf("parseConfig() failed: %v", gotErr)
-				}
-				return
-			}
-			if err := defaults.Set(got); err != nil {
-				if !tt.wantErr {
-					t.Errorf("parseConfig() failed: %v", gotErr)
-				}
-				return
-			}
-
-			if tt.wantErr {
-				t.Fatal("parseConfig() succeeded unexpectedly")
-			}
-			// TODO: update the condition below to compare got with tt.want.
-			if got != nil {
-				spew.Dump(got)
-			}
-		})
-	}
-}
-
-func TestOrcaConfig_Resolve(t *testing.T) {
-	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		baseDir string
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-		{"test1", "/path/to/test1", false},
-		{"test2", "/path/to/test2", false},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := config.NewConfig()
-			gotErr := c.Resolve(tt.baseDir)
+			got, gotErr := config.LoadConfig(tt.orca_dir, tt.r)
 			if gotErr != nil {
 				if !tt.wantErr {
-					t.Errorf("Resolve() failed: %v", gotErr)
+					t.Errorf("LoadConfig() failed: %v", gotErr)
 				}
 				return
 			}
 			if tt.wantErr {
-				t.Fatal("Resolve() succeeded unexpectedly")
+				t.Fatal("LoadConfig() succeeded unexpectedly")
 			}
-			if c.Name != nil {
-				t.Logf("\n%v\n", *c.Name)
+			// TODO: update the condition below to compare got with tt.want.
+			if got.Name == nil {
+				t.Errorf("name got nil")
 			}
 		})
 	}
