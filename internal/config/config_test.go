@@ -24,7 +24,7 @@ volume:
 network:
     enabled: true 
     internal: false 
-    name: custom_network
+    name: custom_net
 `
 var partYaml = `
 volume:
@@ -45,14 +45,8 @@ func TestCreate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := config.Create("", t.TempDir()+tt.path)
-			// テストで作成したファイルの削除
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("Create() failed: %v", gotErr)
-				}
-				return
-			}
+			got := config.Create("")
+
 			if tt.wantErr {
 				t.Fatal("Create() succeeded unexpectedly")
 			}
@@ -64,6 +58,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestLoadConfig(t *testing.T) {
+	d := "/workspace/orca/testdata"
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -75,10 +70,11 @@ func TestLoadConfig(t *testing.T) {
 		{"default", "default", config.FakeConfigReader{Want: defaultYaml}, false},
 		{"full", "def", config.FakeConfigReader{Want: fullYaml}, false},
 		{"part", "part", config.FakeConfigReader{Want: partYaml}, false},
+		{"fin", d, config.ConfigFileReader{OrcaRoot: d}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := config.LoadConfig(tt.orca_dir, tt.r)
+			_, gotErr := config.LoadConfig(tt.orca_dir, tt.r)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("LoadConfig() failed: %v", gotErr)
@@ -89,9 +85,6 @@ func TestLoadConfig(t *testing.T) {
 				t.Fatal("LoadConfig() succeeded unexpectedly")
 			}
 			// TODO: update the condition below to compare got with tt.want.
-			if got.Name == nil {
-				t.Errorf("name got nil")
-			}
 		})
 	}
 }

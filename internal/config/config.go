@@ -2,7 +2,6 @@ package config
 
 import (
 	orca "orca/helper"
-	"orca/internal/ostools"
 	"path/filepath"
 
 	"github.com/creasty/defaults"
@@ -36,7 +35,8 @@ type ResolvedConfig struct {
 	Network ResolvedNetwork
 }
 type ResolvedVolume struct {
-	VolumeConfig
+	VolumeRoot *string
+	EnsurePath bool
 }
 type ResolvedNetwork struct {
 	Enabled  bool
@@ -62,23 +62,35 @@ func parseConfig(cfg *OrcaConfig, data []byte) error {
 }
 
 // Configの実行時に解決される値を解決する処理 ほぼ全てのコマンドで必要
-func (c *OrcaConfig) resolve(baseDir string) error {
+func (c *OrcaConfig) resolve(name string) *ResolvedConfig {
+	result := &ResolvedConfig{
+		Volume: ResolvedVolume{
+			VolumeRoot: c.Volume.VolumeRoot,
+			EnsurePath: c.Volume.EnsurePath,
+		},
+		Network: ResolvedNetwork{
+			Enabled:  c.Network.Enabled,
+			Internal: c.Network.Internal},
+	}
 	if c.Name == nil {
-		name := filepath.Base(baseDir)
-		c.Name = &name
+		result.Name = name
+	} else {
+		result.Name = *c.Name
 	}
 
 	if c.Network != nil && c.Network.Enabled {
 		if c.Network.Name == nil {
-			name := *c.Name + "_network"
-			c.Network.Name = &name
+			name := result.Name + "_network"
+			result.Network.Name = name
+		} else {
+			result.Network.Name = *c.Network.Name
 		}
 	}
-	return nil
+	return result
 }
 
 // ファイル読み込みからConfig構築
-func LoadConfig(orca_dir string, r ConfigReader) (*OrcaConfig, error) {
+func LoadConfig(orca_dir string, r ConfigReader) (*ResolvedConfig, error) {
 	data, err := r.Read()
 	if err != nil {
 		return nil, err
@@ -94,15 +106,11 @@ func LoadConfig(orca_dir string, r ConfigReader) (*OrcaConfig, error) {
 	if err := defaults.Set(cfg); err != nil {
 		return nil, orca.OrcaError("default apply failed", err)
 	}
-	// pathをもとにして実行時解決部分の補完
-	if err := cfg.resolve(orca_dir); err != nil {
-		return nil, orca.OrcaError("config resolve failed", err)
-	}
-	return cfg, nil
+	return cfg.resolve(filepath.Base(orca_dir)), nil
 }
 
 // ゼロからorca.ymlを生成するやつ init コマンドで呼び出される
-func Create(clusterName string, path string) (*OrcaConfig, error) {
+func Create(clusterName string) *OrcaConfig {
 	cfg := &OrcaConfig{
 		Volume:  &VolumeConfig{},
 		Network: &NetworkConfig{},
@@ -111,12 +119,6 @@ func Create(clusterName string, path string) (*OrcaConfig, error) {
 		cfg.Name = &clusterName
 	}
 	defaults.Set(cfg)
-	if data, err := yaml.Marshal(cfg); err != nil {
-		return nil, err
-	} else {
-		if err := ostools.CreateFile(path, data); err != nil {
-			return nil, err
-		}
-	}
-	return cfg, nil
+
+	return cfg
 }

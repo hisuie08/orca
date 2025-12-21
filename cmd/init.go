@@ -42,11 +42,11 @@ func runInit(baseDir, clusterName string) error {
 		return err
 	}
 
-	cfg := config.NewDefaultConfig(clusterName)
-	if err:=writeConfig(path, cfg);err!=nil{
+	cfg := config.Create(clusterName)
+	if err := writeConfig(path, cfg); err != nil {
 		return err
 	}
-	fmt.Printf("%v was created successfully\n",path);
+	fmt.Printf("%v was created successfully\n", path)
 	return nil
 }
 
@@ -55,7 +55,6 @@ func writeConfig(path string, cfg *config.OrcaConfig) error {
 	if err != nil {
 		return err
 	}
-
 	return os.WriteFile(path, data, 0644)
 }
 
