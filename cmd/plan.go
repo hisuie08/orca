@@ -32,19 +32,21 @@ var planCmd = &cobra.Command{
 	},
 }
 
+func newCfgReader(p string)*config.ConfigFileReader{
+	return  &config.ConfigFileReader{OrcaRoot: p}
+}
 func runPlan(orcaRoot string, w io.Writer) error {
 	printer := orca.NewPrinter(w, *orca.NewColorizer(w))
-	cfg, err := config.Load(orcaRoot)
+	cfg, err := config.LoadConfig(orcaRoot,newCfgReader(orcaRoot))
 	if err != nil {
 		return err
 	}
-	cfg.Resolve(orcaRoot)
-	cmp, err := compose.GetAllCompose(orcaRoot)
+	cmp, err := compose.GetAllCompose(orcaRoot,compose.DockerComposeInspector{})
 	if err != nil {
 		return err
 	}
-	vol := compose.CollectVolumes(*cmp)
-	net := compose.CollectComposes(*cmp)
+	vol := cmp.CollectVolumes()
+	net := cmp.CollectComposes()
 	volumePlan := plan.BuildVolumePlan(vol, cfg.Volume)
 
 	networkPlan := plan.BuildNetworkPlan(net, cfg.Network)

@@ -61,7 +61,7 @@ func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.Collected
 // ボリュームのPlanを構築する
 func buildVolPlan(
 	groups map[string][]compose.CollectedVolume,
-	cfg *config.VolumeConfig,
+	cfg *config.ResolvedVolume,
 ) []VolumePlan {
 
 	plans := []VolumePlan{}
@@ -144,7 +144,7 @@ func buildVolPlan(
 	return plans
 }
 
-func BuildVolumePlan(collect []compose.CollectedVolume, cfg *config.VolumeConfig) []VolumePlan {
+func BuildVolumePlan(collect []compose.CollectedVolume, cfg *config.ResolvedVolume) []VolumePlan {
 	group := groupVolumes(collect)
 	return buildVolPlan(group, cfg)
 }

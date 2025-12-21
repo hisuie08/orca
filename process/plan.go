@@ -7,8 +7,7 @@ import (
 	"orca/internal/plan"
 )
 
-func PlanProcess(orcaRoot string, cfg *config.OrcaConfig, printer *orca.Printer) error {
-	cfg.Resolve(orcaRoot)
+func PlanProcess(orcaRoot string, cfg *config.ResolvedConfig, printer *orca.Printer) error {
 	// compose構成ロード
 	composeMap, err := compose.GetAllCompose(orcaRoot, compose.FakeInspector{})
 	if err != nil {
@@ -16,12 +15,12 @@ func PlanProcess(orcaRoot string, cfg *config.OrcaConfig, printer *orca.Printer)
 	}
 	// VolumePlan構築と適用
 	volumes := composeMap.CollectVolumes()
-	volPlans := plan.BuildVolumePlan(volumes, cfg.Volume)
+	volPlans := plan.BuildVolumePlan(volumes, &cfg.Volume)
 	if err := ApplyVolumePlan(*composeMap, volPlans); err != nil {
 		return err
 	}
 	// NetworkPlan構築と適用
-	netPlan := plan.BuildNetworkPlan(composeMap.CollectComposes(), cfg.Network)
+	netPlan := plan.BuildNetworkPlan(composeMap.CollectComposes(), &cfg.Network)
 	if err := ApplyNetworkPlan(*composeMap, netPlan); err != nil {
 		return err
 	}
