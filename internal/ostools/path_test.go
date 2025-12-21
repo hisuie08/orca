@@ -1,6 +1,7 @@
 package ostools
 
 import (
+	"os"
 	"testing"
 )
 
@@ -90,7 +91,8 @@ func TestFileExisists(t *testing.T) {
 }
 
 func TestDirectories(t *testing.T) {
-	testpath = "/workspace/orca/testdata"
+	testpath = t.TempDir()
+	os.CopyFS(testpath, os.DirFS("/workspace/orca/testdata"))
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -121,7 +123,8 @@ func TestDirectories(t *testing.T) {
 }
 
 func TestFiles(t *testing.T) {
-	testpath = "/workspace/orca/testdata"
+	testpath = t.TempDir()
+	os.CopyFS(testpath, os.DirFS("/workspace/orca/testdata"))
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -152,7 +155,7 @@ func TestFiles(t *testing.T) {
 }
 
 func TestAppendFile(t *testing.T) {
-	testpath = "/workspace/orca/testdata/append/append.txt"
+	testpath = t.TempDir() + "/append.txt"
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
