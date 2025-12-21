@@ -1,39 +1,18 @@
 package config_test
 
 import (
+	"orca/infra/inspector"
 	"orca/internal/config"
-	"os"
+	"orca/testdata"
 	"testing"
 )
 
-var defaultYaml = `
-name:
-volume:
-    volume_root:
-    ensure_path: true
-network:
-    enabled: true 
-    internal: false 
-    name: 
-`
-var fullYaml = `
-name: MyOrca
-volume:
-    volume_root: /test/volume
-    ensure_path: true
-network:
-    enabled: true 
-    internal: false 
-    name: custom_net
-`
-var partYaml = `
-volume:
-    volume_root: 
-    ensure_path: true
-`
+var fakeReader = inspector.FakeConfigReader{
+	Mock: testdata.TestConfigYaml,
+}
 
 func TestCreate(t *testing.T) {
-	wd, _ := os.Getwd()
+	wd := t.TempDir()
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -67,10 +46,11 @@ func TestLoadConfig(t *testing.T) {
 		wantErr  bool
 	}{
 		// TODO: Add test cases.
-		{"default", "default", config.FakeConfigReader{Want: defaultYaml}, false},
-		{"full", "def", config.FakeConfigReader{Want: fullYaml}, false},
-		{"part", "part", config.FakeConfigReader{Want: partYaml}, false},
-		{"fin", d, config.ConfigFileReader{OrcaRoot: d}, false},
+		{"default", "def", fakeReader, false},
+		{"full", "full", fakeReader, false},
+		{"part", "part", fakeReader, false},
+		{"notexist", "notexist", fakeReader, true},
+		{"fin", d, inspector.ConfigFileReader{}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -46,21 +46,26 @@ type CollectedSpec[T any] struct {
 	From string // 定義されていたcompose
 	Spec T      // 定義
 }
-type FromRef struct{
+type FromRef struct {
 	Compose string
-	Key string
+	Key     string
 }
 type CollectedVolume struct {
-	From FromRef // 定義されていたcompose
-	Spec *VolumeSpec      // 定義
+	From FromRef     // 定義されていたcompose
+	Spec *VolumeSpec // 定義
 }
 
 type CollectedCompose struct {
-	From string // 定義されていたcompose
-	Spec *ComposeSpec      // 定義
+	From string       // 定義されていたcompose
+	Spec *ComposeSpec // 定義
 }
 
 type CollectedNetwork struct {
-	From FromRef // 定義されていたcompose
-	Spec *NetworkSpec      // 定義
+	From FromRef      // 定義されていたcompose
+	Spec *NetworkSpec // 定義
+}
+
+type ComposeInspector interface {
+	Directories() ([]string, error)
+	Config(composeDir string) ([]byte, error)
 }

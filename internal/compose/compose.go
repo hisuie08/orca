@@ -2,17 +2,17 @@ package compose
 
 import (
 	orca "orca/helper"
-	"orca/internal/ostools"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
+
 // 全てはここから始まる
 func GetAllCompose(orcaRoot string,
 	i ComposeInspector) (composes *ComposeMap, err error) {
 	result := ComposeMap{}
-	dirs, err := ostools.Directories(orcaRoot)
+	dirs, err := i.Directories()
 	if err != nil {
 		return nil, err
 	}
