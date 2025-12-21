@@ -1,6 +1,5 @@
 /*
 Copyright © 2025 hisuie08
-
 */
 package main
 

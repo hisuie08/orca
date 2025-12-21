@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	orca "orca/helper"
 	"orca/internal/config"
 	"os"
 	"path/filepath"
@@ -34,7 +35,7 @@ var initCmd = &cobra.Command{
 }
 
 func runInit(baseDir, clusterName string) error {
-	path := filepath.Join(baseDir, config.OrcaYamlFile)
+	path := filepath.Join(baseDir, orca.OrcaYamlFile)
 
 	if _, err := os.Stat(path); err == nil {
 		return fmt.Errorf("orca.yml already exists")

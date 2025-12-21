@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	orca "orca/helper"
+	"orca/infra/inspector"
 	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/plan"
@@ -32,24 +33,24 @@ var planCmd = &cobra.Command{
 	},
 }
 
-func newCfgReader(p string)*config.ConfigFileReader{
-	return  &config.ConfigFileReader{OrcaRoot: p}
+func newCfgReader() *inspector.ConfigFileReader {
+	return &inspector.ConfigFileReader{}
 }
 func runPlan(orcaRoot string, w io.Writer) error {
 	printer := orca.NewPrinter(w, *orca.NewColorizer(w))
-	cfg, err := config.LoadConfig(orcaRoot,newCfgReader(orcaRoot))
+	cfg, err := config.LoadConfig(orcaRoot, newCfgReader())
 	if err != nil {
 		return err
 	}
-	cmp, err := compose.GetAllCompose(orcaRoot,compose.DockerComposeInspector{})
+	cmp, err := compose.GetAllCompose(orcaRoot, inspector.DockerComposeInspector{})
 	if err != nil {
 		return err
 	}
 	vol := cmp.CollectVolumes()
 	net := cmp.CollectComposes()
-	volumePlan := plan.BuildVolumePlan(vol, cfg.Volume)
+	volumePlan := plan.BuildVolumePlan(vol, &cfg.Volume, inspector.DockerInspector{})
 
-	networkPlan := plan.BuildNetworkPlan(net, cfg.Network)
+	networkPlan := plan.BuildNetworkPlan(net, &cfg.Network)
 	plan.PrintVolumePlanTable(volumePlan, printer)
 
 	fmt.Printf("\n")
