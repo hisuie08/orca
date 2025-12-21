@@ -2,6 +2,7 @@ package plan
 
 import (
 	orca "orca/helper"
+	"orca/infra/inspector"
 	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/ostools"
@@ -11,6 +12,8 @@ import (
 
 	"gopkg.in/yaml.v3"
 )
+
+var fakeComposeInspector = inspector.FakeComposeInspector{}
 
 func TestBuildNetworkPlan(t *testing.T) {
 	netname := "orcanet"
@@ -34,7 +37,7 @@ func TestBuildNetworkPlan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			comp, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
+			comp, _ := compose.GetAllCompose(testdata.TestPath, fakeComposeInspector)
 			got := BuildNetworkPlan(comp.CollectComposes(), tt.cfg)
 			if tt.wantErr {
 				t.Fatal("BuildNetworkPlan() succeeded unexpectedly")
@@ -60,7 +63,7 @@ func TestPrintNetworkPlan(t *testing.T) {
 	}
 
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
-	comp, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
+	comp, _ := compose.GetAllCompose(testdata.TestPath, fakeComposeInspector)
 	buildPlan := BuildNetworkPlan(comp.CollectComposes(), &testcfg.Network)
 	tests := []struct {
 		name string // description of this test case
