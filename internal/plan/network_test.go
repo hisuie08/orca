@@ -14,22 +14,22 @@ import (
 
 func TestBuildNetworkPlan(t *testing.T) {
 	netname := "orcanet"
-	testcfg := &config.OrcaConfig{
-		Network: &config.NetworkConfig{
+	testcfg := &config.ResolvedConfig{
+		Network: config.ResolvedNetwork{
 			Enabled:  true,
 			Internal: false,
-			Name:     &netname,
+			Name:     netname,
 		},
 	}
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
 		orcaRoot string
-		cfg      *config.NetworkConfig
+		cfg      *config.ResolvedNetwork
 		wantErr  bool
 	}{
 		// TODO: Add test cases.
-		{"test", testdata.TestPath, testcfg.Network, false},
+		{"test", testdata.TestPath, &testcfg.Network, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -51,17 +51,17 @@ func TestBuildNetworkPlan(t *testing.T) {
 func TestPrintNetworkPlan(t *testing.T) {
 
 	netname := "orcanet"
-	testcfg := &config.OrcaConfig{
-		Network: &config.NetworkConfig{
+	testcfg := &config.ResolvedConfig{
+		Network: config.ResolvedNetwork{
 			Enabled:  true,
 			Internal: false,
-			Name:     &netname,
+			Name:     netname,
 		},
 	}
 
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	comp, _ := compose.GetAllCompose(testdata.TestPath, compose.FakeInspector{})
-	buildPlan := BuildNetworkPlan(comp.CollectComposes(), testcfg.Network)
+	buildPlan := BuildNetworkPlan(comp.CollectComposes(), &testcfg.Network)
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.

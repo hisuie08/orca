@@ -9,9 +9,9 @@ import (
 )
 
 func BuildNetworkPlan(composes []compose.CollectedCompose,
-	cfg *config.NetworkConfig) NetworkPlan {
+	cfg *config.ResolvedNetwork) NetworkPlan {
 	plan := NetworkPlan{
-		SharedName: *cfg.Name,
+		SharedName: cfg.Name,
 		Actions:    map[string][]NetworkAction{},
 	}
 	for _, c := range composes {
@@ -20,11 +20,11 @@ func BuildNetworkPlan(composes []compose.CollectedCompose,
 				Network: k,
 			}
 			switch {
-			case k == "default" && n.Name != *cfg.Name:
+			case k == "default" && n.Name != cfg.Name:
 				// デフォルト上書き
 				action.Type = NetworkOverrideDefault
 				action.Message = "default network is overridden to use shared network orca_network"
-			case k != "default" && n.Name == *cfg.Name:
+			case k != "default" && n.Name == cfg.Name:
 				// 競合削除
 				action.Type = NetworkRemoveConflict
 				action.Message = fmt.Sprintf("network %s conflicts with shared network and will be removed", n.Name)
