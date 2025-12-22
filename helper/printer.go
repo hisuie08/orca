@@ -45,6 +45,16 @@ func NewPrinter(w io.Writer, c Colorizer) *Printer {
 	return &Printer{w, c}
 }
 
+func (p *Printer) SetWriter(w io.Writer) *Printer {
+	p.W = w
+	p.C = *NewColorizer(w)
+	return p
+}
+func (p *Printer) SetColored(b bool) *Printer {
+	p.C.Enabled = b
+	return p
+}
+
 func (p *Printer) PrintDRY(s string) {
 	label := p.C.Blue("[DRY-RUN]: ")
 	fmt.Fprintf(p.W, "%s %s", label, s)

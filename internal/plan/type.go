@@ -40,9 +40,10 @@ const (
 type PlanStatus string
 
 const (
-	StatusOK    PlanStatus = "OK"
-	StatusWarn  PlanStatus = "WARN"
-	StatusError PlanStatus = "ERROR"
+	StatusExist  PlanStatus = "OK"
+	StatusCreate PlanStatus = "CREATE"
+	StatusWarn   PlanStatus = "WARN"
+	StatusError  PlanStatus = "ERROR"
 )
 
 type VolumePlan struct {

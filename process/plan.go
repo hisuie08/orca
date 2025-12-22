@@ -1,38 +1,37 @@
 package process
 
 import (
-	orca "orca/helper"
-	"orca/infra/inspector"
+	"io"
 	"orca/internal/compose"
-	"orca/internal/config"
+	"orca/internal/context"
 	"orca/internal/plan"
 )
 
-func PlanProcess(
-	orcaRoot string, cfg *config.ResolvedConfig,
-	c compose.ComposeInspector, d inspector.DockerInspector, printer *orca.Printer) error {
-	// compose構成ロード
-	composeMap, err := compose.GetAllCompose(orcaRoot, c)
+func BuildPlan(ctx context.OrcaContext) error {
+	cmp, err := compose.GetAllCompose(ctx.OrcaRoot, ctx.ComposeInspector)
 	if err != nil {
 		return err
 	}
-	// VolumePlan構築と適用
-	volumes := composeMap.CollectVolumes()
-	volPlans := plan.BuildVolumePlan(volumes, &cfg.Volume, d)
-	if err := ApplyVolumePlan(*composeMap, volPlans); err != nil {
-		return err
-	}
-	// NetworkPlan構築と適用
-	netPlan := plan.BuildNetworkPlan(composeMap.CollectComposes(), &cfg.Network)
-	if err := ApplyNetworkPlan(*composeMap, netPlan); err != nil {
-		return err
-	}
+	vol := cmp.CollectVolumes()
+	net := cmp.CollectComposes()
+	volumePlan := plan.BuildVolumePlan(vol, &ctx.Config.Volume, ctx.DockerInspector)
 
+	networkPlan := plan.BuildNetworkPlan(net, &ctx.Config.Network)
+	if err := ApplyVolumeCompose(*cmp, volumePlan); err != nil {
+		return err
+	}
+	if err := ApplyNetworkCompose(*cmp, networkPlan); err != nil {
+		return err
+	}
+	// o, _ := os.OpenFile("./log.txt", os.O_WRONLY|os.O_CREATE, 0666)
+	// printer.W = o
+	// printer.C.Enabled = false
+	plan.DumpPlan(ctx, volumePlan, networkPlan, ctx.Printer.W)
 	return nil
 }
 
 // Volume
-func ApplyVolumePlan(m compose.ComposeMap, plans []plan.VolumePlan) error {
+func ApplyVolumeCompose(m compose.ComposeMap, plans []plan.VolumePlan) error {
 	for _, p := range plans {
 		for _, u := range p.UsedBy {
 			for k, v := range m[u].Volumes {
@@ -79,7 +78,7 @@ func ApplyExternal(v *compose.VolumeSpec) *compose.VolumeSpec {
 }
 
 // Network
-func ApplyNetworkPlan(m compose.ComposeMap, plans plan.NetworkPlan) error {
+func ApplyNetworkCompose(m compose.ComposeMap, plans plan.NetworkPlan) error {
 	for c, actions := range plans.Actions {
 		for _, action := range actions {
 			switch action.Type {
@@ -95,4 +94,8 @@ func ApplyNetworkPlan(m compose.ComposeMap, plans plan.NetworkPlan) error {
 		}
 	}
 	return nil
+}
+
+func Summary(w io.Writer) {
+
 }

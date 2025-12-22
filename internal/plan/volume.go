@@ -11,17 +11,11 @@ import (
 	"strings"
 )
 
-// Orcaがボリュームをオーバーレイする必要があるか
-//
-// local+bind + deviceが存在しないケース
-func NeedOverlay(v *compose.VolumeSpec) bool {
-
-	if v.External {
-		return false
-	}
-
-	// case 1: driver未定義 → defaultの local
-	if v.Driver == "" {
+// Planに考慮すべきボリュームか判断
+// デフォルト/external/local+bind
+func shouldConsider(v *compose.VolumeSpec) bool {
+	// case 1: external:true か ドライバ設定無し
+	if v.External || v.Driver == "" {
 		return true
 	}
 
@@ -32,11 +26,8 @@ func NeedOverlay(v *compose.VolumeSpec) bool {
 
 	// case 3: driver=local + bind だが deviceのパスが存在しない
 	if v.Driver == "local" && len(v.DriverOpts) > 0 {
-		t := v.DriverOpts["type"]
-		o := v.DriverOpts["o"]
-		dev := v.DriverOpts["device"]
-		if t == "none" && o == "bind" {
-			if !ostools.DirExists(dev) {
+		if v.DriverOpts["type"] == "none" && v.DriverOpts["o"] == "bind" {
+			if !ostools.DirExists(v.DriverOpts["device"]) {
 				return true
 			}
 		}
@@ -48,9 +39,8 @@ func NeedOverlay(v *compose.VolumeSpec) bool {
 func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.CollectedVolume {
 	groups := make(map[string][]compose.CollectedVolume)
 	for _, v := range vols {
-		// orcaがオーバーレイする必要がないボリュームはスキップ
-		// 照合のためにexternalは一旦回収
-		if !NeedOverlay(v.Spec) && !v.Spec.External {
+		// orcaが検討する必要がないボリュームはスキップ
+		if !shouldConsider(v.Spec) {
 			continue
 		}
 		name := v.Spec.Name
@@ -155,7 +145,10 @@ func BuildVolumePlan(
 }
 
 func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
-	status := StatusOK
+	status := StatusExist
+	if plan.NeedMkdir {
+		status = StatusCreate
+	}
 	if len(plan.Warnings) > 0 {
 		status = StatusWarn
 	}
@@ -176,8 +169,11 @@ func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
 	stat := string(status)
 	// TODO: NeedMkDirを反映したstatusの細かい出し分け
 	switch status {
-	case StatusOK:
-		stat = c.Green(string(StatusOK))
+	case StatusExist:
+		stat = c.Green(string(StatusExist))
+	case StatusCreate:
+		stat = c.Green(string(StatusCreate))
+
 	case StatusWarn:
 		stat = c.Yellow(string(StatusWarn))
 	}

@@ -7,13 +7,9 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"io"
-	orca "orca/helper"
-	"orca/infra/inspector"
-	"orca/internal/compose"
-	"orca/internal/config"
-	"orca/internal/plan"
+	"orca/internal/context"
+	"orca/process"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -33,29 +29,16 @@ var planCmd = &cobra.Command{
 	},
 }
 
-func newCfgReader() *inspector.ConfigFileReader {
-	return &inspector.ConfigFileReader{}
-}
 func runPlan(orcaRoot string, w io.Writer) error {
-	printer := orca.NewPrinter(w, *orca.NewColorizer(w))
-	cfg, err := config.LoadConfig(orcaRoot, newCfgReader())
+	ctx, err := context.BuildContext(orcaRoot, w)
 	if err != nil {
 		return err
 	}
-	cmp, err := compose.GetAllCompose(orcaRoot, inspector.DockerComposeInspector{})
-	if err != nil {
-		return err
-	}
-	vol := cmp.CollectVolumes()
-	net := cmp.CollectComposes()
-	volumePlan := plan.BuildVolumePlan(vol, &cfg.Volume, inspector.DockerInspector{})
+	process.BuildPlan(*ctx)
+	// o, _ := os.OpenFile("./log.txt", os.O_WRONLY|os.O_CREATE, 0666)
+	// printer.W = o
+	// printer.C.Enabled = false
 
-	networkPlan := plan.BuildNetworkPlan(net, &cfg.Network)
-	plan.PrintVolumePlanTable(volumePlan, printer)
-
-	fmt.Printf("\n")
-
-	plan.PrintNetworkPlan(networkPlan, printer)
 	return nil
 }
 
