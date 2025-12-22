@@ -5,15 +5,15 @@ import (
 	"os/exec"
 )
 
-type NetworkApplier interface {
+type NetworkCreator interface {
 	CreateNetwork(name string, opt ...string) error
 }
 
-type VolumeApplier interface {
+type VolumeCreator interface {
 	CreateVolume(name string, opt ...string) error
 }
 
-type FsApplier interface {
+type DirCreator interface {
 	CreateDir(path string) error
 }
 

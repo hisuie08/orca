@@ -1,7 +1,6 @@
 package process
 
 import (
-	"io"
 	"orca/internal/compose"
 	"orca/internal/context"
 	"orca/internal/plan"
@@ -14,15 +13,26 @@ func BuildPlan(ctx context.OrcaContext) error {
 	}
 	vol := cmp.CollectVolumes()
 	net := cmp.CollectComposes()
-	volumePlan := plan.BuildVolumePlan(vol, &ctx.Config.Volume, ctx.DockerInspector)
+	volumePlan := func() []plan.VolumePlan {
+		if ctx.Config.Volume.VolumeRoot != nil {
+			return plan.BuildVolumePlan(vol, &ctx.Config.Volume, ctx.DockerInspector)
+		}
+		return []plan.VolumePlan{}
+	}()
+	networkPlan := func() plan.NetworkPlan {
+		if ctx.Config.Network.Enabled {
+			return plan.BuildNetworkPlan(net, &ctx.Config.Network)
+		}
+		return plan.NetworkPlan{}
+	}()
 
-	networkPlan := plan.BuildNetworkPlan(net, &ctx.Config.Network)
 	if err := ApplyVolumeCompose(*cmp, volumePlan); err != nil {
 		return err
 	}
 	if err := ApplyNetworkCompose(*cmp, networkPlan); err != nil {
 		return err
 	}
+
 	// o, _ := os.OpenFile("./log.txt", os.O_WRONLY|os.O_CREATE, 0666)
 	// printer.W = o
 	// printer.C.Enabled = false
@@ -41,13 +51,13 @@ func ApplyVolumeCompose(m compose.ComposeMap, plans []plan.VolumePlan) error {
 				if v.Name == p.Name {
 					switch p.Type {
 					case plan.VolumeLocal:
-						m[u].Volumes[k] = ApplyLocalBind(v, p.BindPath)
+						m[u].Volumes[k] = applyLocalBind(v, p.BindPath)
 						//
 					case plan.VolumeExternal:
-						m[u].Volumes[k] = ApplyExternal(v)
+						m[u].Volumes[k] = applyExternal(v)
 						//
 					case plan.VolumeShared:
-						m[u].Volumes[k] = ApplyExternal(v)
+						m[u].Volumes[k] = applyExternal(v)
 					}
 				}
 			}
@@ -57,7 +67,7 @@ func ApplyVolumeCompose(m compose.ComposeMap, plans []plan.VolumePlan) error {
 	}
 	return nil
 }
-func ApplyLocalBind(v *compose.VolumeSpec, bindPath string) *compose.VolumeSpec {
+func applyLocalBind(v *compose.VolumeSpec, bindPath string) *compose.VolumeSpec {
 	v.Driver = "local"
 	if v.DriverOpts == nil {
 		v.DriverOpts = map[string]string{}
@@ -68,7 +78,7 @@ func ApplyLocalBind(v *compose.VolumeSpec, bindPath string) *compose.VolumeSpec 
 	return v
 }
 
-func ApplyExternal(v *compose.VolumeSpec) *compose.VolumeSpec {
+func applyExternal(v *compose.VolumeSpec) *compose.VolumeSpec {
 	v.Driver = ""
 	for k := range v.DriverOpts {
 		delete(v.DriverOpts, k)
@@ -94,8 +104,4 @@ func ApplyNetworkCompose(m compose.ComposeMap, plans plan.NetworkPlan) error {
 		}
 	}
 	return nil
-}
-
-func Summary(w io.Writer) {
-
 }
