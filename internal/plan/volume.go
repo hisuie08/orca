@@ -153,7 +153,10 @@ func toVolPlanRow(plan VolumePlan, c *orca.Colorizer) []string {
 		status = StatusWarn
 	}
 
-	bind := plan.BindPath
+	bind, err := filepath.Abs(plan.BindPath)
+	if err != nil {
+		status = StatusError
+	}
 	if bind == "" {
 		bind = "-"
 	}
