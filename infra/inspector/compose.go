@@ -2,7 +2,7 @@ package inspector
 
 import (
 	"errors"
-	"orca/internal/ostools"
+	"orca/ostools"
 	"os"
 	"os/exec"
 	"path/filepath"

@@ -2,7 +2,7 @@ package inspector
 
 import (
 	orca "orca/helper"
-	"orca/internal/ostools"
+	"orca/ostools"
 	"path/filepath"
 )
 

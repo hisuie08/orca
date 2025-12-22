@@ -1,7 +1,7 @@
 package applier
 
 import (
-	"orca/internal/ostools"
+	"orca/ostools"
 	"os/exec"
 )
 
@@ -19,18 +19,21 @@ type FsApplier interface {
 
 type DockerApplier struct{}
 
-func (d DockerApplier) CreateNetwork(name string, opt ...string) error {
-	opts := append([]string{"network", "create"}, opt...)
-	cmd := exec.Command("docker", opts...)
-	_, err := cmd.CombinedOutput()
-	return err
+func (d DockerApplier) CreateNetwork(name string, opt ...string) (string, error) {
+	cmd := append([]string{"docker", "network", "create"}, opt...)
+	return RunCommand(cmd...)
 }
-func (d DockerApplier) CreateVolume(name string, opt ...string) error {
-	opts := append([]string{"volume", "create"}, opt...)
-	cmd := exec.Command("docker", opts...)
-	_, err := cmd.CombinedOutput()
-	return err
+func (d DockerApplier) CreateVolume(name string, opt ...string) (string, error) {
+	cmd := append([]string{"docker", "volume", "create"}, opt...)
+	return RunCommand(cmd...)
 }
 func (d DockerApplier) CreateDir(path string) error {
 	return ostools.CreateDir(path)
+}
+
+func RunCommand(cmdline ...string) (string, error) {
+	name, opts := cmdline[0], cmdline[1:]
+	cmd := exec.Command(name, opts...)
+	res, err := cmd.CombinedOutput()
+	return string(res), err
 }

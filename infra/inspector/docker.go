@@ -1,7 +1,7 @@
 package inspector
 
 import (
-	"orca/internal/ostools"
+	"orca/ostools"
 	"os/exec"
 )
 

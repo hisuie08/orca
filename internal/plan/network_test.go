@@ -5,7 +5,7 @@ import (
 	"orca/infra/inspector"
 	"orca/internal/compose"
 	"orca/internal/config"
-	"orca/internal/ostools"
+	"orca/ostools"
 	"orca/testdata"
 	"os"
 	"testing"
