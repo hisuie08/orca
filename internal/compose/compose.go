@@ -1,7 +1,6 @@
 package compose
 
 import (
-	"orca/consts"
 	orca "orca/helper"
 	"orca/infra/applier"
 	"orca/internal/context"
@@ -69,11 +68,24 @@ func (m ComposeMap) CollectVolumes() []CollectedVolume {
 	return result
 }
 
-func (m ComposeMap) DumpAllComposes(ctx context.OrcaContext) {
-	switch ctx.RunMode {
-	case context.ModeExecute:
-		d := applier.DotOrcaDumper{DotOrcaDir: filepath.Join(ctx.OrcaRoot, consts.DotOrcaDir)}
-	case context.ModeDryRun:
-
+func (m ComposeMap) DumpAllComposes(ctx context.OrcaContext) ([]string, error) {
+	result:=[]string{}
+	for name, c := range m {
+		b, err := yaml.Marshal(c)
+		if err != nil {
+			return []string{}, err
+		}
+		d := func() applier.ComposeWriter {
+			switch ctx.RunMode {
+			case context.ModeDryRun:
+				return applier.FakeDotOrcaDumper{FakeRoot: ctx.OrcaRoot, FakeDir: map[string][]byte{}}
+			default:
+				return applier.NewDotOrcaDumper(ctx.OrcaRoot)
+			}
+		}()
+		if e,err:=d.DumpCompose(name,b); err != nil {
+			return nil, err
+		}else{result= append(result,e)}
 	}
+	return result,nil
 }
