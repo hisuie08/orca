@@ -8,8 +8,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-
-
 // テスト用に切り出したパース処理
 func parseConfig(cfg *OrcaConfig, data []byte) error {
 	if err := yaml.Unmarshal(data, cfg); err != nil {
@@ -59,10 +57,7 @@ func LoadConfig(orcaRoot string, r ConfigReader) (*ResolvedConfig, error) {
 	if err := parseConfig(cfg, data); err != nil {
 		return nil, err
 	}
-	// defaults適用
-	if err := defaults.Set(cfg); err != nil {
-		return nil, orca.OrcaError("default apply failed", err)
-	}
+
 	return cfg.resolve(filepath.Base(orcaRoot)), nil
 }
 
