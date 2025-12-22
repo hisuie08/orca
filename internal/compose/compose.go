@@ -1,12 +1,14 @@
 package compose
 
 import (
+	"orca/consts"
 	orca "orca/helper"
+	"orca/infra/applier"
+	"orca/internal/context"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
-
 
 // 全てはここから始まる
 func GetAllCompose(orcaRoot string,
@@ -65,4 +67,13 @@ func (m ComposeMap) CollectVolumes() []CollectedVolume {
 		}
 	}
 	return result
+}
+
+func (m ComposeMap) DumpAllComposes(ctx context.OrcaContext) {
+	switch ctx.RunMode {
+	case context.ModeExecute:
+		d := applier.DotOrcaDumper{DotOrcaDir: filepath.Join(ctx.OrcaRoot, consts.DotOrcaDir)}
+	case context.ModeDryRun:
+
+	}
 }
