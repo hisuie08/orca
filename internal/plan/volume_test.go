@@ -2,21 +2,17 @@ package plan_test
 
 import (
 	orca "orca/helper"
-	"orca/infra/inspector"
 	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/internal/plan"
+	"orca/test/fake"
 	"orca/testdata"
 	"os"
 	"testing"
 )
 
-var fakeConfigReader = inspector.FakeConfigReader{}
-var fakeComposeInspector = inspector.FakeComposeInspector{}
-var fakeDockerInspector = inspector.FakeDockerInspector{}
-
 func TestBuildVolumePlan(t *testing.T) {
-	config.LoadConfig("def", fakeConfigReader)
+	config.LoadConfig("def", fake.ConfigReader)
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
@@ -31,9 +27,9 @@ func TestBuildVolumePlan(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			cmps, _ := compose.GetAllCompose(testdata.TestPath, fakeComposeInspector)
+			cmps, _ := compose.GetAllCompose(testdata.TestPath, fake.ComposeInspector)
 			vol := cmps.CollectVolumes()
-			got := plan.BuildVolumePlan(vol, tt.cfg, fakeDockerInspector)
+			got := plan.BuildVolumePlan(vol, tt.cfg, fake.DockerInspector)
 			if tt.wantErr {
 				t.Fatal("BuildVolumePlan() succeeded unexpectedly")
 			}
@@ -54,9 +50,9 @@ func TestPrintVolumePlanTable(t *testing.T) {
 		},
 	}
 
-	comp, _ := compose.GetAllCompose(testdata.TestPath, fakeComposeInspector)
+	comp, _ := compose.GetAllCompose(testdata.TestPath, fake.ComposeInspector)
 	vol := comp.CollectVolumes()
-	buildPlan := plan.BuildVolumePlan(vol, &cfg.Volume, fakeDockerInspector)
+	buildPlan := plan.BuildVolumePlan(vol, &cfg.Volume, fake.DockerInspector)
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	tests := []struct {
 		name  string

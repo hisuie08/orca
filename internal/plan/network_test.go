@@ -2,10 +2,10 @@ package plan
 
 import (
 	orca "orca/helper"
-	"orca/infra/inspector"
 	"orca/internal/compose"
 	"orca/internal/config"
 	"orca/ostools"
+	"orca/test/fake"
 	"orca/testdata"
 	"os"
 	"testing"
@@ -13,7 +13,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var fakeComposeInspector = inspector.FakeComposeInspector{}
+var fakeComposeInspector = fake.ComposeInspector
 
 func TestBuildNetworkPlan(t *testing.T) {
 	netname := "orcanet"

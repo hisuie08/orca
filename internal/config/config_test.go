@@ -3,13 +3,11 @@ package config_test
 import (
 	"orca/infra/inspector"
 	"orca/internal/config"
-	"orca/testdata"
+	"orca/test/fake"
 	"testing"
 )
 
-var fakeReader = inspector.FakeConfigReader{
-	Mock: testdata.TestConfigYaml,
-}
+var fakeReader = fake.ConfigReader
 
 func TestCreate(t *testing.T) {
 	wd := t.TempDir()
