@@ -1,31 +1,36 @@
 package compose
 
 import (
-	orca "orca/helper"
+	"errors"
 	"orca/infra/applier"
-	"orca/internal/context"
+	"orca/ostools"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
+type ComposeInspector interface {
+	// docker compose config
+	Config(composeDir string) ([]byte, error)
+}
+
 // 全てはここから始まる
 func GetAllCompose(orcaRoot string,
-	i ComposeInspector) (composes *ComposeMap, err error) {
+	c ComposeInspector) (*ComposeMap, error) {
 	result := ComposeMap{}
-	dirs, err := i.Directories()
+	dirs, err := ostools.Dirs(orcaRoot)
 	if err != nil {
 		return nil, err
 	}
 	for _, dir := range dirs {
-		data, err := i.Config(dir)
-		if err != nil {
+		data, err := c.Config(dir)
+		if err != nil && errors.Is(err, err) {
 			continue
 		}
 
 		spec := &ComposeSpec{}
 		if err := yaml.Unmarshal(data, spec); err != nil {
-			return nil, orca.OrcaError("compose Parse Error", err)
+			return nil, err
 		}
 
 		result[filepath.Base(dir)] = spec
@@ -68,24 +73,18 @@ func (m ComposeMap) CollectVolumes() []CollectedVolume {
 	return result
 }
 
-func (m ComposeMap) DumpAllComposes(ctx context.OrcaContext) ([]string, error) {
-	result:=[]string{}
+func (m ComposeMap) DumpAllComposes(cw applier.ComposeWriter) ([]string, error) {
+	result := []string{}
 	for name, c := range m {
 		b, err := yaml.Marshal(c)
 		if err != nil {
-			return []string{}, err
+			return result, err
 		}
-		d := func() applier.ComposeWriter {
-			switch ctx.RunMode {
-			case context.ModeDryRun:
-				return applier.FakeDotOrcaDumper{FakeRoot: ctx.OrcaRoot, FakeDir: map[string][]byte{}}
-			default:
-				return applier.NewDotOrcaDumper(ctx.OrcaRoot)
-			}
-		}()
-		if e,err:=d.DumpCompose(name,b); err != nil {
-			return nil, err
-		}else{result= append(result,e)}
+		e, err := cw.DumpCompose(name, b)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, e)
 	}
-	return result,nil
+	return result, nil
 }

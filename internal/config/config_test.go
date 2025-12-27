@@ -1,58 +1,80 @@
 package config_test
 
 import (
-	"orca/infra/inspector"
+	"orca/infra/applier"
 	"orca/internal/config"
-	"orca/test/fake"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-var fakeReader = fake.ConfigReader
+var _ config.ConfigReader = (*fakeCfgReader)(nil)
+
+// FakeConfigReader テスト用
+type fakeCfgReader struct {
+	result string
+	ErrOn  bool
+}
+
+func (f fakeCfgReader) Read() ([]byte, error) {
+	if f.ErrOn {
+		return nil, os.ErrNotExist
+	}
+	return []byte(f.result), nil
+}
 
 func TestCreate(t *testing.T) {
-	wd := t.TempDir()
+	root := t.TempDir()
+	ok, ng := filepath.Join(root, "ok"), filepath.Join(root, "ng")
+	os.Mkdir(ok, 0755)
+	os.Mkdir(ng, 0755)
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		path    string
-		wantErr bool
+		path        string
+		clusterName string
+		wantErr     bool
 	}{
 		// TODO: Add test cases.
-		{"test1", wd, false},
+		{"ok", ok, "", false},
+		{"ng", ng, "", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := config.Create("")
+			c := applier.ConfigFile{tt.path}
+			p, e := config.Create(tt.clusterName, c)
+
+			if e != nil {
+				t.Fatal("Failed %w", e)
+			}
 
 			if tt.wantErr {
 				t.Fatal("Create() succeeded unexpectedly")
 			}
-			if got.Network.Enabled {
+			t.Log(p, "\n")
 
-			}
 		})
 	}
 }
 
 func TestLoadConfig(t *testing.T) {
-	d := "/workspace/orca/testdata"
+	a, b :=
+		fakeCfgReader{result: "", ErrOn: false},
+		fakeCfgReader{result: "", ErrOn: true}
 	tests := []struct {
 		name string // description of this test case
+		dir  string
 		// Named input parameters for target function.
-		orca_dir string
-		r        config.ConfigReader
-		wantErr  bool
+		r       config.ConfigReader
+		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"default", "def", fakeReader, false},
-		{"full", "full", fakeReader, false},
-		{"part", "part", fakeReader, false},
-		{"notexist", "notexist", fakeReader, true},
-		{"fin", d, inspector.ConfigFileReader{}, false},
+		{"pass", "a", a, false},
+		{"fail", "b", b, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, gotErr := config.LoadConfig(tt.orca_dir, tt.r)
+			_, gotErr := config.LoadConfig(tt.dir, tt.r)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("LoadConfig() failed: %v", gotErr)
@@ -62,7 +84,6 @@ func TestLoadConfig(t *testing.T) {
 			if tt.wantErr {
 				t.Fatal("LoadConfig() succeeded unexpectedly")
 			}
-			// TODO: update the condition below to compare got with tt.want.
 		})
 	}
 }

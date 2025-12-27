@@ -1,7 +1,6 @@
 package ostools
 
 import (
-	orca "orca/helper"
 	"os"
 	"path/filepath"
 )
@@ -20,7 +19,7 @@ func DirExists(path string) bool {
 }
 
 // ファイルの存在確認
-func FileExisists(path string) bool {
+func FileExists(path string) bool {
 	return pathExists(path, false)
 }
 
@@ -29,14 +28,14 @@ func fileDirs(path string, isDir bool) ([]string, error) {
 	result := []string{}
 	readDir, err := os.ReadDir(path)
 	if err != nil {
-		return nil, orca.OrcaError("directory read failed", err)
+		return nil, err
 	}
 	for _, d := range readDir {
 		if d.IsDir() != isDir {
 			continue
 		}
 		if abs, err := filepath.Abs(path); err != nil {
-			return nil, orca.OrcaError("path resolve failed", err)
+			return nil, err
 		} else {
 			dir := filepath.Join(abs, d.Name())
 			result = append(result, dir)
@@ -46,7 +45,7 @@ func fileDirs(path string, isDir bool) ([]string, error) {
 }
 
 // サブディレクトリを走査
-func Directories(path string) ([]string, error) {
+func Dirs(path string) ([]string, error) {
 	return fileDirs(path, true)
 }
 
@@ -63,20 +62,16 @@ func ensureParentDir(target string) error {
 
 // - target がなければ再帰的に作成
 // - content を書き込んで閉じる（既存なら上書き）
-func CreateFile(target string, content []byte) error {
+func CreateFile(target string, content []byte, dry bool) (string, error) {
 	if err := ensureParentDir(target); err != nil {
-		return err
+		return "", err
 	}
-
-	return os.WriteFile(target, content, 0o644)
-}
-
-func ReadFile(target string) ([]byte, error) {
-	data, err := os.ReadFile(target)
-	if err != nil {
-		return nil, orca.OrcaError("file read error", err)
+	if !dry {
+		if err := os.WriteFile(target, content, 0o644); err != nil {
+			return "", nil
+		}
 	}
-	return data, nil
+	return target, nil
 }
 
 func CreateDir(target string) error {

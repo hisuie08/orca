@@ -1,79 +1,94 @@
 package compose_test
 
 import (
+	"errors"
 	"orca/infra/applier"
 	"orca/internal/compose"
-	"orca/test/fake"
+	"os"
+	"path/filepath"
 
 	"testing"
 )
 
-func TestGetAllCompose(t *testing.T) {
-	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		orcaRoot string
-		i        compose.ComposeInspector
-		wantErr  bool
-	}{
-		// TODO: Add test cases.
+var _ compose.ComposeInspector = (*fakeInspector)(nil)
+
+type fakeInspector struct {
+	results map[string][]byte
+	errors  map[string]error
+}
+
+func (f *fakeInspector) Config(dir string) ([]byte, error) {
+	base := filepath.Base(dir)
+	if err, ok := f.errors[base]; ok {
+		return nil, err
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := compose.GetAllCompose(tt.orcaRoot, fake.ComposeInspector)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("GetAllCompose() failed: %v", gotErr)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Fatal("GetAllCompose() succeeded unexpectedly")
-			}
-			// TODO: update the condition below to compare got with tt.want.
-			if got != nil {
-				if len(got.CollectComposes()) == 0 {
-					t.Errorf("compose got 0")
-				}
-			}
-		})
+	return f.results[base], nil
+}
+
+func TestGetAllCompose_PartialFailure(t *testing.T) {
+	root := t.TempDir()
+	os.Mkdir(filepath.Join(root, "ok"), 0755)
+	os.Mkdir(filepath.Join(root, "ng"), 0755)
+
+	inspector := &fakeInspector{
+		results: map[string][]byte{
+			"ok": []byte("volumes: {}\nnetworks: {}"),
+		},
+		errors: map[string]error{
+			"ng": errors.New("compose error"),
+		},
+	}
+
+	got, err := compose.GetAllCompose(root, inspector)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(*got) != 1 {
+		t.Fatalf("expected 1 compose, got %d", len(*got))
+	}
+
+	if _, ok := (*got)["ok"]; !ok {
+		t.Fatal("expected 'ok' to be present")
 	}
 }
 
-func TestComposeMap_DumpAllComposes(t *testing.T) {
-	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for receiver constructor.
-		orcaRoot string
-		i        compose.ComposeInspector
-		// Named input parameters for target function.
-		cw      applier.ComposeWriter
-		wantErr bool
-	}{
-		{"test",t.TempDir(),fake.ComposeInspector,fake.ComposeWriter,false},
+var _ applier.ComposeWriter = (*fakeWriter)(nil)
+
+type fakeWriter struct {
+	dumped map[string][]byte
+	errOn  string
+}
+
+func (f *fakeWriter) DumpCompose(name string, b []byte) (string, error) {
+	if name == f.errOn {
+		return "", errors.New("dump error")
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m, err := compose.GetAllCompose(tt.orcaRoot, tt.i)
-			if err != nil {
-				t.Fatalf("could not construct receiver type: %v", err)
-			}
-			got, gotErr := m.DumpAllComposes(tt.cw)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("DumpAllComposes() failed: %v", gotErr)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Fatal("DumpAllComposes() succeeded unexpectedly")
-			}
-			
-			// TODO: update the condition below to compare got with tt.want.
-			if len(got)!= len(m.CollectComposes()){
-				t.Errorf("DumpAllComposes() = got invalid")
-			}
-			t.Log(got)
-		})
+	if f.dumped == nil {
+		f.dumped = map[string][]byte{}
+	}
+	f.dumped[name] = b
+	return "compose." + name + ".yml", nil
+}
+func TestDumpAllComposes_OK(t *testing.T) {
+	m := compose.ComposeMap{
+		"a": &compose.ComposeSpec{Volumes: compose.VolumesSection{}},
+		"b": &compose.ComposeSpec{Networks: compose.NetworksSection{}},
+	}
+
+	w := &fakeWriter{errOn: ""}
+
+	got, err := m.DumpAllComposes(w)
+	t.Log(got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got) != 2 {
+		t.Fatalf("expected 2 results, got %d", len(got))
+	}
+
+	if _, ok := w.dumped["a"]; !ok {
+		t.Fatal("compose a not dumped")
 	}
 }

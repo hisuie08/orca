@@ -12,24 +12,24 @@ import (
 )
 
 func TestBuildVolumePlan(t *testing.T) {
-	config.LoadConfig("def", fake.ConfigReader)
+	v := t.TempDir()
+	cv := []compose.CollectedVolume{}
+	cfg := &config.ResolvedVolume{VolumeRoot: &v, EnsurePath: true}
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
 		orcaRoot string
+		vol      []compose.CollectedVolume
 		cfg      *config.ResolvedVolume
 
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"test", testdata.TestPath, (*config.ResolvedVolume)(testdata.TestConfig.Volume), false},
+		{"test", testdata.TestPath, cv, cfg, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
-			cmps, _ := compose.GetAllCompose(testdata.TestPath, fake.ComposeInspector)
-			vol := cmps.CollectVolumes()
-			got := plan.BuildVolumePlan(vol, tt.cfg, fake.DockerInspector)
+			got := plan.BuildVolumePlan(tt.vol, tt.cfg, fake.DockerInspector)
 			if tt.wantErr {
 				t.Fatal("BuildVolumePlan() succeeded unexpectedly")
 			}
@@ -50,8 +50,7 @@ func TestPrintVolumePlanTable(t *testing.T) {
 		},
 	}
 
-	comp, _ := compose.GetAllCompose(testdata.TestPath, fake.ComposeInspector)
-	vol := comp.CollectVolumes()
+	vol := []compose.CollectedVolume{}
 	buildPlan := plan.BuildVolumePlan(vol, &cfg.Volume, fake.DockerInspector)
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	tests := []struct {

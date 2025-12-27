@@ -1,26 +1,31 @@
 package config
 
 import (
-	orca "orca/helper"
 	"path/filepath"
 
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
 
-// テスト用に切り出したパース処理
-func parseConfig(cfg *OrcaConfig, data []byte) error {
-	if err := yaml.Unmarshal(data, cfg); err != nil {
-		return orca.OrcaError("orca.yml unmarshal failed", err)
-	}
-	return nil
+type ConfigReader interface {
+	Read() ([]byte, error)
+}
+type ConfigWriter interface {
+	Create(b []byte) (string, error)
 }
 
 // Configの実行時に解決される値を解決する処理 ほぼ全てのコマンドで必要
 func (c *OrcaConfig) resolve(name string) *ResolvedConfig {
 	result := &ResolvedConfig{
 		Volume: ResolvedVolume{
-			VolumeRoot: c.Volume.VolumeRoot,
+			VolumeRoot: func() *string {
+				if c.Volume.VolumeRoot != nil {
+					if path, err := filepath.Abs(*c.Volume.VolumeRoot); err == nil {
+						return &path
+					}
+				}
+				return nil
+			}(),
 			EnsurePath: c.Volume.EnsurePath,
 		},
 		Network: ResolvedNetwork{
@@ -46,7 +51,7 @@ func (c *OrcaConfig) resolve(name string) *ResolvedConfig {
 
 // ファイル読み込みからConfig構築
 func LoadConfig(orcaRoot string, r ConfigReader) (*ResolvedConfig, error) {
-	data, err := r.Read(orcaRoot)
+	data, err := r.Read()
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +59,7 @@ func LoadConfig(orcaRoot string, r ConfigReader) (*ResolvedConfig, error) {
 		Volume:  &VolumeConfig{},
 		Network: &NetworkConfig{},
 	}
-	if err := parseConfig(cfg, data); err != nil {
+	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, err
 	}
 
@@ -62,7 +67,7 @@ func LoadConfig(orcaRoot string, r ConfigReader) (*ResolvedConfig, error) {
 }
 
 // ゼロからorca.ymlを生成するやつ init コマンドで呼び出される
-func Create(clusterName string) *OrcaConfig {
+func Create(clusterName string, c ConfigWriter) (string, error) {
 	cfg := &OrcaConfig{
 		Volume:  &VolumeConfig{},
 		Network: &NetworkConfig{},
@@ -71,6 +76,9 @@ func Create(clusterName string) *OrcaConfig {
 		cfg.Name = &clusterName
 	}
 	defaults.Set(cfg)
-
-	return cfg
+	b, err := yaml.Marshal(cfg)
+	if err != nil {
+		return "", err
+	}
+	return c.Create(b)
 }

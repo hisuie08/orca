@@ -1,23 +1,27 @@
 package process
 
 import (
+	"bytes"
 	"orca/internal/compose"
 	"orca/internal/context"
 	"orca/internal/plan"
 )
 
-func BuildPlan(ctx context.OrcaContext) error {
-	cmp, err := compose.GetAllCompose(ctx.OrcaRoot, ctx.ComposeInspector)
+func PlanProcess(ctx context.OrcaContext) error {
+	cmp, err := compose.GetAllCompose(ctx.OrcaRoot, ctx.NewInsCompose())
 	if err != nil {
 		return err
 	}
 	vol := cmp.CollectVolumes()
 	net := cmp.CollectComposes()
 	volumePlan := func() []plan.VolumePlan {
+		//DEBUG
+		ctx.Printer.Printf("%s\n", *ctx.Config.Volume.VolumeRoot)
 		if ctx.Config.Volume.VolumeRoot != nil {
-			return plan.BuildVolumePlan(vol, &ctx.Config.Volume, ctx.DockerInspector)
+			return plan.BuildVolumePlan(vol, &ctx.Config.Volume, ctx.NewInsDocker())
+		} else {
+			return []plan.VolumePlan{}
 		}
-		return []plan.VolumePlan{}
 	}()
 	networkPlan := func() plan.NetworkPlan {
 		if ctx.Config.Network.Enabled {
@@ -33,10 +37,21 @@ func BuildPlan(ctx context.OrcaContext) error {
 		return err
 	}
 
-	// o, _ := os.OpenFile("./log.txt", os.O_WRONLY|os.O_CREATE, 0666)
-	// printer.W = o
-	// printer.C.Enabled = false
-	plan.DumpPlan(ctx, volumePlan, networkPlan, ctx.Printer.W)
+	b := bytes.Buffer{}
+	plan.DumpPlan(ctx, volumePlan, networkPlan, &b)
+	b.WriteTo(ctx.Printer.W)
+	composes, err := cmp.DumpAllComposes(ctx.Applier.Compose)
+	if err != nil {
+		return err
+	}
+	for _, v := range composes {
+		if ctx.RunMode == context.ModeDryRun {
+			ctx.Printer.PrintDRY("Created " + v + "\n")
+		} else {
+			ctx.Printer.Printf("Created %s\n", v)
+		}
+	}
+
 	return nil
 }
 

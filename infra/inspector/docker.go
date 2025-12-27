@@ -5,6 +5,10 @@ import (
 	"os/exec"
 )
 
+var _ NetworkInspector = (*DockerInspector)(nil)
+var _ VolumeInspector = (*DockerInspector)(nil)
+var _ FsInspector = (*DockerInspector)(nil)
+
 type NetworkInspector interface {
 	NetworkExists(name string) bool
 }
@@ -19,6 +23,10 @@ type FsInspector interface {
 
 // DockerInspector 実装
 type DockerInspector struct {
+}
+
+func NewInsDocker() *DockerInspector {
+	return &DockerInspector{}
 }
 
 // VolumeExists docker volume inspect <name>

@@ -2,13 +2,22 @@ package inspector
 
 import (
 	"orca/consts"
-	"orca/ostools"
+	"orca/internal/config"
+	"os"
 	"path/filepath"
 )
 
-type ConfigFileReader struct {
+var _ config.ConfigReader = (*ConfigFile)(nil)
+
+type ConfigFile struct {
+	OrcaRoot string
 }
 
-func (r ConfigFileReader) Read(orcaRoot string) ([]byte, error) {
-	return ostools.ReadFile(filepath.Join(orcaRoot, consts.OrcaYamlFile))
+func (r ConfigFile) Read() ([]byte, error) {
+	target := filepath.Join(r.OrcaRoot, consts.OrcaYamlFile)
+	data, err := os.ReadFile(target)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
 }

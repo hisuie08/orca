@@ -1,22 +1,22 @@
 package inspector
 
 import (
-	"errors"
-	"orca/ostools"
+	"orca/errs"
+	"orca/internal/compose"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-var ErrNoCompose = errors.New("no compose")
+var _ compose.ComposeInspector = (*DockerComposeInspector)(nil)
 
 // DockerComposeInspector
 type DockerComposeInspector struct {
 	OrcaRoot string
 }
 
-func (d DockerComposeInspector) Directories() ([]string, error) {
-	return ostools.Directories(d.OrcaRoot)
+func NewInsCompose(orcaRoot string) *DockerComposeInspector {
+	return &DockerComposeInspector{OrcaRoot: orcaRoot}
 }
 
 func (d DockerComposeInspector) Config(composeDir string) ([]byte, error) {
@@ -41,7 +41,7 @@ func (d DockerComposeInspector) Config(composeDir string) ([]byte, error) {
 	}
 
 	if err != nil {
-		return nil, ErrNoCompose
+		return nil, errs.ErrComposeNotFound
 	}
 	return out, nil
 }

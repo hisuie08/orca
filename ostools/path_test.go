@@ -81,7 +81,7 @@ func TestFileExisists(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := FileExisists(tt.path)
+			got := FileExists(tt.path)
 			// TODO: update the condition below to compare got with tt.want.
 			if got != tt.want {
 				t.Errorf("FileExisists() = %v, want %v", got, tt.want)
@@ -104,7 +104,7 @@ func TestDirectories(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := Directories(tt.path)
+			got, gotErr := Dirs(tt.path)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("Directories() failed: %v", gotErr)
@@ -206,7 +206,7 @@ func TestCreateFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotErr := CreateFile(tt.target, tt.content)
+			_, gotErr := CreateFile(tt.target, tt.content, false)
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("CreateFile() failed: %v", gotErr)

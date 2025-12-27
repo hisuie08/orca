@@ -2,20 +2,13 @@ package compose
 
 type SpecMap[T any] map[string]T
 
-func Collect[T any](m SpecMap[T]) []CollectedSpec[T] {
-	result := []CollectedSpec[T]{}
-	for k, v := range m {
-		result = append(result, CollectedSpec[T]{From: k, Spec: v})
-	}
-	return result
-}
-
 type ComposeMap SpecMap[*ComposeSpec]
 
 // ComposeSpec Orcaが読み出すComposeのルートセクション
 type ComposeSpec struct {
-	Volumes  VolumesSection  `yaml:"volumes"`
-	Networks NetworksSection `yaml:"networks"`
+	Rest     map[string]any  `yaml:",inline"`
+	Volumes  VolumesSection  `yaml:"volumes,omitempty"`
+	Networks NetworksSection `yaml:"networks,omitempty"`
 }
 
 // Composeのトップレベルvolumesセクション
@@ -65,7 +58,4 @@ type CollectedNetwork struct {
 	Spec *NetworkSpec // 定義
 }
 
-type ComposeInspector interface {
-	Directories() ([]string, error)
-	Config(composeDir string) ([]byte, error)
-}
+

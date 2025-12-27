@@ -32,6 +32,4 @@ type ResolvedNetwork struct {
 	Name     string
 }
 
-type ConfigReader interface {
-	Read(orcaRoot string) ([]byte, error)
-}
+
