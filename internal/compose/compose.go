@@ -2,7 +2,9 @@ package compose
 
 import (
 	"errors"
+	"orca/errs"
 	"orca/infra/applier"
+	"orca/infra/inspector"
 	"orca/ostools"
 	"path/filepath"
 
@@ -11,22 +13,17 @@ import (
 
 var _ (composeWriter) = (*applier.ComposeFileWriter)(nil)
 
-type composeInspector interface {
-	// docker compose config
-	Config(composeDir string) ([]byte, error)
-}
-
 // 全てはここから始まる
-func GetAllCompose(orcaRoot string,
-	c composeInspector) (*ComposeMap, error) {
+func GetAllCompose(
+	c inspector.ComposeInspector) (*ComposeMap, error) {
 	result := ComposeMap{}
-	dirs, err := ostools.Dirs(orcaRoot)
+	dirs, err := ostools.Dirs(c.Root())
 	if err != nil {
 		return nil, err
 	}
 	for _, dir := range dirs {
 		data, err := c.Config(dir)
-		if err != nil && errors.Is(err, err) {
+		if err != nil && errors.Is(err, errs.ErrComposeNotFound) {
 			continue
 		}
 

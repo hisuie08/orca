@@ -2,6 +2,7 @@ package compose_test
 
 import (
 	"errors"
+	"orca/errs"
 	"orca/internal/compose"
 	"os"
 	"path/filepath"
@@ -10,10 +11,14 @@ import (
 )
 
 type fakeInspector struct {
+	root    string
 	results map[string][]byte
 	errors  map[string]error
 }
 
+func (f fakeInspector) Root() string {
+	return f.root
+}
 func (f *fakeInspector) Config(dir string) ([]byte, error) {
 	base := filepath.Base(dir)
 	if err, ok := f.errors[base]; ok {
@@ -28,15 +33,16 @@ func TestGetAllCompose_PartialFailure(t *testing.T) {
 	os.Mkdir(filepath.Join(root, "ng"), 0755)
 
 	inspector := &fakeInspector{
+		root: root,
 		results: map[string][]byte{
 			"ok": []byte("volumes: {}\nnetworks: {}"),
 		},
 		errors: map[string]error{
-			"ng": errors.New("compose error"),
+			"ng": errs.ErrComposeNotFound,
 		},
 	}
 
-	got, err := compose.GetAllCompose(root, inspector)
+	got, err := compose.GetAllCompose(inspector)
 	if err != nil {
 		t.Fatal(err)
 	}

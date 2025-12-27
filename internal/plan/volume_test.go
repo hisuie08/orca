@@ -13,13 +13,13 @@ import (
 
 func TestBuildVolumePlan(t *testing.T) {
 	v := t.TempDir()
-	cv := []compose.CollectedVolume{}
+	cv := compose.ComposeMap{}
 	cfg := &config.ResolvedVolume{VolumeRoot: &v, EnsurePath: true}
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
 		orcaRoot string
-		vol      []compose.CollectedVolume
+		vol      compose.ComposeMap
 		cfg      *config.ResolvedVolume
 
 		wantErr bool
@@ -50,7 +50,7 @@ func TestPrintVolumePlanTable(t *testing.T) {
 		},
 	}
 
-	vol := []compose.CollectedVolume{}
+	vol := compose.ComposeMap{}
 	buildPlan := plan.BuildVolumePlan(vol, &cfg.Volume, fake.FakeDocker{})
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	tests := []struct {

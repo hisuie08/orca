@@ -8,14 +8,14 @@ import (
 	"sort"
 )
 
-func BuildNetworkPlan(composes []compose.CollectedCompose,
+func BuildNetworkPlan(m compose.ComposeMap,
 	cfg *config.ResolvedNetwork) NetworkPlan {
 	plan := NetworkPlan{
 		SharedName: cfg.Name,
 		Actions:    map[string][]NetworkAction{},
 	}
-	for _, c := range composes {
-		for k, n := range c.Spec.Networks {
+	for s, c := range m {
+		for k, n := range c.Networks {
 			action := NetworkAction{
 				Network: k,
 			}
@@ -30,7 +30,7 @@ func BuildNetworkPlan(composes []compose.CollectedCompose,
 				action.Message = fmt.Sprintf("network %s conflicts with shared network and will be removed", n.Name)
 			}
 			if action.Type != "" { // 変更があるときだけplanに追加
-				plan.Actions[c.From] = append(plan.Actions[c.From], action)
+				plan.Actions[s] = append(plan.Actions[s], action)
 			}
 		}
 	}

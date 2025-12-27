@@ -12,24 +12,22 @@ import (
 var apl = applier.Applier
 
 func PlanProcess(ctx context.OrcaContext) error {
-	cmp, err := compose.GetAllCompose(ctx.OrcaRoot, ins.Compose(ctx.OrcaRoot))
+	cmp, err := compose.GetAllCompose(ins.Compose(ctx.OrcaRoot))
 	if err != nil {
 		return err
 	}
-	vol := cmp.CollectVolumes()
-	net := cmp.CollectComposes()
 	volumePlan := func() []plan.VolumePlan {
 		//DEBUG
 		ctx.Printer.Printf("%s\n", *ctx.Config.Volume.VolumeRoot)
 		if ctx.Config.Volume.VolumeRoot != nil {
-			return plan.BuildVolumePlan(vol, &ctx.Config.Volume, ins.Docker)
+			return plan.BuildVolumePlan(*cmp, &ctx.Config.Volume, ins.Docker)
 		} else {
 			return []plan.VolumePlan{}
 		}
 	}()
 	networkPlan := func() plan.NetworkPlan {
 		if ctx.Config.Network.Enabled {
-			return plan.BuildNetworkPlan(net, &ctx.Config.Network)
+			return plan.BuildNetworkPlan(*cmp, &ctx.Config.Network)
 		}
 		return plan.NetworkPlan{}
 	}()

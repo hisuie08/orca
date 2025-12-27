@@ -9,13 +9,13 @@ import (
 )
 
 func TestBuildNetworkPlan(t *testing.T) {
-	cc := []compose.CollectedCompose{}
+	cc := compose.ComposeMap{}
 	cfg := config.ResolvedNetwork{
 		Enabled: true, Name: "test", Internal: false}
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		cc      []compose.CollectedCompose
+		cc      compose.ComposeMap
 		cfg     config.ResolvedNetwork
 		wantErr bool
 	}{

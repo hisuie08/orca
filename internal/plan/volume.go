@@ -35,6 +35,19 @@ func shouldConsider(v *compose.VolumeSpec) bool {
 	return false
 }
 
+func collectVolumes(m compose.ComposeMap) []compose.CollectedVolume {
+	result := []compose.CollectedVolume{}
+	for name, c := range m {
+		for k, v := range c.Volumes {
+			result = append(result, compose.CollectedVolume{
+				From: compose.FromRef{Compose: name, Key: k},
+				Spec: v,
+			})
+		}
+	}
+	return result
+}
+
 // 名前基準にボリュームをグルーピングしなおし。重複やexternalの検出用
 func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.CollectedVolume {
 	groups := make(map[string][]compose.CollectedVolume)
@@ -137,9 +150,10 @@ func buildVolPlan(
 }
 
 func BuildVolumePlan(
-	collect []compose.CollectedVolume,
+	m compose.ComposeMap,
 	cfg *config.ResolvedVolume,
 	i inspector.Volumenspector) []VolumePlan {
+	collect := collectVolumes(m)
 	group := groupVolumes(collect)
 	return buildVolPlan(group, cfg, i)
 }
