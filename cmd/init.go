@@ -6,6 +6,8 @@ package cmd
 import (
 	"fmt"
 	"orca/consts"
+	"orca/errs"
+	"orca/infra/applier"
 	"orca/internal/config"
 	"os"
 	"path/filepath"
@@ -13,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
+
+var apl = applier.Applier
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -38,13 +42,12 @@ func runInit(baseDir, clusterName string) error {
 	path := filepath.Join(baseDir, consts.OrcaYamlFile)
 
 	if _, err := os.Stat(path); err == nil {
-		return fmt.Errorf("orca.yml already exists")
+		return errs.ErrAlreadyInitialized
 	} else if !os.IsNotExist(err) {
 		return err
 	}
 
-	cfg := config.Create(clusterName)
-	if err := writeConfig(path, cfg); err != nil {
+	if _, err := config.Create(clusterName, apl.ConfigWriter(baseDir)); err != nil {
 		return err
 	}
 	fmt.Printf("%v was created successfully\n", path)

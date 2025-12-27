@@ -5,32 +5,29 @@ import (
 	"os/exec"
 )
 
-var _ NetworkInspector = (*DockerInspector)(nil)
-var _ VolumeInspector = (*DockerInspector)(nil)
-var _ FsInspector = (*DockerInspector)(nil)
+var _ NetworkInspector = (*dockerInspector)(nil)
+var _ Volumenspector = (*dockerInspector)(nil)
+var _ BindInspector = (*dockerInspector)(nil)
+var (
+	Docker = &dockerInspector{}
+)
 
 type NetworkInspector interface {
 	NetworkExists(name string) bool
 }
-
-type VolumeInspector interface {
+type Volumenspector interface {
 	VolumeExists(name string) bool
 }
-
-type FsInspector interface {
-	DirExists(dir string) bool
+type BindInspector interface {
+	BindExists(dir string) bool
 }
 
 // DockerInspector 実装
-type DockerInspector struct {
-}
-
-func NewInsDocker() *DockerInspector {
-	return &DockerInspector{}
+type dockerInspector struct {
 }
 
 // VolumeExists docker volume inspect <name>
-func (d DockerInspector) VolumeExists(name string) bool {
+func (d dockerInspector) VolumeExists(name string) bool {
 	cmd := exec.Command("docker", "volume", "inspect", name)
 	if _, err := cmd.CombinedOutput(); err != nil {
 		return false
@@ -39,7 +36,7 @@ func (d DockerInspector) VolumeExists(name string) bool {
 }
 
 // NetworkExists docker network inspect <name>
-func (d DockerInspector) NetworkExists(name string) bool {
+func (d dockerInspector) NetworkExists(name string) bool {
 	cmd := exec.Command("docker", "network", "inspect", name)
 	if _, err := cmd.CombinedOutput(); err != nil {
 		return false
@@ -47,7 +44,7 @@ func (d DockerInspector) NetworkExists(name string) bool {
 	return true
 }
 
-// DirExists ボリュームのマウント先確認用
-func (d DockerInspector) DirExists(path string) bool {
+// BindExists ボリュームのマウント先確認用
+func (f dockerInspector) BindExists(path string) bool {
 	return ostools.DirExists(path)
 }

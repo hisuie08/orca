@@ -62,16 +62,25 @@ func ensureParentDir(target string) error {
 
 // - target がなければ再帰的に作成
 // - content を書き込んで閉じる（既存なら上書き）
-func CreateFile(target string, content []byte, dry bool) (string, error) {
-	if err := ensureParentDir(target); err != nil {
+func CreateFile(target string, content []byte) (string, error) {
+	var path string
+	switch filepath.IsAbs(target) {
+	case false:
+		if p, e := filepath.Abs(target); e != nil {
+			return "", e
+		} else {
+			path = p
+		}
+	default:
+		path = target
+	}
+	if err := ensureParentDir(path); err != nil {
 		return "", err
 	}
-	if !dry {
-		if err := os.WriteFile(target, content, 0o644); err != nil {
-			return "", nil
-		}
+	if err := os.WriteFile(path, content, 0o644); err != nil {
+		return "", nil
 	}
-	return target, nil
+	return path, nil
 }
 
 func CreateDir(target string) error {

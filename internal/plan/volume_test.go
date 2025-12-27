@@ -29,7 +29,7 @@ func TestBuildVolumePlan(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := plan.BuildVolumePlan(tt.vol, tt.cfg, fake.DockerInspector)
+			got := plan.BuildVolumePlan(tt.vol, tt.cfg, fake.FakeDocker{})
 			if tt.wantErr {
 				t.Fatal("BuildVolumePlan() succeeded unexpectedly")
 			}
@@ -51,7 +51,7 @@ func TestPrintVolumePlanTable(t *testing.T) {
 	}
 
 	vol := []compose.CollectedVolume{}
-	buildPlan := plan.BuildVolumePlan(vol, &cfg.Volume, fake.DockerInspector)
+	buildPlan := plan.BuildVolumePlan(vol, &cfg.Volume, fake.FakeDocker{})
 	printer := orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
 	tests := []struct {
 		name  string

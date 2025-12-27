@@ -2,13 +2,17 @@ package process
 
 import (
 	"bytes"
+	"orca/infra/applier"
+	ins "orca/infra/inspector"
 	"orca/internal/compose"
 	"orca/internal/context"
 	"orca/internal/plan"
 )
 
+var apl = applier.Applier
+
 func PlanProcess(ctx context.OrcaContext) error {
-	cmp, err := compose.GetAllCompose(ctx.OrcaRoot, ctx.NewInsCompose())
+	cmp, err := compose.GetAllCompose(ctx.OrcaRoot, ins.Compose(ctx.OrcaRoot))
 	if err != nil {
 		return err
 	}
@@ -18,7 +22,7 @@ func PlanProcess(ctx context.OrcaContext) error {
 		//DEBUG
 		ctx.Printer.Printf("%s\n", *ctx.Config.Volume.VolumeRoot)
 		if ctx.Config.Volume.VolumeRoot != nil {
-			return plan.BuildVolumePlan(vol, &ctx.Config.Volume, ctx.NewInsDocker())
+			return plan.BuildVolumePlan(vol, &ctx.Config.Volume, ins.Docker)
 		} else {
 			return []plan.VolumePlan{}
 		}
@@ -40,7 +44,7 @@ func PlanProcess(ctx context.OrcaContext) error {
 	b := bytes.Buffer{}
 	plan.DumpPlan(ctx, volumePlan, networkPlan, &b)
 	b.WriteTo(ctx.Printer.W)
-	composes, err := cmp.DumpAllComposes(ctx.Applier.Compose)
+	composes, err := cmp.DumpAllComposes(apl.Compose(ctx.OrcaRoot))
 	if err != nil {
 		return err
 	}

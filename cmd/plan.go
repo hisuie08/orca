@@ -8,7 +8,6 @@ package cmd
 
 import (
 	"io"
-	"orca/consts"
 	"orca/internal/context"
 	"orca/process"
 	"os"
@@ -31,11 +30,12 @@ var planCmd = &cobra.Command{
 }
 
 func runPlan(orcaRoot string, w io.Writer) error {
-	ctx, err := context.BuildContext(orcaRoot, w)
+	// TODO: mode implement
+	ctx, err := context.BuildContext(orcaRoot, w, context.ModeExecute)
 	if err != nil {
 		return err
 	}
-	process.BuildPlan(*ctx)
+	process.PlanProcess(*ctx)
 	// o, _ := os.OpenFile("./log.txt", os.O_WRONLY|os.O_CREATE, 0666)
 	// printer.W = o
 	// printer.C.Enabled = false

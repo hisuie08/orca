@@ -9,14 +9,16 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type ComposeInspector interface {
+var _ (composeWriter) = (*applier.ComposeFileWriter)(nil)
+
+type composeInspector interface {
 	// docker compose config
 	Config(composeDir string) ([]byte, error)
 }
 
 // 全てはここから始まる
 func GetAllCompose(orcaRoot string,
-	c ComposeInspector) (*ComposeMap, error) {
+	c composeInspector) (*ComposeMap, error) {
 	result := ComposeMap{}
 	dirs, err := ostools.Dirs(orcaRoot)
 	if err != nil {
@@ -73,14 +75,18 @@ func (m ComposeMap) CollectVolumes() []CollectedVolume {
 	return result
 }
 
-func (m ComposeMap) DumpAllComposes(cw applier.ComposeWriter) ([]string, error) {
+type composeWriter interface {
+	WriteCompose(string, []byte) (string, error)
+}
+
+func (m ComposeMap) DumpAllComposes(cw composeWriter) ([]string, error) {
 	result := []string{}
 	for name, c := range m {
 		b, err := yaml.Marshal(c)
 		if err != nil {
 			return result, err
 		}
-		e, err := cw.DumpCompose(name, b)
+		e, err := cw.WriteCompose(name, b)
 		if err != nil {
 			return result, err
 		}

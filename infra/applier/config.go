@@ -2,23 +2,26 @@ package applier
 
 import (
 	"orca/consts"
-	"orca/internal/config"
-	"os"
+	"orca/ostools"
 	"path/filepath"
 )
 
-var _ config.ConfigWriter = (*ConfigFile)(nil)
-
-type ConfigFile struct {
+type configFileWriter struct {
 	OrcaRoot string
 }
 
-func (c ConfigFile) Create(b []byte) (string, error) {
-	path, err := filepath.Abs(filepath.Join(c.OrcaRoot, consts.OrcaYamlFile))
+func (c configFileWriter) WriteConfig(b []byte) (string, error) {
+	path := filepath.Join(c.OrcaRoot, consts.OrcaYamlFile)
+	return ostools.CreateFile(path, b)
+}
+
+type dryConfigWriter struct {
+	OrcaRoot string
+}
+
+func (d dryConfigWriter) WriteConfig(b []byte) (string, error) {
+	path, err := filepath.Abs(filepath.Join(d.OrcaRoot, consts.OrcaYamlFile))
 	if err != nil {
-		return "", err
-	}
-	if err := os.WriteFile(path, b, 0o644); err != nil {
 		return "", err
 	}
 	return path, nil

@@ -2,22 +2,28 @@ package applier
 
 import (
 	"fmt"
-	"orca/consts"
 	"orca/ostools"
 	"path/filepath"
 )
 
-type ComposeWriter interface {
-	DumpCompose(name string, content []byte) (string, error)
+type ComposeFileWriter struct {
+	path string
 }
 
-type DotOrcaDumper struct {
-	OrcaRoot string
-}
-
-func (d DotOrcaDumper) DumpCompose(
+func (c ComposeFileWriter) WriteCompose(
 	name string, content []byte) (string, error) {
-	cmpName := fmt.Sprintf("compose.%s.yml", name)
-	target := filepath.Join(d.OrcaRoot, consts.DotOrcaDir, cmpName)
-	return ostools.CreateFile(target, content, false)
+	n := fmt.Sprintf("compose.%s.yml", name)
+	p := filepath.Join(c.path, n) // orcaRoot/.orca/compose.
+	return ostools.CreateFile(p, content)
+}
+
+type dryComposeWriter struct {
+	path string
+}
+
+func (d dryComposeWriter) WriteCompose(
+	name string, b []byte) (string, error) {
+	n := fmt.Sprintf("compose.%s.yml", name)
+	p := filepath.Join(d.path, n)
+	return p, nil
 }

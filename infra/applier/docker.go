@@ -1,7 +1,6 @@
 package applier
 
 import (
-	"orca/ostools"
 	"os/exec"
 )
 
@@ -13,10 +12,6 @@ type VolumeCreator interface {
 	CreateVolume(name string, opt ...string) error
 }
 
-type DirCreator interface {
-	CreateDir(path string) error
-}
-
 type DockerApplier struct{}
 
 func (d DockerApplier) CreateNetwork(name string, opt ...string) (string, error) {
@@ -26,9 +21,6 @@ func (d DockerApplier) CreateNetwork(name string, opt ...string) (string, error)
 func (d DockerApplier) CreateVolume(name string, opt ...string) (string, error) {
 	cmd := append([]string{"docker", "volume", "create"}, opt...)
 	return RunCommand(cmd...)
-}
-func (d DockerApplier) CreateDir(path string) error {
-	return ostools.CreateDir(path)
 }
 
 func RunCommand(cmdline ...string) (string, error) {

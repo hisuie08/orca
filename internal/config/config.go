@@ -1,17 +1,15 @@
 package config
 
 import (
+	"orca/infra/inspector"
 	"path/filepath"
 
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
 
-type ConfigReader interface {
-	Read() ([]byte, error)
-}
 type ConfigWriter interface {
-	Create(b []byte) (string, error)
+	WriteConfig(b []byte) (string, error)
 }
 
 // Configの実行時に解決される値を解決する処理 ほぼ全てのコマンドで必要
@@ -50,7 +48,7 @@ func (c *OrcaConfig) resolve(name string) *ResolvedConfig {
 }
 
 // ファイル読み込みからConfig構築
-func LoadConfig(orcaRoot string, r ConfigReader) (*ResolvedConfig, error) {
+func LoadConfig(r inspector.ConfigReader) (*ResolvedConfig, error) {
 	data, err := r.Read()
 	if err != nil {
 		return nil, err
@@ -63,7 +61,7 @@ func LoadConfig(orcaRoot string, r ConfigReader) (*ResolvedConfig, error) {
 		return nil, err
 	}
 
-	return cfg.resolve(filepath.Base(orcaRoot)), nil
+	return cfg.resolve(filepath.Base(r.Root())), nil
 }
 
 // ゼロからorca.ymlを生成するやつ init コマンドで呼び出される
@@ -80,5 +78,5 @@ func Create(clusterName string, c ConfigWriter) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return c.Create(b)
+	return c.WriteConfig(b)
 }

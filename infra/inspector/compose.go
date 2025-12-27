@@ -2,26 +2,34 @@ package inspector
 
 import (
 	"orca/errs"
-	"orca/internal/compose"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-var _ compose.ComposeInspector = (*DockerComposeInspector)(nil)
+var _ ComposeInspector = (*dockerComposeInspector)(nil)
 
-// DockerComposeInspector
-type DockerComposeInspector struct {
-	OrcaRoot string
+type ComposeInspector interface {
+	Root() string
+	Config(string) ([]byte, error)
 }
 
-func NewInsCompose(orcaRoot string) *DockerComposeInspector {
-	return &DockerComposeInspector{OrcaRoot: orcaRoot}
+func Compose(orcaRoot string) *dockerComposeInspector {
+	return &dockerComposeInspector{orcaRoot: orcaRoot}
+
 }
 
-func (d DockerComposeInspector) Config(composeDir string) ([]byte, error) {
+// dockerComposeInspector
+type dockerComposeInspector struct {
+	orcaRoot string
+}
+
+func (d dockerComposeInspector) Root() string {
+	return d.orcaRoot
+}
+func (d dockerComposeInspector) Config(composeDir string) ([]byte, error) {
 	// HACK: 駆け上がり探索防止用の空compose
-	stopper := filepath.Join(d.OrcaRoot, "compose.yml")
+	stopper := filepath.Join(d.orcaRoot, "compose.yml")
 	created := false
 
 	if _, err := os.Stat(stopper); os.IsNotExist(err) {

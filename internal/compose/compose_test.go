@@ -2,15 +2,12 @@ package compose_test
 
 import (
 	"errors"
-	"orca/infra/applier"
 	"orca/internal/compose"
 	"os"
 	"path/filepath"
 
 	"testing"
 )
-
-var _ compose.ComposeInspector = (*fakeInspector)(nil)
 
 type fakeInspector struct {
 	results map[string][]byte
@@ -53,14 +50,12 @@ func TestGetAllCompose_PartialFailure(t *testing.T) {
 	}
 }
 
-var _ applier.ComposeWriter = (*fakeWriter)(nil)
-
 type fakeWriter struct {
 	dumped map[string][]byte
 	errOn  string
 }
 
-func (f *fakeWriter) DumpCompose(name string, b []byte) (string, error) {
+func (f *fakeWriter) WriteCompose(name string, b []byte) (string, error) {
 	if name == f.errOn {
 		return "", errors.New("dump error")
 	}

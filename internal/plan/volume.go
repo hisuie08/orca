@@ -53,7 +53,7 @@ func groupVolumes(vols []compose.CollectedVolume) map[string][]compose.Collected
 func buildVolPlan(
 	groups map[string][]compose.CollectedVolume,
 	cfg *config.ResolvedVolume,
-	i inspector.VolumeInspector,
+	i inspector.Volumenspector,
 ) []VolumePlan {
 
 	plans := []VolumePlan{}
@@ -139,7 +139,7 @@ func buildVolPlan(
 func BuildVolumePlan(
 	collect []compose.CollectedVolume,
 	cfg *config.ResolvedVolume,
-	i inspector.VolumeInspector) []VolumePlan {
+	i inspector.Volumenspector) []VolumePlan {
 	group := groupVolumes(collect)
 	return buildVolPlan(group, cfg, i)
 }
