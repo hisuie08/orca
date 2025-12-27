@@ -29,7 +29,7 @@ func (d dockerComposeInspector) Root() string {
 }
 func (d dockerComposeInspector) Config(composeDir string) ([]byte, error) {
 	// HACK: 駆け上がり探索防止用の空compose
-	stopper := filepath.Join(d.orcaRoot, "compose.yml")
+	stopper := filepath.Join(d.Root(), "compose.yml")
 	created := false
 
 	if _, err := os.Stat(stopper); os.IsNotExist(err) {
