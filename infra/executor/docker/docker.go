@@ -10,16 +10,18 @@ import (
 type Executor interface {
 	ComposeUp(string) (string, error)
 	ComposeDown(string) (string, error)
-	CreateNetwork(string) (string, error)
+	CreateNetwork(string, ...string) (string, error)
 	CreateVolume(string, ...string) (string, error)
+}
+
+var _ Executor = (*dockerExecutor)(nil)
+
+func NewExecutor(p policy.ExecPolicy) *dockerExecutor {
+	return &dockerExecutor{policy: p}
 }
 
 type dockerExecutor struct {
 	policy policy.ExecPolicy
-}
-
-func NewDockerExecutor(p policy.ExecPolicy)*dockerExecutor{
-	return &dockerExecutor{policy: p}
 }
 
 func (d *dockerExecutor) run(cmd *exec.Cmd) (string, error) {
