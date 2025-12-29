@@ -32,4 +32,10 @@ type ResolvedNetwork struct {
 	Name     string
 }
 
+type ConfigCreator interface {
+	Create(string) (string, error)
+}
 
+type ConfigLoader interface {
+	Load() (*ResolvedConfig, error)
+}
