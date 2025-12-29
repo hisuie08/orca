@@ -1,7 +1,6 @@
 package compose
 
 import (
-	"errors"
 	"orca/errs"
 	"orca/internal/context"
 	"orca/internal/inspector/fs"
@@ -62,20 +61,4 @@ func (d *composeInspector) Config(composeDir string) (*compose.ComposeSpec, erro
 		return nil, err
 	}
 	return spec, nil
-}
-
-func (d *composeInspector) GetAll() (compose.ComposeMap, error) {
-	result := compose.ComposeMap{}
-	dirs, err := d.fs.Dirs(d.Root())
-	if err != nil {
-		return result, &errs.FileError{Path: d.Root(), Err: err}
-	}
-	for _, dir := range dirs {
-		c, err := d.Config(dir)
-		if err != nil && errors.Is(err, errs.ErrComposeNotFound) {
-			continue
-		}
-		result[filepath.Base(dir)] = c
-	}
-	return result, nil
 }
