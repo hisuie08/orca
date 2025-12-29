@@ -3,6 +3,7 @@ package docker
 import (
 	"fmt"
 	"orca/errs"
+	"orca/internal/context"
 	"orca/internal/policy"
 	"os/exec"
 )
@@ -16,16 +17,16 @@ type Executor interface {
 
 var _ Executor = (*dockerExecutor)(nil)
 
-func NewExecutor(p policy.ExecPolicy) *dockerExecutor {
-	return &dockerExecutor{policy: p}
+func NewExecutor(p policy.ExecPolicy) Executor {
+	return &dockerExecutor{WithPolicy: context.NewWithPolicy(p)}
 }
 
 type dockerExecutor struct {
-	policy policy.ExecPolicy
+	context.WithPolicy
 }
 
 func (d *dockerExecutor) run(cmd *exec.Cmd) (string, error) {
-	if d.policy.AllowSideEffect() {
+	if d.Policy().AllowSideEffect() {
 		out, err := cmd.CombinedOutput()
 		if err != nil {
 			return string(out), &errs.ExternalError{Cmd: cmd.String(), Err: err}
