@@ -1,4 +1,4 @@
-package operator
+package config
 
 import (
 	"orca/internal/config/creator"
