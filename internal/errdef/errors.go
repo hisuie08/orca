@@ -13,9 +13,9 @@ var (
 
 	ErrDryRunViolation = errors.New("operation violates dry-run")
 
-	
 	ErrComposeNotFound = errors.New("compose file not found")
 	ErrClusterNotFound = errors.New("cluster not found")
 
 	ErrExternalDependency = errors.New("external dependency failed")
+	ErrFileOperation      = errors.New("file operation failed")
 )

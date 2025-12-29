@@ -32,3 +32,16 @@ func (e *ExternalError) Error() string {
 func (e *ExternalError) Unwrap() error {
 	return errdef.ErrExternalDependency
 }
+
+type FileError struct {
+	Path string
+	Err  error
+}
+
+func (e *FileError) Error() string {
+	return fmt.Sprintf("file operation failed: %s: %v", e.Path, e.Err)
+}
+
+func (e *FileError) Unwrap() error {
+	return errdef.ErrFileOperation
+}
