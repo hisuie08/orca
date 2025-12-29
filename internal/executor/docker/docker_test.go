@@ -1,7 +1,7 @@
 package docker_test
 
 import (
-	"orca/infra/executor/docker"
+	"orca/internal/executor/docker"
 	"orca/internal/policy"
 	"testing"
 )
