@@ -14,11 +14,10 @@ var _ config.ConfigLoader = (*configLoader)(nil)
 
 type configLoader struct {
 	context.WithRoot
-	cfg *config.ResolvedConfig
 }
 
 func NewLoader(root string) config.ConfigLoader {
-	return &configLoader{cfg: nil, WithRoot: context.NewWithRoot(root)}
+	return &configLoader{WithRoot: context.NewWithRoot(root)}
 }
 
 func (c *configLoader) Load() (*config.ResolvedConfig, error) {
@@ -34,6 +33,5 @@ func (c *configLoader) Load() (*config.ResolvedConfig, error) {
 	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, err
 	}
-	c.cfg = internal.Resolve(cfg, filepath.Base(c.Root()))
-	return c.cfg, nil
+	return internal.Resolve(cfg, filepath.Base(c.Root())), nil
 }
