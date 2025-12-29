@@ -1,8 +1,8 @@
 package loader
 
 import (
-	"orca/internal/context"
 	"orca/internal/config/internal"
+	"orca/internal/context"
 	"orca/model/config"
 	"os"
 	"path/filepath"
