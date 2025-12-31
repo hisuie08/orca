@@ -1,5 +1,7 @@
 package filesystem
 
+var _ Inspector = (*fakeInspector)(nil)
+
 type fakeInspector struct {
 	FileMap map[string][]byte
 	DirMap  map[string]bool
