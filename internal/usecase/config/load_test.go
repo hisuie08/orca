@@ -1,7 +1,6 @@
-package loader_test
+package config
 
 import (
-	"orca/internal/config/loader"
 	"os"
 	"testing"
 )
@@ -10,7 +9,7 @@ func Test(t *testing.T) {
 	dir := t.TempDir()
 	testpath := os.DirFS("/workspace/orca/testdata/config")
 	os.CopyFS(dir, testpath)
-	fakeLoader := loader.NewLoader(dir)
+	fakeLoader := NewLoader(dir)
 	l, e := fakeLoader.Load()
 	if e != nil {
 		t.Fatal(e)

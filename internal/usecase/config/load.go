@@ -1,28 +1,33 @@
-package loader
+package config
 
 import (
-	"orca/internal/config/internal"
 	"orca/internal/context"
+	"orca/internal/inspector"
+	"orca/internal/usecase/config/internal"
 	"orca/model/config"
-	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
-var _ config.ConfigLoader = (*configLoader)(nil)
+type loader interface {
+	Load() (*config.ResolvedConfig, error)
+}
+
+var _ loader = (*configLoader)(nil)
 
 type configLoader struct {
 	context.WithRoot
+	fi inspector.FileSystem
 }
 
-func NewLoader(root string) config.ConfigLoader {
+func NewLoader(root string) loader {
 	return &configLoader{WithRoot: context.NewWithRoot(root)}
 }
 
 func (c *configLoader) Load() (*config.ResolvedConfig, error) {
-	target := c.OrcaYamlFile()
-	data, err := os.ReadFile(target)
+	path := c.OrcaYamlFile()
+	data, err := c.fi.Read(path)
 	if err != nil {
 		return nil, err
 	}

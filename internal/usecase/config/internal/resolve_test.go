@@ -1,7 +1,7 @@
 package internal_test
 
 import (
-	"orca/internal/config/internal"
+	"orca/internal/usecase/config/internal"
 	"orca/model/config"
 	"testing"
 )

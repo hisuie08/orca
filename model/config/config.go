@@ -31,11 +31,3 @@ type ResolvedNetwork struct {
 	Internal bool
 	Name     string
 }
-
-type ConfigCreator interface {
-	Create(string) (string, error)
-}
-
-type ConfigLoader interface {
-	Load() (*ResolvedConfig, error)
-}

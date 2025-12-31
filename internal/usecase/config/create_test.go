@@ -1,14 +1,13 @@
-package creator_test
+package config
 
 import (
-	"orca/internal/config/creator"
-	"orca/internal/policy"
+	"orca/model/policy"
 	"testing"
 )
 
 func TestConfigCreator(t *testing.T) {
 	dir := t.TempDir()
-	fakeCreator := creator.NewCreator(dir, policy.RealPolicy{})
+	fakeCreator := NewCreator(dir, policy.RealPolicy{})
 
 	_, err := fakeCreator.Create("name")
 	if err != nil {
