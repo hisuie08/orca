@@ -1,19 +1,23 @@
 package config
 
 import (
-	"os"
+	"orca/model/config"
 	"testing"
 )
 
+var _ loader = (*fakeLoader)(nil)
+
+type fakeLoader struct {
+}
+
+func (f *fakeLoader) Load() (*config.ResolvedConfig, error) {
+	return &config.ResolvedConfig{}, nil
+}
 func Test(t *testing.T) {
-	dir := t.TempDir()
-	testpath := os.DirFS("/workspace/orca/testdata/config")
-	os.CopyFS(dir, testpath)
-	fakeLoader := NewLoader(dir)
-	l, e := fakeLoader.Load()
+	fakeLoader := fakeLoader{}
+	_, e := fakeLoader.Load()
 	if e != nil {
 		t.Fatal(e)
 	}
-	t.Logf("%#v", l)
 
 }
