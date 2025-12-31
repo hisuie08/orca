@@ -2,7 +2,6 @@ package docker
 
 import (
 	"orca/errs"
-	"orca/internal/inspector/filesystem"
 	"orca/model/compose"
 	"os/exec"
 
@@ -18,14 +17,18 @@ type Inspector interface {
 	Compose(dir string) (*compose.ComposeSpec, error)
 }
 
-// DockerInspector 実装
-type inspector struct {
-	fi filesystem.Inspector
+type fsInspector interface {
+	DirExists(string) bool
 }
 
-func NewInspector() Inspector {
+// DockerInspector 実装
+type inspector struct {
+	fi fsInspector
+}
+
+func NewInspector(fi fsInspector) Inspector {
 	return &inspector{
-		fi: filesystem.NewInspector(),
+		fi: fi,
 	}
 }
 

@@ -14,7 +14,7 @@ type Docker interface {
 }
 
 func NewDocker() Docker {
-	return docker.NewInspector()
+	return docker.NewInspector(NewFilesystem())
 }
 
 type FileSystem interface {
