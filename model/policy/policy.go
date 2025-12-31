@@ -14,7 +14,3 @@ func (RealPolicy) AllowSideEffect() bool { return true }
 type DryPolicy struct{}
 
 func (DryPolicy) AllowSideEffect() bool { return false }
-
-type PolicyProvider interface {
-	Policy() ExecPolicy
-}
