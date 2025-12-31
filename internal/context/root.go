@@ -5,7 +5,12 @@ import (
 	"path/filepath"
 )
 
-type WithRoot struct {
+type WithRoot interface {
+	Root() string
+	OrcaDir() string
+	OrcaYamlFile() string
+}
+type withRoot struct {
 	root string
 }
 
@@ -19,17 +24,17 @@ func NewWithRoot(root string) WithRoot {
 		panic(fmt.Sprintf("failed to resolve absolute path: %v", err))
 	}
 
-	return WithRoot{root: abs}
+	return &withRoot{root: abs}
 }
 
-func (w WithRoot) Root() string {
+func (w *withRoot) Root() string {
 	return w.root
 }
 
-func (w WithRoot) OrcaDir() string {
+func (w *withRoot) OrcaDir() string {
 	return filepath.Join(w.root, ".orca")
 }
 
-func (w WithRoot) OrcaYamlFile() string {
+func (w *withRoot) OrcaYamlFile() string {
 	return filepath.Join(w.root, "orca.yml")
 }

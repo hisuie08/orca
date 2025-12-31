@@ -1,6 +1,6 @@
 package context
 
-import "orca/internal/policy"
+import "orca/model/policy"
 
 type WithPolicy interface {
 	Policy() policy.ExecPolicy
@@ -18,8 +18,4 @@ func NewWithPolicy(p policy.ExecPolicy) withPolicy {
 
 func (w withPolicy) Policy() policy.ExecPolicy {
 	return w.policy
-}
-
-type F struct {
-	WithPolicy
 }

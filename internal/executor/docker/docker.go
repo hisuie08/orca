@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"orca/errs"
 	"orca/internal/context"
-	"orca/internal/policy"
+	"orca/model/policy"
 	"os/exec"
 )
 

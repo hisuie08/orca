@@ -4,7 +4,7 @@ import (
 	"io/fs"
 	"orca/errs"
 	"orca/internal/context"
-	"orca/internal/policy"
+	"orca/model/policy"
 	"os"
 	"path/filepath"
 )
