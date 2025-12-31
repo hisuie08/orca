@@ -25,18 +25,7 @@ type executor struct {
 	context.WithPolicy
 }
 
-func (d *executor) run(cmd *exec.Cmd) (string, error) {
-	if d.Policy().AllowSideEffect() {
-		out, err := cmd.CombinedOutput()
-		if err != nil {
-			return string(out), &errs.ExternalError{Cmd: cmd.String(), Err: err}
-		} else {
-			return string(out), nil
-		}
-	}
-	out := fmt.Sprintf("[DRY-RUN] %s", cmd.String())
-	return out, nil
-}
+
 
 func (d *executor) ComposeUp(composeFile string) (string, error) {
 	cmd := exec.Command("docker", "compose", "-f", composeFile, "up", "-d")
@@ -61,4 +50,17 @@ func (d *executor) CreateVolume(name string, opt ...string) (string, error) {
 	c := append([]string{"volume", "create", name}, opt...)
 	cmd := exec.Command("docker", c...)
 	return d.run(cmd)
+}
+
+func (d *executor) run(cmd *exec.Cmd) (string, error) {
+	if d.Policy().AllowSideEffect() {
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return string(out), &errs.ExternalError{Cmd: cmd.String(), Err: err}
+		} else {
+			return string(out), nil
+		}
+	}
+	out := fmt.Sprintf("[DRY-RUN] %s", cmd.String())
+	return out, nil
 }
