@@ -1,9 +1,9 @@
 package executor
 
 import (
+	"orca/internal/context"
 	"orca/internal/executor/docker"
 	"orca/internal/executor/filesystem"
-	"orca/model/policy"
 )
 
 type Docker interface {
@@ -13,7 +13,7 @@ type Docker interface {
 	CreateVolume(string, ...string) (string, error)
 }
 
-func NewDocker(p policy.ExecPolicy) Docker {
+func NewDocker(p context.WithPolicy) Docker {
 	return docker.NewExecutor(p)
 }
 
@@ -24,6 +24,6 @@ type FileSystem interface {
 	RemoveDir(path string) error
 }
 
-func NewFilesystem(p policy.ExecPolicy) FileSystem {
+func NewFilesystem(p context.WithPolicy) FileSystem {
 	return filesystem.NewExecutor(p)
 }

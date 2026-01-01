@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"orca/errs"
 	"orca/internal/context"
-	"orca/model/policy"
 	"os/exec"
 )
 
@@ -17,15 +16,13 @@ type Executor interface {
 
 var _ Executor = (*executor)(nil)
 
-func NewExecutor(p policy.ExecPolicy) Executor {
-	return &executor{WithPolicy: context.NewWithPolicy(p)}
+func NewExecutor(ctx context.WithPolicy) Executor {
+	return &executor{WithPolicy: ctx}
 }
 
 type executor struct {
 	context.WithPolicy
 }
-
-
 
 func (d *executor) ComposeUp(composeFile string) (string, error) {
 	cmd := exec.Command("docker", "compose", "-f", composeFile, "up", "-d")

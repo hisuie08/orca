@@ -4,7 +4,6 @@ import (
 	"io/fs"
 	"orca/errs"
 	"orca/internal/context"
-	"orca/model/policy"
 	"os"
 	"path/filepath"
 )
@@ -22,8 +21,8 @@ type executor struct {
 	context.WithPolicy
 }
 
-func NewExecutor(p policy.ExecPolicy) *executor {
-	return &executor{WithPolicy: context.NewWithPolicy(p)}
+func NewExecutor(ctx context.WithPolicy) *executor {
+	return &executor{WithPolicy: ctx}
 }
 
 func (f *executor) WriteFile(path string, data []byte) error {
