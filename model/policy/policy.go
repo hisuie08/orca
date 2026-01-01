@@ -4,13 +4,18 @@ type ExecPolicy interface {
 	AllowSideEffect() bool
 }
 
-var _ ExecPolicy = (*RealPolicy)(nil)
-var _ ExecPolicy = (*DryPolicy)(nil)
+var (
+	Real = &realPolicy{}
+	Dry  = &dryPolicy{}
+)
 
-type RealPolicy struct{}
+var _ ExecPolicy = (*realPolicy)(nil)
+var _ ExecPolicy = (*dryPolicy)(nil)
 
-func (RealPolicy) AllowSideEffect() bool { return true }
+type realPolicy struct{}
 
-type DryPolicy struct{}
+func (realPolicy) AllowSideEffect() bool { return true }
 
-func (DryPolicy) AllowSideEffect() bool { return false }
+type dryPolicy struct{}
+
+func (dryPolicy) AllowSideEffect() bool { return false }
