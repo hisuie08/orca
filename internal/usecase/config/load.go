@@ -10,24 +10,23 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type loader interface {
-	Load() (*config.ResolvedConfig, error)
+type LoadConfigContext interface {
+	context.WithRoot
 }
 
-var _ loader = (*configLoader)(nil)
+func LoadConfig(ctx LoadConfigContext, fi inspector.FileSystem) (*config.ResolvedConfig, error) {
+	l := &configLoader{WithRoot: ctx, FileSystem: fi}
+	return l.Load()
+}
 
 type configLoader struct {
 	context.WithRoot
-	fi inspector.FileSystem
-}
-
-func NewLoader(root string) loader {
-	return &configLoader{WithRoot: context.NewWithRoot(root)}
+	inspector.FileSystem
 }
 
 func (c *configLoader) Load() (*config.ResolvedConfig, error) {
 	path := c.OrcaYamlFile()
-	data, err := c.fi.Read(path)
+	data, err := c.Read(path)
 	if err != nil {
 		return nil, err
 	}

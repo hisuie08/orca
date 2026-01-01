@@ -4,29 +4,29 @@ import (
 	"orca/internal/context"
 	"orca/internal/executor/filesystem"
 	"orca/model/config"
-	"orca/model/policy"
 
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
 
-var _ creator = (*cfgCreator)(nil)
-
-type creator interface {
-	Create(string) (string, error)
+type CreateConfigContext interface {
+	context.WithRoot
+	context.WithPolicy
 }
+
 type cfgCreator struct {
 	context.WithRoot
 	context.WithPolicy
 	writer filesystem.Executor
 }
 
-func NewCreator(root string, p policy.ExecPolicy) creator {
-	return &cfgCreator{
-		writer:     filesystem.NewExecutor(p),
-		WithRoot:   context.NewWithRoot(root),
-		WithPolicy: context.NewWithPolicy(p),
+func CreateConfig(ctx CreateConfigContext, name string) (string, error) {
+	c := &cfgCreator{
+		writer:     filesystem.NewExecutor(ctx),
+		WithRoot:   ctx,
+		WithPolicy: ctx,
 	}
+	return c.Create(name)
 }
 
 func (c *cfgCreator) Create(clusterName string) (string, error) {
