@@ -15,18 +15,14 @@ type LoadConfigContext interface {
 }
 
 func LoadConfig(ctx LoadConfigContext) (*config.ResolvedConfig, error) {
-	l := &configLoader{WithRoot: ctx, fi: inspector.NewFilesystem()}
-	return l.Load()
+	return loadConfig(ctx, inspector.NewFilesystem())
 }
 
-type configLoader struct {
-	context.WithRoot
-	fi inspector.FileSystem
-}
-
-func (c *configLoader) Load() (*config.ResolvedConfig, error) {
-	path := c.OrcaYamlFile()
-	data, err := c.fi.Read(path)
+func loadConfig(ctx LoadConfigContext,
+	fi inspector.FileSystem) (
+	*config.ResolvedConfig, error) {
+	path := ctx.OrcaYamlFile()
+	data, err := fi.Read(path)
 	if err != nil {
 		return nil, err
 	}
@@ -37,5 +33,5 @@ func (c *configLoader) Load() (*config.ResolvedConfig, error) {
 	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, err
 	}
-	return internal.Resolve(cfg, filepath.Base(c.Root())), nil
+	return internal.Resolve(cfg, filepath.Base(ctx.Root())), nil
 }
