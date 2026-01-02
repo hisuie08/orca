@@ -18,8 +18,12 @@ func LoadConfig(ctx LoadConfigContext) (*config.ResolvedConfig, error) {
 	return loadConfig(ctx, inspector.NewFilesystem())
 }
 
+type fsInspector interface {
+	Read(string) ([]byte, error)
+}
+
 func loadConfig(ctx LoadConfigContext,
-	fi inspector.FileSystem) (
+	fi fsInspector) (
 	*config.ResolvedConfig, error) {
 	path := ctx.OrcaYamlFile()
 	data, err := fi.Read(path)

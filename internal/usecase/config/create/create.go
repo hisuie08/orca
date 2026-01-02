@@ -18,8 +18,12 @@ func CreateConfig(ctx CreateConfigContext, name string) (string, error) {
 	return createConfig(ctx, filesystem.NewExecutor(ctx), name)
 }
 
+type fsExecutor interface {
+	WriteFile(string, []byte) error
+}
+
 func createConfig(ctx CreateConfigContext,
-	writer filesystem.Executor,
+	writer fsExecutor,
 	clusterName string) (string, error) {
 	cfg := makeConfig(clusterName)
 	b, err := yaml.Marshal(cfg)
