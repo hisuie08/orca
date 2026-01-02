@@ -34,27 +34,3 @@ type NetworkSpec struct {
 	Labels   map[string]string `yaml:"labels"`
 }
 
-// CollectedSpec
-type CollectedSpec[T any] struct {
-	From string // 定義されていたcompose
-	Spec T      // 定義
-}
-type FromRef struct {
-	Compose string
-	Key     string
-}
-
-type CollectedCompose struct {
-	From string       // 定義されていたcompose
-	Spec *ComposeSpec // 定義
-}
-
-type CollectedVolume struct {
-	From FromRef     // 定義されていたcompose
-	Spec *VolumeSpec // 定義
-}
-
-type CollectedNetwork struct {
-	From FromRef      // 定義されていたcompose
-	Spec *NetworkSpec // 定義
-}
