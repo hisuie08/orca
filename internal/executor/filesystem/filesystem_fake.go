@@ -1,29 +1,39 @@
 package filesystem
 
-type fakeExecutor struct {
-	Files map[string][]byte
-	Dirs  map[string]bool
-	Ops   []string
+var _ Executor = (*fakeExecutor)(nil)
 
+type fakeExecutor struct {
+	Files           map[string][]byte
+	Dirs            map[string]bool
+	Issued          []string
+	Done            []string
 	AllowSideEffect bool
 }
 
-func newFakeExecutor(allow bool) Executor {
+const (
+	opWrite  = "WriteFile"
+	opMkdir  = "CreateDir"
+	opRmFile = "RemoveFile"
+	opRmDir  = "RemoveDir"
+)
+
+func newFakeExecutor(allow bool) *fakeExecutor {
 	return &fakeExecutor{
 		Files:           map[string][]byte{},
 		Dirs:            map[string]bool{},
-		Ops:             []string{},
+		Issued:          []string{},
+		Done:            []string{},
 		AllowSideEffect: allow,
 	}
 }
 
 func (f *fakeExecutor) WriteFile(path string, data []byte) error {
-	f.Ops = append(f.Ops, "WriteFile:"+path)
-
+	op := opWrite + ":" + path
+	f.Issued = append(f.Issued, op)
 	if !f.AllowSideEffect {
 		return nil
 	}
-
+	f.Done = append(f.Done, op)
 	dir := dirOf(path)
 	f.Dirs[dir] = true
 	f.Files[path] = data
@@ -31,34 +41,34 @@ func (f *fakeExecutor) WriteFile(path string, data []byte) error {
 }
 
 func (f *fakeExecutor) CreateDir(path string) error {
-	f.Ops = append(f.Ops, "CreateDir:"+path)
-
+	op := opMkdir + ":" + path
+	f.Issued = append(f.Issued, op)
 	if !f.AllowSideEffect {
 		return nil
 	}
-
+	f.Done = append(f.Done, op)
 	f.Dirs[path] = true
 	return nil
 }
 
 func (f *fakeExecutor) RemoveFile(path string) error {
-	f.Ops = append(f.Ops, "RemoveFile:"+path)
-
+	op := opRmFile + ":" + path
+	f.Issued = append(f.Issued, op)
 	if !f.AllowSideEffect {
 		return nil
 	}
-
+	f.Done = append(f.Done, op)
 	delete(f.Files, path)
 	return nil
 }
 
 func (f *fakeExecutor) RemoveDir(path string) error {
-	f.Ops = append(f.Ops, "RemoveDir:"+path)
-
+	op := opRmDir + ":" + path
+	f.Issued = append(f.Issued, op)
 	if !f.AllowSideEffect {
 		return nil
 	}
-
+	f.Done = append(f.Done, op)
 	delete(f.Dirs, path)
 	return nil
 }

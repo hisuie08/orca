@@ -7,12 +7,13 @@ import (
 
 func TestDockerExecutor(t *testing.T) {
 	testCases := []struct {
-		desc   string
-		allow  bool
-		wantOp int
+		desc       string
+		allow      bool
+		wantIssued int
+		wantDone   int
 	}{
-		{desc: "real", allow: true, wantOp: 4},
-		{desc: "dry", allow: false, wantOp: 0},
+		{desc: "real", allow: true, wantIssued: 4, wantDone: 4},
+		{desc: "dry", allow: false, wantIssued: 4, wantDone: 0},
 	}
 	for _, tC := range testCases {
 		t.Run(fmt.Sprintf("%s_allow=%v", tC.desc, tC.allow), func(t *testing.T) {
@@ -29,8 +30,11 @@ func TestDockerExecutor(t *testing.T) {
 			if _, e := fake.CreateNetwork(""); e != nil {
 				t.Fatal(e)
 			}
-			if len(fake.Ops) != tC.wantOp {
-				t.Errorf("expected %d in Ops but got %d", len(fake.Ops), tC.wantOp)
+			if len(fake.Issued) != tC.wantIssued {
+				t.Errorf("expected %d in Issued but got %d", len(fake.Issued), tC.wantIssued)
+			}
+			if len(fake.Done) != tC.wantDone {
+				t.Errorf("expected %d in Done but got %d", len(fake.Done), tC.wantDone)
 			}
 		})
 	}

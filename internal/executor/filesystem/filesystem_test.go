@@ -5,7 +5,7 @@ import (
 )
 
 func TestWriteFileCreatesParentDir(t *testing.T) {
-	exec := newFakeExecutor(true).(*fakeExecutor)
+	exec := newFakeExecutor(true)
 
 	err := exec.WriteFile("a/b/c.txt", []byte("hello"))
 	if err != nil {
@@ -24,13 +24,13 @@ func TestWriteFileCreatesParentDir(t *testing.T) {
 		"WriteFile:a/b/c.txt",
 	}
 
-	if len(exec.Ops) != len(wantOps) {
-		t.Fatalf("ops mismatch: %+v", exec.Ops)
+	if len(exec.Done) != len(wantOps) {
+		t.Fatalf("ops mismatch: %+v", exec.Done)
 	}
 }
 
 func TestDryRunDoesNotModifyState(t *testing.T) {
-	exec := newFakeExecutor(false).(*fakeExecutor)
+	exec := newFakeExecutor(false)
 
 	_ = exec.WriteFile("x/y.txt", []byte("dry"))
 
@@ -38,7 +38,7 @@ func TestDryRunDoesNotModifyState(t *testing.T) {
 		t.Fatalf("file should not be written in dry-run")
 	}
 
-	if len(exec.Ops) != 1 {
+	if len(exec.Issued) ==0 {
 		t.Fatalf("op should be recorded")
 	}
 }

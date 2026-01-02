@@ -5,12 +5,13 @@ import "strings"
 var _ Executor = (*fakeExecutor)(nil)
 
 type fakeExecutor struct {
-	Ops             []string
+	Issued          []string
+	Done            []string
 	AllowSideEffect bool
 }
 
 func newFakeExecutor(allow bool) Executor {
-	return &fakeExecutor{Ops: []string{}, AllowSideEffect: allow}
+	return &fakeExecutor{Issued: []string{}, Done: []string{}, AllowSideEffect: allow}
 }
 
 func (f *fakeExecutor) ComposeUp(name string) (string, error) {
@@ -31,8 +32,9 @@ func (f *fakeExecutor) CreateVolume(name string, opts ...string) (string, error)
 }
 
 func (f *fakeExecutor) runFake(cmd string) (string, error) {
+	f.Issued = append(f.Issued, cmd)
 	if f.AllowSideEffect {
-		f.Ops = append(f.Ops, cmd)
+		f.Done = append(f.Done, cmd)
 	}
 	return cmd, nil
 }
