@@ -14,12 +14,6 @@ type CreateConfigContext interface {
 	context.WithPolicy
 }
 
-type cfgCreator struct {
-	context.WithRoot
-	context.WithPolicy
-	writer filesystem.Executor
-}
-
 func CreateConfig(ctx CreateConfigContext, name string) (string, error) {
 	c := &cfgCreator{
 		writer:     filesystem.NewExecutor(ctx),
@@ -27,6 +21,12 @@ func CreateConfig(ctx CreateConfigContext, name string) (string, error) {
 		WithPolicy: ctx,
 	}
 	return c.Create(name)
+}
+
+type cfgCreator struct {
+	context.WithRoot
+	context.WithPolicy
+	writer filesystem.Executor
 }
 
 func (c *cfgCreator) Create(clusterName string) (string, error) {

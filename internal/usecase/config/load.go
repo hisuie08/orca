@@ -14,19 +14,19 @@ type LoadConfigContext interface {
 	context.WithRoot
 }
 
-func LoadConfig(ctx LoadConfigContext, fi inspector.FileSystem) (*config.ResolvedConfig, error) {
-	l := &configLoader{WithRoot: ctx, FileSystem: fi}
+func LoadConfig(ctx LoadConfigContext) (*config.ResolvedConfig, error) {
+	l := &configLoader{WithRoot: ctx, fi: inspector.NewFilesystem()}
 	return l.Load()
 }
 
 type configLoader struct {
 	context.WithRoot
-	inspector.FileSystem
+	fi inspector.FileSystem
 }
 
 func (c *configLoader) Load() (*config.ResolvedConfig, error) {
 	path := c.OrcaYamlFile()
-	data, err := c.Read(path)
+	data, err := c.fi.Read(path)
 	if err != nil {
 		return nil, err
 	}

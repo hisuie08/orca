@@ -33,7 +33,7 @@ func TestLoadConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, gotErr := LoadConfig(tt.ctx, tt.fi)
+			_, gotErr := (&configLoader{WithRoot: tt.ctx,fi: tt.fi}).Load()
 			if gotErr != nil {
 				if !tt.wantErr {
 					t.Errorf("LoadConfig() failed: %v", gotErr)
