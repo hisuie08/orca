@@ -15,30 +15,21 @@ type CreateConfigContext interface {
 }
 
 func CreateConfig(ctx CreateConfigContext, name string) (string, error) {
-	c := &cfgCreator{
-		writer:     filesystem.NewExecutor(ctx),
-		WithRoot:   ctx,
-		WithPolicy: ctx,
-	}
-	return c.Create(name)
+	return createConfig(ctx, filesystem.NewExecutor(ctx), name)
 }
 
-type cfgCreator struct {
-	context.WithRoot
-	context.WithPolicy
-	writer filesystem.Executor
-}
-
-func (c *cfgCreator) Create(clusterName string) (string, error) {
-	cfg := c.makeConfig(clusterName)
+func createConfig(ctx CreateConfigContext,
+	writer filesystem.Executor,
+	clusterName string) (string, error) {
+	cfg := makeConfig(clusterName)
 	b, err := yaml.Marshal(cfg)
 	if err != nil {
 		return "", err
 	}
-	return c.OrcaYamlFile(), c.writer.WriteFile(c.OrcaYamlFile(), b)
+	return ctx.OrcaYamlFile(), writer.WriteFile(ctx.OrcaYamlFile(), b)
 }
 
-func (c *cfgCreator) makeConfig(name string) *config.OrcaConfig {
+func makeConfig(name string) *config.OrcaConfig {
 	cfg := &config.OrcaConfig{
 		Volume:  &config.VolumeConfig{},
 		Network: &config.NetworkConfig{},

@@ -2,12 +2,30 @@ package config
 
 import (
 	"orca/internal/context"
-	"orca/internal/inspector"
+	"orca/internal/executor"
 	"orca/model/policy"
 	"testing"
 )
 
-func Test(t *testing.T) {
+var _ executor.FileSystem = (*fakeFileWriter)(nil)
+
+type fakeFileWriter struct {
+	context.WithPolicy
+	Files []string
+	executor.FileSystem
+}
+
+func (f *fakeFileWriter) WriteFile(path string, data []byte) error {
+	if f.Policy().AllowSideEffect() {
+		f.Files = append(f.Files, path)
+	}
+	return nil
+}
+func newFakeWriter(ctx CreateConfigContext) *fakeFileWriter {
+	return &fakeFileWriter{WithPolicy: ctx, Files: []string{}}
+}
+
+func TestCreateConfig(t *testing.T) {
 	testCases := []struct {
 		desc   string
 		policy policy.ExecPolicy
@@ -20,22 +38,14 @@ func Test(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			dir := t.TempDir()
 			ctx := context.New().WithRoot(dir).WithPolicy(tC.policy)
-			var _ context.WithRoot = &ctx
-
-			_, err := CreateConfig(&ctx, "")
+			writer := newFakeWriter(&ctx)
+			_, err := createConfig(&ctx, writer, "")
 			if err != nil {
 				t.Error(err)
 			}
-			c, err := inspector.NewFilesystem().Files(dir)
-			if err != nil {
-				t.Error(err)
-			}
-			if len(c) != tC.expect {
-				t.Errorf("expected %d file but created %d files", tC.expect, len(c))
+			if len(writer.Files) != tC.expect {
+				t.Errorf("expected %d file but created %d files", tC.expect, len(writer.Files))
 			}
 		})
 	}
-}
-func TestConfigCreator(t *testing.T) {
-
 }
