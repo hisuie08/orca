@@ -1,5 +1,10 @@
 package filesystem
 
+import (
+	"io/fs"
+	"orca/errs"
+)
+
 var _ Inspector = (*fakeInspector)(nil)
 
 type fakeInspector struct {
@@ -44,6 +49,9 @@ func (f *fakeInspector) Files(path string) ([]string, error) {
 }
 
 func (f *fakeInspector) Read(path string) ([]byte, error) {
+	if r, ok := f.FileMap[path]; ok {
+		return r, &errs.FileError{Path: path, Err: fs.ErrNotExist}
+	}
 	return f.FileMap[path], nil
 }
 
