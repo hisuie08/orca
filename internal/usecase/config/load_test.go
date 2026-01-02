@@ -3,18 +3,9 @@ package config
 import (
 	"orca/internal/context"
 	"orca/internal/inspector"
+	fakeinspector "orca/internal/inspector/fake"
 	"testing"
 )
-
-var _ inspector.FileSystem = (*fakeFileReader)(nil)
-
-type fakeFileReader struct {
-	inspector.FileSystem
-}
-
-func (f *fakeFileReader) Read(string) ([]byte, error) {
-	return []byte{}, nil
-}
 
 func TestLoadConfig(t *testing.T) {
 	tests := []struct {
@@ -24,7 +15,7 @@ func TestLoadConfig(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"test", &fakeFileReader{}, false},
+		{"test", &fakeinspector.FakeFilesystem{}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
