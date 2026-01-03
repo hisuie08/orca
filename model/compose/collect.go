@@ -16,12 +16,12 @@ type CollectedCompose struct {
 }
 
 type CollectedVolume struct {
-	From FromRef     // 定義されていたcompose
+	Ref  FromRef     // 定義されていたcompose
 	Spec *VolumeSpec // 定義
 }
 
 type CollectedNetwork struct {
-	From FromRef      // 定義されていたcompose
+	Ref  FromRef      // 定義されていたcompose
 	Spec *NetworkSpec // 定義
 }
 
@@ -38,7 +38,7 @@ func (m ComposeMap) CollectNetworks() []CollectedNetwork {
 	for name, c := range m {
 		for k, v := range c.Networks {
 			result = append(result, CollectedNetwork{
-				From: FromRef{Compose: name, Key: k},
+				Ref:  FromRef{Compose: name, Key: k},
 				Spec: v,
 			})
 		}
@@ -51,7 +51,7 @@ func (m ComposeMap) CollectVolumes() []CollectedVolume {
 	for name, c := range m {
 		for k, v := range c.Volumes {
 			result = append(result, CollectedVolume{
-				From: FromRef{Compose: name, Key: k},
+				Ref:  FromRef{Compose: name, Key: k},
 				Spec: v,
 			})
 		}
