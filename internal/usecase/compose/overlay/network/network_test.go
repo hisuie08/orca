@@ -26,14 +26,12 @@ func fakeNetworkPlan(s string, a plan.NetworkActionType, c, k string) plan.Netwo
 }
 func TestOverlayNetwork(t *testing.T) {
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
+		name string
 		composename string
 		key         string
 		action      plan.NetworkActionType
 		want        compose.NetworksSection
 	}{
-		// TODO: Add test cases.
 		{name: "override", action: plan.NetworkOverrideDefault},
 		{name: "remove", action: plan.NetworkRemoveConflict},
 	}
