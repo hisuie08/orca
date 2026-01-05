@@ -1,5 +1,7 @@
 package compose
 
+import "maps"
+
 func (v *VolumeSpec) IsExternal() bool {
 	return v.External
 }
@@ -20,4 +22,10 @@ func (v *VolumeSpec) IsLocalBind() bool {
 func (v *VolumeSpec) HasBindPath() (string, bool) {
 	path, ok := v.DriverOpts["device"]
 	return path, ok
+}
+
+func (v VolumeSpec) Equal(u VolumeSpec) bool {
+	l := v.Name == u.Name && v.External == u.External && v.Driver == u.Driver
+	m := maps.Equal(v.DriverOpts, u.DriverOpts) && maps.Equal(v.Labels, u.Labels)
+	return l && m
 }

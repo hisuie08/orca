@@ -1,12 +1,14 @@
 package plan
 
+import "orca/model/config"
+
 // ===========
 //
 //	OrcaPlan
 //
 // ===========
 type OrcaPlan struct {
-	Name        string // cluster name
+	Config      config.ResolvedConfig
 	ComposeDirs []string
 	Volumes     []VolumePlan
 	Networks    NetworkPlan
