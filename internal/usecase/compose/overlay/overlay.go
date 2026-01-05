@@ -15,16 +15,16 @@ type composeOverlayer interface {
 	OverlayNetwork(plan.NetworkPlan)
 }
 
-type OverlayContext interface {
+type overlayContext interface {
 	context.WithConfig
 }
 
 type overlayer struct {
-	ctx OverlayContext
+	ctx overlayContext
 	cm  compose.ComposeMap
 }
 
-func ComposeOverlayer(ctx OverlayContext, cm compose.ComposeMap) *overlayer {
+func ComposeOverlayer(ctx overlayContext, cm compose.ComposeMap) *overlayer {
 	return &overlayer{cm: cm, ctx: ctx}
 }
 

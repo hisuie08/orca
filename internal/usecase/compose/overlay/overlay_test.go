@@ -24,7 +24,7 @@ func fakeMap() compose.ComposeMap {
 			nRef: &compose.NetworkSpec{Name: cRef + "_net"}},
 	}}
 }
-func fakeCtx(volume *string, network bool) OverlayContext {
+func fakeCtx(volume *string, network bool) overlayContext {
 	ctx := context.New().WithConfig(&config.ResolvedConfig{
 		Volume:  config.ResolvedVolume{VolumeRoot: volume},
 		Network: config.ResolvedNetwork{Enabled: network, Name: netName}})
@@ -43,7 +43,7 @@ func fakePlan(cfg config.ResolvedConfig) ([]plan.VolumePlan, plan.NetworkPlan) {
 func TestOverlay(t *testing.T) {
 	testCases := []struct {
 		name string
-		ctx  OverlayContext
+		ctx  overlayContext
 		want func(compose.ComposeMap) bool
 	}{
 		{name: "network_and_volume_enabled", ctx: fakeCtx(&volRoot, true),
