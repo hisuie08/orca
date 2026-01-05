@@ -36,6 +36,10 @@ func buildVolumePlan(
 	if cfg.VolumeRoot == nil || *cfg.VolumeRoot == "" {
 		panic("BuildVolumePlan called while volume management is disabled (VolumeRoot is nil)")
 	}
+	volumeRoot, err := filepath.Abs(*cfg.VolumeRoot)
+	if err != nil {
+		panic("volumeRoot could not be resolved")
+	}
 	// ボリュームは名前基準に処理
 	for name, vols := range groupVolsByName(cv) {
 		vp := plan.VolumePlan{
@@ -75,7 +79,7 @@ func buildVolumePlan(
 		// 3. 複数個所に定義 かつ 未存在 -> shared volumeとして orca管轄に昇格
 		case len(vols) > 1 && !hasExternal:
 			vp.Type = plan.VolumeShared
-			vp.BindPath = filepath.Join(*cfg.VolumeRoot, name)
+			vp.BindPath = filepath.Join(volumeRoot, name)
 			vp.NeedMkdir = !di.BindExists(vp.BindPath)
 			vp.Reason = "duplicated volume across compose"
 
@@ -83,7 +87,7 @@ func buildVolumePlan(
 		default:
 			vp.Type = plan.VolumeLocal
 			if vp.BindPath == "" {
-				vp.BindPath = filepath.Join(*cfg.VolumeRoot, name)
+				vp.BindPath = filepath.Join(volumeRoot, name)
 			}
 			vp.NeedMkdir = !di.BindExists(vp.BindPath)
 			vp.Reason = "single compose volume"
