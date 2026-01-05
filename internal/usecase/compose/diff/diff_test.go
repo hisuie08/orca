@@ -7,8 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func testCompose() *compose.ComposeMap {
-	return &compose.ComposeMap{}
+func testCompose() compose.ComposeMap {
+	return compose.ComposeMap{}
 }
 
 func Test(t *testing.T) {

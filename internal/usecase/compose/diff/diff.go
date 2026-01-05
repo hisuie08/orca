@@ -9,9 +9,9 @@ import (
 // CopyMap creates a semantic deep copy of ComposeMap by YAML round-trip.
 // This is intended for diffing / snapshot purposes,
 // NOT for preserving original YAML formatting, comments, or ordering.
-func CopyMap(cm *compose.ComposeMap) (*compose.ComposeMap, error) {
+func CopyMap(cm compose.ComposeMap) (compose.ComposeMap, error) {
 	cp := compose.ComposeMap{}
-	for ref, oldSpec := range *cm {
+	for ref, oldSpec := range cm {
 		b, err := yaml.Marshal(oldSpec)
 		if err != nil {
 			return nil, err
@@ -22,5 +22,5 @@ func CopyMap(cm *compose.ComposeMap) (*compose.ComposeMap, error) {
 		}
 		cp[ref] = newSpec
 	}
-	return &cp, nil
+	return cp, nil
 }

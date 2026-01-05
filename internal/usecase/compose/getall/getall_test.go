@@ -55,14 +55,14 @@ func TestGetAllCompose_AllFound(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(*result) != 2 {
-		t.Fatalf("expected 2 compose, got %d", len(*result))
+	if len(result) != 2 {
+		t.Fatalf("expected 2 compose, got %d", len(result))
 	}
 
-	if _, ok := (*result)["a"]; !ok {
+	if _, ok := (result)["a"]; !ok {
 		t.Errorf("compose a not found")
 	}
-	if _, ok := (*result)["b"]; !ok {
+	if _, ok := (result)["b"]; !ok {
 		t.Errorf("compose b not found")
 	}
 }
@@ -87,11 +87,11 @@ func TestGetAllCompose_SkipNotFound(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if len(*result) != 1 {
-		t.Fatalf("expected 1 compose, got %d", len(*result))
+	if len(result) != 1 {
+		t.Fatalf("expected 1 compose, got %d", len(result))
 	}
 
-	if _, ok := (*result)["a"]; !ok {
+	if _, ok := (result)["a"]; !ok {
 		t.Errorf("compose a should exist")
 	}
 }

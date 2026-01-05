@@ -13,7 +13,7 @@ type GetAllComposeContext interface {
 	context.WithRoot
 }
 
-func GetAllCompose(ctx GetAllComposeContext) (*compose.ComposeMap, error) {
+func GetAllCompose(ctx GetAllComposeContext) (compose.ComposeMap, error) {
 	return getAllCompose(ctx, inspector.NewDocker(), inspector.NewFilesystem())
 }
 
@@ -26,7 +26,7 @@ type fsInspector interface {
 
 func getAllCompose(ctx GetAllComposeContext,
 	di dockerInspector, fi fsInspector) (
-	*compose.ComposeMap, error) {
+	compose.ComposeMap, error) {
 	result := compose.ComposeMap{}
 	dirs, err := fi.Dirs(ctx.Root())
 	if err != nil {
@@ -43,5 +43,5 @@ func getAllCompose(ctx GetAllComposeContext,
 
 		result[filepath.Base(dir)] = data
 	}
-	return &result, nil
+	return result, nil
 }

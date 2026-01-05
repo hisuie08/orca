@@ -10,6 +10,6 @@ type GetAllComposeContext interface {
 	context.WithRoot
 }
 
-func GetAllCompose(ctx GetAllComposeContext) (*compose.ComposeMap, error) {
+func GetAllCompose(ctx GetAllComposeContext) (compose.ComposeMap, error) {
 	return getall.GetAllCompose(ctx)
 }
