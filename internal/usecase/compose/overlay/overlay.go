@@ -13,7 +13,6 @@ var _ composeOverlayer = (*overlayer)(nil)
 type composeOverlayer interface {
 	OverlayVolume([]plan.VolumePlan)
 	OverlayNetwork(plan.NetworkPlan)
-	ComposeMap() compose.ComposeMap
 }
 
 type OverlayContext interface {
@@ -39,8 +38,4 @@ func (o *overlayer) OverlayNetwork(np plan.NetworkPlan) {
 	if o.ctx.Config().Network.Enabled {
 		network.OverlayNetwork(o.cm, np)
 	}
-}
-
-func (o *overlayer) ComposeMap() compose.ComposeMap {
-	return o.cm
 }
