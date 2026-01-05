@@ -1,15 +1,13 @@
 package plan
 
-import "orca/model/config"
-
 // ===========
 //
 //	OrcaPlan
 //
 // ===========
 type OrcaPlan struct {
-	Config      config.ResolvedConfig
-	ComposeDirs []string
+	Name        string
+	ComposeDirs []string `yaml:"composes"`
 	Volumes     []VolumePlan
 	Networks    NetworkPlan
 }
