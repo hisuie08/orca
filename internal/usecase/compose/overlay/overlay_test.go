@@ -46,14 +46,14 @@ func TestOverlay(t *testing.T) {
 		ctx  OverlayContext
 		want func(compose.ComposeMap) bool
 	}{
-		{name: "enabled", ctx: fakeCtx(&volRoot, true),
+		{name: "network_and_volume_enabled", ctx: fakeCtx(&volRoot, true),
 			want: func(nm compose.ComposeMap) bool {
 				nv := nm[cRef].Volumes[vRef]
 				nn := nm[cRef].Networks[nRef]
 				return nv.External && nv.Driver == "" &&
 					nn.Name == netName && nn.External
 			}},
-		{name: "disabled", ctx: fakeCtx(nil, false),
+		{name: "network_and_volume_disabled", ctx: fakeCtx(nil, false),
 			want: func(nm compose.ComposeMap) bool {
 				nv := nm[cRef].Volumes[vRef]
 				nn := nm[cRef].Networks[nRef]
