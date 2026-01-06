@@ -5,6 +5,7 @@ import (
 	"orca/model/compose"
 	"orca/model/config"
 	"orca/model/plan"
+	"path/filepath"
 	"testing"
 )
 
@@ -205,6 +206,7 @@ func TestNilRoot(t *testing.T) {
 }
 
 func TestBind(t *testing.T) {
+	fakeRoot := filepath.Join(t.TempDir(), "volRoot")
 	cv := []compose.CollectedVolume{
 		(&mockVolume{Compose: "a", Key: "a", Name: "a_vol",
 			Driver: "local", DriverOpts: map[string]string{
@@ -224,9 +226,9 @@ func TestBind(t *testing.T) {
 		"a_vol": {path: "/path/to/exist", needMkdir: false},
 		"b_vol": {path: "/path/to/notexist", needMkdir: true},
 		// orca set default volume root <VolumeRoot>/<volume_name>
-		"c_vol": {path: "testroot/c_vol", needMkdir: true},
+		"c_vol": {path: filepath.Join(fakeRoot, "c_vol"), needMkdir: true},
 	}
-	ctx := fakeVolCtx("testroot", true)
+	ctx := fakeVolCtx(fakeRoot, true)
 	pl := buildVolumePlan(ctx, cv, di)
 	for _, p := range pl {
 		w := want[p.Name]
