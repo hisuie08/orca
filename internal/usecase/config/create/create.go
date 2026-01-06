@@ -29,12 +29,15 @@ type creator struct {
 }
 
 func ConfigCreator(ctx createContext) Creator {
-	return &creator{ctx: ctx}
+	return &creator{ctx: ctx, fi: inspector.NewFilesystem(),
+		fe: executor.NewFilesystem(ctx)}
 }
 
 func (c *creator) CreateConfig(clusterName string, force bool) (string, error) {
-	if c.fi.FileExists(c.ctx.OrcaYamlFile()) && !force {
-		return "", &errs.FileError{Path: c.ctx.OrcaYamlFile(), Err: fs.ErrExist}
+	if c.fi.FileExists(c.ctx.OrcaYamlFile()) {
+		if !force {
+			return "", &errs.FileError{Path: c.ctx.OrcaYamlFile(), Err: fs.ErrExist}
+		}
 	}
 	cfg := makeConfig(clusterName)
 	b, err := yaml.Marshal(cfg)
