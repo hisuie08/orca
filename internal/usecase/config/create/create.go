@@ -1,36 +1,47 @@
 package create
 
 import (
+	"io/fs"
+	"orca/errs"
 	"orca/internal/context"
-	"orca/internal/executor/filesystem"
+	"orca/internal/executor"
+	"orca/internal/inspector"
 	"orca/model/config"
 
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
 )
 
-type CreateConfigContext interface {
+var _ Creator = (*creator)(nil)
+
+type createContext interface {
 	context.WithRoot
 	context.WithPolicy
 }
-
-func CreateConfig(ctx CreateConfigContext, name string) (string, error) {
-	return createConfig(ctx, filesystem.NewExecutor(ctx), name)
+type Creator interface {
+	CreateConfig(string, bool) (string, error)
 }
 
-type fsExecutor interface {
-	WriteFile(string, []byte) error
+type creator struct {
+	ctx createContext
+	fe  executor.FileSystem
+	fi  inspector.FileSystem
 }
 
-func createConfig(ctx CreateConfigContext,
-	writer fsExecutor,
-	clusterName string) (string, error) {
+func ConfigCreator(ctx createContext) Creator {
+	return &creator{ctx: ctx}
+}
+
+func (c *creator) CreateConfig(clusterName string, force bool) (string, error) {
+	if c.fi.FileExists(c.ctx.OrcaYamlFile()) && !force {
+		return "", &errs.FileError{Path: c.ctx.OrcaYamlFile(), Err: fs.ErrExist}
+	}
 	cfg := makeConfig(clusterName)
 	b, err := yaml.Marshal(cfg)
 	if err != nil {
 		return "", err
 	}
-	return ctx.OrcaYamlFile(), writer.WriteFile(ctx.OrcaYamlFile(), b)
+	return c.ctx.OrcaYamlFile(), c.fe.WriteFile(c.ctx.OrcaYamlFile(), b)
 }
 
 func makeConfig(name string) *config.OrcaConfig {

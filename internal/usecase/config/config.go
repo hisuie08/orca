@@ -15,11 +15,11 @@ func LoadConfig(ctx LoadConfigContext) (*config.ResolvedConfig, error) {
 	return load.LoadConfig(ctx)
 }
 
-type CreateConfigContext interface {
+type CreateCfgContext interface {
 	context.WithRoot
 	context.WithPolicy
 }
 
-func CreateConfig(ctx CreateConfigContext, name string) (string, error) {
-	return create.CreateConfig(ctx, name)
+func CreateConfig(ctx CreateCfgContext, name string, force bool) (string, error) {
+	return create.ConfigCreator(ctx).CreateConfig(name, force)
 }

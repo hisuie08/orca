@@ -13,11 +13,11 @@ type DumpContext interface {
 	context.WithPolicy
 }
 
-type Dumper interface {
-	DumpComposes(compose.ComposeMap) ([]string, error)
-	DumpPlan(plan.OrcaPlan) (string, error)
+func DumpComposes(
+	ctx DumpContext, cm compose.ComposeMap, force bool) ([]string, error) {
+	return dump.DotOrcaDumper(ctx, force).DumpComposes(cm)
 }
 
-func DotOrcaDumper(ctx DumpContext, force bool) Dumper {
-	return dump.DotOrcaDumper(ctx, force)
+func DumpPlan(ctx DumpContext, pl plan.OrcaPlan, force bool) (string, error) {
+	return dump.DotOrcaDumper(ctx, force).DumpPlan(pl)
 }

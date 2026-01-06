@@ -2,7 +2,8 @@ package create
 
 import (
 	"orca/internal/context"
-	fakeexecutor "orca/internal/executor/fake"
+	"orca/internal/executor"
+	"orca/internal/inspector"
 	"orca/model/policy"
 	"testing"
 )
@@ -20,16 +21,16 @@ func TestCreateConfig(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			dir := t.TempDir()
 			ctx := context.New().WithRoot(dir).WithPolicy(tC.policy)
-			writer := &fakeexecutor.FakeFilesystem{
-				Issued: []string{}, Done: []string{},
-				AllowSideEffect: tC.policy.AllowSideEffect()}
-			_, err := createConfig(&ctx, writer, "")
+			fi := inspector.NewFilesystem()
+			fe := executor.NewFilesystem(&ctx)
+			_, err := (&creator{ctx: &ctx, fe: fe, fi: fi}).
+				CreateConfig("", false)
+			written, err := fi.Files(dir)
 			if err != nil {
 				t.Error(err)
 			}
-			written := len(writer.Done)
-			if written != tC.expect {
-				t.Errorf("expected %d file but created %d files", tC.expect, written)
+			if len(written) != tC.expect {
+				t.Errorf("expected %d file but created %d files", tC.expect, len(written))
 			}
 		})
 	}
