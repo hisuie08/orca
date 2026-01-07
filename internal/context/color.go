@@ -10,15 +10,14 @@ import (
 var _ WithColor = (*withColor)(nil)
 
 type WithColor interface {
-	ColorEnabled() bool
+	Colored() bool
 }
 
 type withColor struct {
 	enabled bool
 }
 
-
-func (c *withColor) ColorEnabled() bool {
+func (c *withColor) Colored() bool {
 	return c.enabled
 }
 

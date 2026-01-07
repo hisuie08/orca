@@ -84,8 +84,8 @@ func (c *Context) Policy() policy.ExecPolicy {
 	return c.policy.Policy()
 }
 
-func (c *Context) ColorEnabled() bool {
-	return c.color.ColorEnabled()
+func (c *Context) Colored() bool {
+	return c.color.Colored()
 }
 
 func (c *Context) Output() io.Writer {
