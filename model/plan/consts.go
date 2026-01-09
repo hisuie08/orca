@@ -1,13 +1,5 @@
 package plan
 
-type PlanStatus string
-
-const (
-	StatusExist PlanStatus = "OK"
-	StatusWarn  PlanStatus = "WARN"
-	StatusError PlanStatus = "ERROR"
-)
-
 type NetworkActionType = string
 
 const (
