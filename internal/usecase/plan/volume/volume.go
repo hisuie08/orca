@@ -87,18 +87,14 @@ func buildVolumePlan(
 		default:
 			vp.Type = plan.VolumeLocal
 			if vp.BindPath == "" {
-				vp.BindPath = filepath.Join(volumeRoot, name)
+				abs, err := filepath.Abs(filepath.Join(volumeRoot, name))
+				if err != nil {
+					panic(err)
+				}
+				vp.BindPath = abs
 			}
 			vp.NeedMkdir = !di.BindExists(vp.BindPath)
 			vp.Reason = "single compose volume"
-		}
-		if vp.BindPath != "" {
-			// BindPathを絶対パスに置換
-			abs, err := filepath.Abs(vp.BindPath)
-			if err != nil {
-				panic(err)
-			}
-			vp.BindPath = abs
 		}
 
 		plans = append(plans, vp)
