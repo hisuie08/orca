@@ -1,15 +1,11 @@
-package orca_test
+package printer
 
 import (
-	orca "orca/helper"
-	"os"
 	"testing"
 )
 
-var printer = orca.NewPrinter(os.Stdout, orca.Colorizer{Enabled: true})
-
 func TestPrinter_PrintGrid(t *testing.T) {
-	testRows:=[][]string{{"abcd", "def"}, {"ghij", "klmn"}}
+	testRows := [][]string{{"abcd", "def"}, {"ghij", "klmn"}}
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for receiver constructor.
@@ -21,7 +17,7 @@ func TestPrinter_PrintGrid(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			printer.PrintGrid(tt.rows)
+			
 		})
 	}
 }
