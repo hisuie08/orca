@@ -31,3 +31,7 @@ type ResolvedNetwork struct {
 	Internal bool
 	Name     string
 }
+
+func (v *ResolvedVolume) Enabled() bool {
+	return v.VolumeRoot != nil && *v.VolumeRoot != ""
+}

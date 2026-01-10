@@ -33,7 +33,7 @@ func buildVolumePlan(
 	di dockerInspector) []plan.VolumePlan {
 	cfg := ctx.Config().Volume
 	plans := []plan.VolumePlan{}
-	if cfg.VolumeRoot == nil || *cfg.VolumeRoot == "" {
+	if !cfg.Enabled() {
 		panic("BuildVolumePlan called while volume management is disabled (VolumeRoot is nil)")
 	}
 	volumeRoot, err := filepath.Abs(*cfg.VolumeRoot)

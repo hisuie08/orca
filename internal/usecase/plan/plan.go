@@ -21,7 +21,11 @@ func BuildOrcaPlan(ctx orcaPlanContext, cm compose.ComposeMap) plan.OrcaPlan {
 		result.ComposeDirs = append(result.ComposeDirs, name)
 	}
 	sort.Strings(result.ComposeDirs)
-	result.Volumes = volume.BuildVolumePlan(ctx, cm.CollectVolumes())
-	result.Networks = network.BuildNetworkPlan(ctx, cm.CollectNetworks())
+	if ctx.Config().Volume.Enabled() {
+		result.Volumes = volume.BuildVolumePlan(ctx, cm.CollectVolumes())
+	}
+	if ctx.Config().Network.Enabled {
+		result.Networks = network.BuildNetworkPlan(ctx, cm.CollectNetworks())
+	}
 	return result
 }
