@@ -46,6 +46,7 @@ func buildVolumePlan(
 			Name:     name,
 			UsedBy:   []plan.VolumeRef{},
 			BindPath: "",
+			Exists:   false,
 		}
 		hasExternal := false
 		// <name> を持つ各ボリューム定義を検証
@@ -66,6 +67,7 @@ func buildVolumePlan(
 		switch {
 		// 1. docker Volumeがすでに存在 -> externalとして 既存ボリュームを使用
 		case di.VolumeExists(name):
+			vp.Exists = true
 			vp.Type = plan.VolumeExternal
 			vp.BindPath = ""
 			vp.NeedMkdir = false

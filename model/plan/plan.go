@@ -47,11 +47,11 @@ type VolumePlan struct {
 	Name   string
 	Type   VolumeType
 	UsedBy []VolumeRef
+	Exists bool
 
 	// Only meaningful for local/shared
 	BindPath  string
 	NeedMkdir bool
-
 	// Reason for decision (for logging, displaying plan, and debugging)
 	Reason string
 }
