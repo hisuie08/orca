@@ -1,5 +1,10 @@
 package compose
 
+import (
+	"slices"
+	"strings"
+)
+
 // CollectedSpec
 type CollectedSpec[T any] struct {
 	From string // 定義されていたcompose
@@ -30,6 +35,9 @@ func (m ComposeMap) CollectComposes() []CollectedCompose {
 	for k, v := range m {
 		result = append(result, CollectedCompose{From: k, Spec: v})
 	}
+	slices.SortFunc(result, func(a, b CollectedCompose) int {
+		return strings.Compare(a.From, b.From)
+	})
 	return result
 }
 
@@ -43,6 +51,9 @@ func (m ComposeMap) CollectNetworks() []CollectedNetwork {
 			})
 		}
 	}
+	slices.SortFunc(result, func(a, b CollectedNetwork) int {
+		return strings.Compare(a.Spec.Name, b.Spec.Name)
+	})
 	return result
 }
 
@@ -56,5 +67,8 @@ func (m ComposeMap) CollectVolumes() []CollectedVolume {
 			})
 		}
 	}
+	slices.SortFunc(result, func(a, b CollectedVolume) int {
+		return strings.Compare(a.Spec.Name, b.Spec.Name)
+	})
 	return result
 }
