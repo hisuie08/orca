@@ -4,8 +4,12 @@ import (
 	"errors"
 	"orca/errs"
 	"orca/internal/context"
+	"orca/internal/errdef"
 	"orca/model/compose"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
 type fakeDockerInspector struct {
@@ -34,101 +38,82 @@ func (f *fakeFSInspector) Dirs(path string) ([]string, error) {
 	}
 	return f.DirsMap[path], nil
 }
-func TestGetAllCompose_AllFound(t *testing.T) {
-	ctx := context.New().WithRoot("/root")
 
-	fs := &fakeFSInspector{
-		DirsMap: map[string][]string{
-			"/root": {"/root/a", "/root/b"},
-		},
+var fakeRoot = "/root"
+
+func TestGetALLCompose_Success(t *testing.T) {
+	testCases := []struct {
+		name     string
+		dirs     []string
+		composes map[string]*compose.ComposeSpec
+		want     compose.ComposeMap
+	}{
+		{name: "All found", dirs: []string{
+			fakeRoot + "/a", fakeRoot + "/b"},
+			composes: map[string]*compose.ComposeSpec{
+				fakeRoot + "/a": {}, fakeRoot + "/b": {}},
+			want: compose.ComposeMap{"a": {}, "b": {}}},
+		{name: "Skip not found", dirs: []string{
+			fakeRoot + "/a", fakeRoot + "/b"},
+			composes: map[string]*compose.ComposeSpec{fakeRoot + "/b": {}},
+			want:     compose.ComposeMap{"b": {}}},
+		{name: "Empty dirs", dirs: []string{},
+			composes: map[string]*compose.ComposeSpec{},
+			want:     compose.ComposeMap{}},
+		{name: "Compose with contents", dirs: []string{fakeRoot + "/a"},
+			composes: map[string]*compose.ComposeSpec{fakeRoot + "/a": &compose.ComposeSpec{
+				Volumes: compose.VolumesSection{
+					"a_vol": &compose.VolumeSpec{Name: "a_vol"}},
+				Networks: compose.NetworksSection{
+					"default": &compose.NetworkSpec{Name: "a_network"}}},
+			}, want: compose.ComposeMap{"a": &compose.ComposeSpec{
+				Volumes: compose.VolumesSection{
+					"a_vol": &compose.VolumeSpec{Name: "a_vol"}},
+				Networks: compose.NetworksSection{
+					"default": &compose.NetworkSpec{Name: "a_network"}}}}},
 	}
-
-	docker := &fakeDockerInspector{
-		ComposeMap: map[string]*compose.ComposeSpec{
-			"/root/a": {},
-			"/root/b": {},
-		},
-	}
-
-	result, err := getAllCompose(&ctx, docker, fs)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if len(result) != 2 {
-		t.Fatalf("expected 2 compose, got %d", len(result))
-	}
-
-	if _, ok := (result)["a"]; !ok {
-		t.Errorf("compose a not found")
-	}
-	if _, ok := (result)["b"]; !ok {
-		t.Errorf("compose b not found")
-	}
-}
-
-func TestGetAllCompose_SkipNotFound(t *testing.T) {
-	ctx := context.New().WithRoot("/root")
-
-	fs := &fakeFSInspector{
-		DirsMap: map[string][]string{
-			"/root": {"/root/a", "/root/b"},
-		},
-	}
-
-	docker := &fakeDockerInspector{
-		ComposeMap: map[string]*compose.ComposeSpec{
-			"/root/a": {},
-		},
-	}
-
-	result, err := getAllCompose(&ctx, docker, fs)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-
-	if len(result) != 1 {
-		t.Fatalf("expected 1 compose, got %d", len(result))
-	}
-
-	if _, ok := (result)["a"]; !ok {
-		t.Errorf("compose a should exist")
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.New().WithRoot(fakeRoot)
+			fs := &fakeFSInspector{DirsMap: map[string][]string{
+				fakeRoot: tt.dirs}}
+			docker := &fakeDockerInspector{ComposeMap: tt.composes}
+			result, err := getAllCompose(&ctx, docker, fs)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			diff := cmp.Diff(tt.want, result, cmpopts.EquateEmpty(),
+				cmpopts.IgnoreUnexported())
+			if len(diff) != 0 {
+				t.Errorf("%v", diff)
+			}
+		})
 	}
 }
 
-func TestGetAllCompose_FilesystemError(t *testing.T) {
-	ctx := context.New().WithRoot("/root")
-
-	fs := &fakeFSInspector{
-		Err: errors.New("fs error"),
+func TestGetAllCompose_HasError(t *testing.T) {
+	testCases := []struct {
+		name string
+		dErr error
+		fErr error
+	}{
+		{name: "fs error", fErr: &errs.TestError{Err: errors.New("fs error")}},
+		{name: "docker error", dErr: &errs.TestError{
+			Err: errors.New("docker down")}}}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.New().WithRoot(fakeRoot)
+			fs := &fakeFSInspector{DirsMap: map[string][]string{
+				fakeRoot: {fakeRoot + "/a"}}, Err: tt.fErr}
+			docker := &fakeDockerInspector{
+				ErrMap: map[string]error{fakeRoot + "/a": tt.dErr}}
+			_, err := getAllCompose(&ctx, docker, fs)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if !errors.Is(err, errdef.TestErr) {
+				t.Fatalf("unexpected error type: %v", err)
+			}
+		})
 	}
-
-	docker := &fakeDockerInspector{}
-
-	_, err := getAllCompose(&ctx, docker, fs)
-	if err == nil {
-		t.Fatal("expected error, got nil")
-	}
-}
-
-
-func TestGetAllCompose_DockerError(t *testing.T) {
-    ctx := context.New().WithRoot("/root")
-
-    fs := &fakeFSInspector{
-        DirsMap: map[string][]string{
-            "/root": {"/root/a"},
-        },
-    }
-
-    docker := &fakeDockerInspector{
-        ErrMap: map[string]error{
-            "/root/a": errors.New("docker down"),
-        },
-    }
-
-    _, err := getAllCompose(&ctx, docker, fs)
-    if err == nil {
-        t.Fatal("expected error, got nil")
-    }
 }
