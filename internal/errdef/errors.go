@@ -18,4 +18,6 @@ var (
 
 	ErrExternalDependency = errors.New("external dependency failed")
 	ErrFileOperation      = errors.New("file operation failed")
+	
+	TestErr = errors.New("test error")
 )

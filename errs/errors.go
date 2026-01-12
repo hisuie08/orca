@@ -45,3 +45,15 @@ func (e *FileError) Error() string {
 func (e *FileError) Unwrap() error {
 	return errdef.ErrFileOperation
 }
+
+type TestError struct {
+	Err error
+}
+
+func (e *TestError) Error() string {
+	return fmt.Sprintf("%v", e.Err)
+}
+
+func (e *TestError) Unwrap() error {
+	return errdef.TestErr
+}
