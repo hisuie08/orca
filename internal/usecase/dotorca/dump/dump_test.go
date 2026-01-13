@@ -30,7 +30,7 @@ func TestDumpCompose(t *testing.T) {
 			tmpdir := t.TempDir()
 			ctx := context.New().WithRoot(tmpdir).
 				WithConfig(&config.ResolvedConfig{}).
-				WithPolicy(tt.p)
+				WithPolicy(tt.p).WithReport(os.Stdout)
 			dumper := DotOrcaDumper(&ctx, false)
 			got, err := dumper.DumpComposes(cm)
 			if len(got) != tt.wantWritten {
