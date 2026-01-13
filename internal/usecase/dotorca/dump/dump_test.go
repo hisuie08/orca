@@ -96,7 +96,7 @@ func TestForceDump(t *testing.T) {
 		t.Run(tC.name, func(t *testing.T) {
 			ctx := context.New().WithRoot(t.TempDir()).
 				WithConfig(&config.ResolvedConfig{}).
-				WithPolicy(policy.Real)
+				WithPolicy(policy.Real).WithReport(os.Stdout)
 			dumper := DotOrcaDumper(&ctx, tC.force)
 			cm := compose.ComposeMap{"a": &compose.ComposeSpec{}}
 			// first dump
