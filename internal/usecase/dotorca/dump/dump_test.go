@@ -7,6 +7,7 @@ import (
 	"orca/model/config"
 	"orca/model/plan"
 	"orca/model/policy"
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -69,7 +70,7 @@ func TestDumpPlan(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.New().WithRoot(t.TempDir()).
 				WithConfig(&config.ResolvedConfig{}).
-				WithPolicy(tt.policy)
+				WithPolicy(tt.policy).WithReport(os.Stdout)
 			dumper := DotOrcaDumper(&ctx, false)
 			path, err := dumper.DumpPlan(pl)
 			if err != nil {

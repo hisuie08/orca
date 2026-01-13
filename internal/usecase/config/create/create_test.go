@@ -5,6 +5,7 @@ import (
 	"orca/internal/executor"
 	"orca/internal/inspector"
 	"orca/model/policy"
+	"os"
 	"testing"
 )
 
@@ -20,7 +21,8 @@ func TestCreateConfig(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			dir := t.TempDir()
-			ctx := context.New().WithRoot(dir).WithPolicy(tC.policy)
+			ctx := context.New().WithRoot(dir).WithPolicy(tC.policy).
+				WithReport(os.Stdout)
 			fi := inspector.NewFilesystem()
 			fe := executor.NewFilesystem(&ctx)
 			_, err := (&creator{ctx: &ctx, fe: fe, fi: fi}).
