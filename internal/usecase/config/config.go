@@ -18,6 +18,7 @@ func LoadConfig(ctx LoadConfigContext) (*config.ResolvedConfig, error) {
 type CreateCfgContext interface {
 	context.WithRoot
 	context.WithPolicy
+	context.WithReport
 }
 
 func CreateConfig(ctx CreateCfgContext, name string, force bool) (string, error) {

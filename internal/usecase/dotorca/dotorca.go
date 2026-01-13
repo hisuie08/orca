@@ -11,6 +11,7 @@ import (
 type DumpContext interface {
 	context.WithRoot
 	context.WithPolicy
+	context.WithReport
 }
 
 func DumpComposes(
