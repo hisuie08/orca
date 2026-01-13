@@ -1,6 +1,6 @@
 package filesystem
 
-var _ Executor = (*fakeExecutor)(nil)
+var _ executor = (*fakeExecutor)(nil)
 
 type fakeExecutor struct {
 	Files           map[string][]byte

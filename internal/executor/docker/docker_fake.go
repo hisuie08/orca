@@ -2,7 +2,7 @@ package docker
 
 import "strings"
 
-var _ Executor = (*fakeExecutor)(nil)
+var _ executor = (*fakeExecutor)(nil)
 
 type fakeExecutor struct {
 	Issued          []string
@@ -10,31 +10,31 @@ type fakeExecutor struct {
 	AllowSideEffect bool
 }
 
-func newFakeExecutor(allow bool) Executor {
+func newFakeExecutor(allow bool) executor {
 	return &fakeExecutor{Issued: []string{}, Done: []string{}, AllowSideEffect: allow}
 }
 
-func (f *fakeExecutor) ComposeUp(name string) (string, error) {
+func (f *fakeExecutor) ComposeUp(name string) ([]byte, error) {
 	cmd := "docker compose -f " + name + " up -d"
 	return f.runFake(cmd)
 }
-func (f *fakeExecutor) ComposeDown(name string) (string, error) {
+func (f *fakeExecutor) ComposeDown(name string) ([]byte, error) {
 	cmd := "docker compose -f " + name + " down"
 	return f.runFake(cmd)
 }
-func (f *fakeExecutor) CreateNetwork(name string, opts ...string) (string, error) {
+func (f *fakeExecutor) CreateNetwork(name string, opts ...string) ([]byte, error) {
 	cmd := strings.Join(append([]string{"docker", "network", "create", name}, opts...), " ")
 	return f.runFake(cmd)
 }
-func (f *fakeExecutor) CreateVolume(name string, opts ...string) (string, error) {
+func (f *fakeExecutor) CreateVolume(name string, opts ...string) ([]byte, error) {
 	cmd := strings.Join(append([]string{"docker", "volume", "create", name}, opts...), " ")
 	return f.runFake(cmd)
 }
 
-func (f *fakeExecutor) runFake(cmd string) (string, error) {
+func (f *fakeExecutor) runFake(cmd string) ([]byte, error) {
 	f.Issued = append(f.Issued, cmd)
 	if f.AllowSideEffect {
 		f.Done = append(f.Done, cmd)
 	}
-	return cmd, nil
+	return []byte(cmd), nil
 }

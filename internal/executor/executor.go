@@ -7,13 +7,18 @@ import (
 )
 
 type Docker interface {
-	ComposeUp(string) (string, error)
-	ComposeDown(string) (string, error)
-	CreateNetwork(string, ...string) (string, error)
-	CreateVolume(string, ...string) (string, error)
+	ComposeUp(string) ([]byte, error)
+	ComposeDown(string) ([]byte, error)
+	CreateNetwork(string, ...string) ([]byte, error)
+	CreateVolume(string, ...string) ([]byte, error)
 }
 
-func NewDocker(p context.WithPolicy) Docker {
+type execContext interface{
+	context.WithPolicy
+	context.WithReport
+}
+
+func NewDocker(p execContext) Docker {
 	return docker.NewExecutor(p)
 }
 
@@ -24,6 +29,6 @@ type FileSystem interface {
 	RemoveDir(path string) error
 }
 
-func NewFilesystem(p context.WithPolicy) FileSystem {
+func NewFilesystem(p execContext) FileSystem {
 	return filesystem.NewExecutor(p)
 }

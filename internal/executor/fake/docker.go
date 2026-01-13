@@ -20,27 +20,27 @@ const (
 	cmdCreateNet = "network create"
 )
 
-func (f *FakeDocker) ComposeUp(name string) (string, error) {
+func (f *FakeDocker) ComposeUp(name string) ([]byte, error) {
 	cmd := cmdUp + ":" + name
 	return f.runFake(cmd)
 }
-func (f *FakeDocker) ComposeDown(name string) (string, error) {
+func (f *FakeDocker) ComposeDown(name string) ([]byte, error) {
 	cmd := cmdDown + ":" + name
 	return f.runFake(cmd)
 }
-func (f *FakeDocker) CreateNetwork(name string, opts ...string) (string, error) {
+func (f *FakeDocker) CreateNetwork(name string, opts ...string) ([]byte, error) {
 	cmd := cmdCreateNet + ":" + name
 	return f.runFake(cmd)
 }
-func (f *FakeDocker) CreateVolume(name string, opts ...string) (string, error) {
+func (f *FakeDocker) CreateVolume(name string, opts ...string) ([]byte, error) {
 	cmd := cmdCreateVol + ":" + name
 	return f.runFake(cmd)
 }
 
-func (f *FakeDocker) runFake(cmd string) (string, error) {
+func (f *FakeDocker) runFake(cmd string) ([]byte, error) {
 	f.Issued = append(f.Issued, cmd)
 	if f.AllowSideEffect {
 		f.Done = append(f.Done, cmd)
 	}
-	return cmd, nil
+	return []byte(cmd), nil
 }

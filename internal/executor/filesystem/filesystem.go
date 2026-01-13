@@ -1,6 +1,7 @@
 package filesystem
 
 import (
+	"fmt"
 	"io/fs"
 	"orca/errs"
 	"orca/internal/context"
@@ -8,24 +9,28 @@ import (
 	"path/filepath"
 )
 
-type Executor interface {
+type executor interface {
 	WriteFile(path string, data []byte) error
 	CreateDir(path string) error
 	RemoveFile(path string) error
 	RemoveDir(path string) error
 }
-
-var _ Executor = (*executor)(nil)
-
-type executor struct {
+type execContext interface {
 	context.WithPolicy
+	context.WithReport
 }
 
-func NewExecutor(ctx context.WithPolicy) *executor {
-	return &executor{WithPolicy: ctx}
+var _ executor = (*fsExecutor)(nil)
+
+type fsExecutor struct {
+	ctx execContext
 }
 
-func (f *executor) WriteFile(path string, data []byte) error {
+func NewExecutor(ctx execContext) *fsExecutor {
+	return &fsExecutor{ctx: ctx}
+}
+
+func (f *fsExecutor) WriteFile(path string, data []byte) error {
 	// create dir to path if not exist
 	dir := filepath.Dir(path)
 	if dir != "." {
@@ -36,28 +41,30 @@ func (f *executor) WriteFile(path string, data []byte) error {
 	return f.writeFile(path, data, 0o644)
 }
 
-func (f *executor) CreateDir(path string) error {
+func (f *fsExecutor) CreateDir(path string) error {
 	return f.createDir(path, 0o755)
 }
 
-func (f *executor) RemoveFile(path string) error {
+func (f *fsExecutor) RemoveFile(path string) error {
 	return f.removeFile(path)
 }
-func (f *executor) RemoveDir(path string) error {
+func (f *fsExecutor) RemoveDir(path string) error {
 	return f.removeDir(path)
 }
 
-func (f *executor) writeFile(p string, content []byte, perm fs.FileMode) error {
-	if f.Policy().AllowSideEffect() {
-		if err := os.WriteFile(p, content, perm); err != nil {
-			return &errs.FileError{Path: p, Err: err}
+func (f *fsExecutor) writeFile(path string, content []byte, perm fs.FileMode) error {
+	f.report(fmt.Sprintf("%s: %s","create file",path))
+	if f.ctx.Policy().AllowSideEffect() {
+		if err := os.WriteFile(path, content, perm); err != nil {
+			return &errs.FileError{Path: path, Err: err}
 		}
 	}
 	return nil
 }
 
-func (f *executor) createDir(path string, perm fs.FileMode) error {
-	if f.Policy().AllowSideEffect() {
+func (f *fsExecutor) createDir(path string, perm fs.FileMode) error {
+	f.report(fmt.Sprintf("%s: %s","create dir",path))
+	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.MkdirAll(path, perm); err != nil {
 			return &errs.FileError{Path: path, Err: err}
 		}
@@ -65,19 +72,31 @@ func (f *executor) createDir(path string, perm fs.FileMode) error {
 	return nil
 }
 
-func (f *executor) removeFile(p string) error {
-	if f.Policy().AllowSideEffect() {
-		if err := os.Remove(p); err != nil {
-			return &errs.FileError{Path: p, Err: err}
+func (f *fsExecutor) removeFile(path string) error {
+	f.report(fmt.Sprintf("%s: %s","remove file",path))
+	
+	if f.ctx.Policy().AllowSideEffect() {
+		if err := os.Remove(path); err != nil {
+			return &errs.FileError{Path: path, Err: err}
 		}
 	}
 	return nil
 }
-func (f *executor) removeDir(p string) error {
-	if f.Policy().AllowSideEffect() {
-		if err := os.RemoveAll(p); err != nil {
-			return &errs.FileError{Path: p, Err: err}
+func (f *fsExecutor) removeDir(path string) error {
+	f.report(fmt.Sprintf("%s: %s","remove dir",path))
+	if f.ctx.Policy().AllowSideEffect() {
+		if err := os.RemoveAll(path); err != nil {
+			return &errs.FileError{Path: path, Err: err}
 		}
 	}
 	return nil
+}
+
+func (f *fsExecutor) report(cmd string) {
+	mode := "[DRY-RUN]"
+	if f.ctx.Policy().AllowSideEffect() {
+		mode = "[RUN]"
+	}
+	msg := fmt.Sprintf("%s %s\n", mode, cmd)
+	f.ctx.Report().Write([]byte(msg))
 }
