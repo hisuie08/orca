@@ -7,9 +7,10 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"io"
 	"orca/internal/context"
+	"orca/model/policy"
 	"orca/process"
+	"orca/process/plan"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -25,21 +26,24 @@ var planCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return runPlan(cwd, os.Stdout)
+		ctx := context.New().WithRoot(cwd).
+			WithPolicy(policy.Real).WithReport(cmd.OutOrStderr())
+		return runPlan(&ctx)
 	},
 }
 
-func runPlan(orcaRoot string, w io.Writer) error {
+type PlanContext interface {
+	context.WithRoot
+	context.WithPolicy
+	context.WithReport
+}
+
+func runPlan(ctx PlanContext) error {
 	// TODO: mode implement
-	ctx, err := context.BuildContext(orcaRoot, w, context.ModeExecute)
-	if err != nil {
-		return err
-	}
-	process.PlanProcess(*ctx)
 	// o, _ := os.OpenFile("./log.txt", os.O_WRONLY|os.O_CREATE, 0666)
 	// printer.W = o
 	// printer.C.Enabled = false
-
+	process.PlanProcess(ctx, plan.PlanOption{Force: true})
 	return nil
 }
 

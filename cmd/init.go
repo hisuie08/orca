@@ -4,66 +4,55 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
-	"orca/consts"
-	"orca/errs"
-	"orca/infra/applier"
-	"orca/internal/config"
+	initprocess "orca/internal/process/init"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
-var apl = applier.Applier
+func newInitCommand() *cobra.Command {
+	var opt initprocess.InitOption
 
-// initCmd represents the init command
-var initCmd = &cobra.Command{
-	Use:   "init [cluster-name]",
-	Short: "Initialize an orca cluster in current directory",
-	Args:  cobra.MaximumNArgs(1),
-	RunE: func(cmd *cobra.Command, args []string) error {
-		cwd, err := os.Getwd()
-		if err != nil {
-			return err
-		}
+	cmd := &cobra.Command{
+		Use:   "init [name]",
+		Short: "Initialize new orca cluster",
+		Args:  cobra.MaximumNArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-		clusterName := ""
-		if len(args) == 1 {
-			clusterName = args[0]
-		}
-
-		return runInit(cwd, clusterName)
-	},
-}
-
-func runInit(baseDir, clusterName string) error {
-	path := filepath.Join(baseDir, consts.OrcaYamlFile)
-
-	if _, err := os.Stat(path); err == nil {
-		return errs.ErrAlreadyInitialized
-	} else if !os.IsNotExist(err) {
-		return err
+			wd, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			if len(args) > 0 {
+				opt.Name = args[0]
+			} else {
+				opt.Name = filepath.Base(wd)
+			}
+			ctx, err := BuildBaseContext(cmd)
+			// Process 呼び出し
+			proc := initprocess.New()
+			return proc.Run(ctx, opt)
+		},
 	}
 
-	if _, err := config.Create(clusterName, apl.ConfigWriter(baseDir)); err != nil {
-		return err
-	}
-	fmt.Printf("%v was created successfully\n", path)
-	return nil
-}
+	// --- flags ---
 
-func writeConfig(path string, cfg *config.OrcaConfig) error {
-	data, err := yaml.Marshal(cfg)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(path, data, 0644)
+	cmd.Flags().BoolVar(&opt.NoCreate, "nocreate", false, "Do not create orca.yml")
+	cmd.Flags().BoolVar(&opt.Force, "force", false, "Overwrite existing orca.yml")
+
+	cmd.Flags().StringVar(&opt.Volume.Path, "volume", "", "Volume path")
+	cmd.Flags().BoolVar(&opt.Volume.EnsurePath, "ensure-volume-path", false, "Ensure volume path exists")
+
+	cmd.Flags().BoolVar(&opt.Network.Enabled, "enable-network", false, "Enable network")
+	cmd.Flags().StringVar(&opt.Network.Name, "network-name", "", "Shared network name")
+	cmd.Flags().BoolVar(&opt.Network.Internal, "network-internal", false, "Make network internal")
+
+	return cmd
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	rootCmd.AddCommand(newInitCommand())
 
 	// Here you will define your flags and configuration settings.
 

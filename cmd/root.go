@@ -78,5 +78,6 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.PersistentFlags().BoolP("dry-run", "", false, "Run in DRY mode")
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().BoolP("debug", "", false, "Show detail logs")
+	rootCmd.PersistentFlags().BoolP("silent", "", false, "Never print to console")
 }
