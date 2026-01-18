@@ -6,6 +6,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"orca/cmd/cmdflag"
 	"orca/errs"
 	"os"
 
@@ -39,7 +40,7 @@ func Execute() {
 	os.Exit(exitCode)
 }
 func handleError(cmd cobra.Command, err error) int {
-	silent, err := cmd.PersistentFlags().GetBool("silent")
+	silent, err := cmd.PersistentFlags().GetBool(cmdflag.Silent)
 	if err != nil {
 		silent = false
 	}
@@ -91,7 +92,7 @@ func init() {
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
-	rootCmd.PersistentFlags().BoolP("dry-run", "", false, "Run in DRY mode")
-	rootCmd.PersistentFlags().BoolP("debug", "", false, "Show detail logs")
-	rootCmd.PersistentFlags().BoolP("silent", "", false, "Never print to console")
+	rootCmd.PersistentFlags().Bool(cmdflag.DryRun, false, "Run in DRY mode")
+	rootCmd.PersistentFlags().Bool(cmdflag.Debug, false, "Show detail logs")
+	rootCmd.PersistentFlags().Bool(cmdflag.Silent, false, "Never print to console")
 }
