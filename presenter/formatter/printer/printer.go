@@ -12,8 +12,8 @@ func pRow(cols []string, widths []int) string {
 	for i, c := range cols {
 		vis := formatter.VisibleLen(c)
 		pad := max(widths[i]-vis, 0)
-		result = append(result, fmt.Sprintf(c),
-			fmt.Sprintf(strings.Repeat(" ", pad)), fmt.Sprintf("  "))
+		result = append(result, fmt.Sprintf("%s", c), 
+		strings.Repeat(" ", pad), "  ")
 	}
 	result = append(result, fmt.Sprintf("\n"))
 	return strings.Join(result, "")
@@ -23,7 +23,7 @@ func pRow(cols []string, widths []int) string {
 func pSeparator(widths []int) string {
 	result := []string{}
 	for _, wth := range widths {
-		result = append(result, fmt.Sprintf(strings.Repeat("-", wth), "  "))
+		result = append(result, strings.Repeat("-", wth), "  ")
 	}
 	result = append(result, fmt.Sprintf("\n"))
 	return strings.Join(result, "")
@@ -33,12 +33,11 @@ func pSeparator(widths []int) string {
 func PTable(title string, headers []string, rows [][]string) string {
 	// 各列の最大幅
 	widths := make([]int, len(headers))
-	// headersを基準に初期値
+	// 内容に応じて拡張
 	for i, h := range headers {
 		widths[i] =
 			formatter.VisibleLen(h)
 	}
-	// 内容に応じて拡張
 	for _, cols := range rows {
 		for i, c := range cols {
 			widths[i] = max(widths[i], formatter.VisibleLen(c))
@@ -50,5 +49,14 @@ func PTable(title string, headers []string, rows [][]string) string {
 	for _, r := range rows {
 		result = append(result, pRow(r, widths))
 	}
+	return strings.Join(result, "")
+}
+
+func PList(title string, contents []string) string {
+	result := []string{title, "\n"}
+	for _, c := range contents {
+		result = append(result, c, "\n")
+	}
+	result = append(result, "\n")
 	return strings.Join(result, "")
 }
