@@ -1,0 +1,11 @@
+{
+	"compile-time assetsion": {
+		"scope": "go",
+		"prefix": "cta",
+		"body": [
+			"var _ $1 =(*$2)(nil)",
+			"$0"
+		],
+		"description": "Log output to console"
+	}
+}
