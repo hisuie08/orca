@@ -12,7 +12,6 @@ var _ WithPolicy = (*Context)(nil)
 var _ WithColor = (*Context)(nil)
 var _ WithOutput = (*Context)(nil)
 var _ WithReport = (*Context)(nil)
-var _ WithDiag = (*Context)(nil)
 
 type Context struct {
 	root   *withRoot
@@ -21,7 +20,6 @@ type Context struct {
 	color  *withColor
 	output *withOutput
 	report *withReport
-	diag   *withDiag
 }
 
 func New() Context {
@@ -30,7 +28,7 @@ func New() Context {
 
 func FromCommandCtx(ctx CommandContext) Context {
 	c := New().WithRoot(ctx.Root()).WithOutput(ctx.Output()).
-		WithReport(ctx.Report()).WithDiag(ctx.Diag())
+		WithReport(ctx.Report())
 	return c
 }
 
@@ -63,10 +61,6 @@ func (c Context) WithReport(w io.Writer) Context {
 	return c
 }
 
-func (c Context) WithDiag(w io.Writer) Context {
-	c.diag = &withDiag{out: w}
-	return c
-}
 func (c Context) WithColor(w io.Writer) Context {
 	c.color = &withColor{enabled: isTTY(w)}
 	return c
@@ -99,7 +93,4 @@ func (c *Context) Output() io.Writer {
 }
 func (c *Context) Report() io.Writer {
 	return c.report.out
-}
-func (c *Context) Diag() io.Writer {
-	return c.diag.out
 }

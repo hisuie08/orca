@@ -35,34 +35,48 @@ func Execute() {
 		os.Exit(0)
 	}
 
-	exitCode := handleError(err)
+	exitCode := handleError(*rootCmd, err)
 	os.Exit(exitCode)
 }
-func handleError(err error) int {
+func handleError(cmd cobra.Command, err error) int {
+	silent, err := cmd.PersistentFlags().GetBool("silent")
+	if err != nil {
+		silent = false
+	}
 	switch {
 	case errors.Is(err, errs.ErrAlreadyInitialized):
-		fmt.Fprintln(os.Stderr, "このディレクトリは既に初期化されています")
-		fmt.Fprintln(os.Stderr, "--force オプションで再生成してください")
+		if !silent {
+			fmt.Fprintln(os.Stderr, "このディレクトリは既に初期化されています")
+			fmt.Fprintln(os.Stderr, "--force オプションで再生成してください")
+		}
 		return 0
 	case errors.Is(err, errs.ErrNotInitialized):
-		fmt.Fprintln(os.Stderr, "このディレクトリは初期化されていません")
-		fmt.Fprintln(os.Stderr, "orca init を先に実行してください")
+		if !silent {
+			fmt.Fprintln(os.Stderr, "このディレクトリは初期化されていません")
+			fmt.Fprintln(os.Stderr, "orca init を先に実行してください")
+		}
 		//return exitcode.NotInitialized
 		return 1
 
 	case errors.Is(err, errs.ErrPlanDirty):
-		fmt.Fprintln(os.Stderr, "plan が最新ではありません")
-		fmt.Fprintln(os.Stderr, "orca plan を再実行してください")
+		if !silent {
+			fmt.Fprintln(os.Stderr, "plan が最新ではありません")
+			fmt.Fprintln(os.Stderr, "orca plan を再実行してください")
+		}
 		//return exitcode.PlanDirty
 		return 1
 
 	case errors.Is(err, errs.ErrDryRunViolation):
-		fmt.Fprintln(os.Stderr, "dry-run のため操作は実行されませんでした")
+		if !silent {
+			fmt.Fprintln(os.Stderr, "dry-run のため操作は実行されませんでした")
+		}
 		//return exitcode.OK
 		return 0
 
 	default:
-		fmt.Fprintln(os.Stderr, err.Error())
+		if !silent {
+			fmt.Fprintln(os.Stderr, err.Error())
+		}
 		//return exitcode.GeneralError
 		return 1
 	}
