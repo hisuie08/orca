@@ -2,20 +2,23 @@ package load
 
 import (
 	"orca/internal/context"
-	"orca/internal/inspector"
-	fakeinspector "orca/internal/inspector/fake"
 	"testing"
 )
 
+type fakeInspector struct{}
+
+func (f *fakeInspector) Read(string) ([]byte, error) {
+	return []byte{}, nil
+}
 func TestLoadConfig(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		fi      inspector.FileSystem
+		fi      fsInspector
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"test", &fakeinspector.FakeFilesystem{}, false},
+		{"test", &fakeInspector{}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
