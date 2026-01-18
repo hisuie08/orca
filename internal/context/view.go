@@ -2,12 +2,6 @@ package context
 
 import "io"
 
-type ViewContext interface {
-	WithColor
-	WithOutput
-	WithReport
-	WithDiag
-}
 type WithOutput interface {
 	Output() io.Writer
 }
