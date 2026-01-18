@@ -26,11 +26,6 @@ func New() Context {
 	return Context{}
 }
 
-func FromCommandCtx(ctx CommandContext) Context {
-	c := New().WithRoot(ctx.Root()).WithOutput(ctx.Output()).
-		WithReport(ctx.Report())
-	return c
-}
 
 func (c Context) WithRoot(root string) Context {
 	c.root = newWithRoot(root)
