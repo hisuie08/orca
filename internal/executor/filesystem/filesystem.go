@@ -101,5 +101,5 @@ func (f *fsExecutor) report(cmd string) {
 		mode = "[RUN]"
 	}
 	msg := fmt.Sprintf("%s %s\n", mode, cmd)
-	f.log.Log(logger.LogNormal, []byte(msg))
+	f.log.Log(logger.LogDebug, []byte(msg))
 }
