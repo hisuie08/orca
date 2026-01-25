@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"orca/errs"
 	"orca/internal/context"
+	"orca/internal/logger"
 	"os"
 	"path/filepath"
 )
@@ -17,17 +18,19 @@ type executor interface {
 }
 type execContext interface {
 	context.WithPolicy
-	context.WithReport
+	context.WithLog
 }
 
 var _ executor = (*fsExecutor)(nil)
 
 type fsExecutor struct {
 	ctx execContext
+	log logger.Logger
 }
 
 func NewExecutor(ctx execContext) *fsExecutor {
-	return &fsExecutor{ctx: ctx}
+	l := logger.New(ctx.LogTarget(), ctx.LogLevel()).Init(logger.LogNormal)
+	return &fsExecutor{ctx: ctx, log: l}
 }
 
 func (f *fsExecutor) WriteFile(path string, data []byte) error {
@@ -53,7 +56,7 @@ func (f *fsExecutor) RemoveDir(path string) error {
 }
 
 func (f *fsExecutor) writeFile(path string, content []byte, perm fs.FileMode) error {
-	f.report(fmt.Sprintf("%s: %s","create file",path))
+	f.report(fmt.Sprintf("%s: %s", "create file", path))
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.WriteFile(path, content, perm); err != nil {
 			return &errs.FileError{Path: path, Err: err}
@@ -63,7 +66,7 @@ func (f *fsExecutor) writeFile(path string, content []byte, perm fs.FileMode) er
 }
 
 func (f *fsExecutor) createDir(path string, perm fs.FileMode) error {
-	f.report(fmt.Sprintf("%s: %s","create dir",path))
+	f.report(fmt.Sprintf("%s: %s", "create dir", path))
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.MkdirAll(path, perm); err != nil {
 			return &errs.FileError{Path: path, Err: err}
@@ -73,8 +76,8 @@ func (f *fsExecutor) createDir(path string, perm fs.FileMode) error {
 }
 
 func (f *fsExecutor) removeFile(path string) error {
-	f.report(fmt.Sprintf("%s: %s","remove file",path))
-	
+	f.report(fmt.Sprintf("%s: %s", "remove file", path))
+
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.Remove(path); err != nil {
 			return &errs.FileError{Path: path, Err: err}
@@ -83,7 +86,7 @@ func (f *fsExecutor) removeFile(path string) error {
 	return nil
 }
 func (f *fsExecutor) removeDir(path string) error {
-	f.report(fmt.Sprintf("%s: %s","remove dir",path))
+	f.report(fmt.Sprintf("%s: %s", "remove dir", path))
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.RemoveAll(path); err != nil {
 			return &errs.FileError{Path: path, Err: err}
@@ -98,5 +101,5 @@ func (f *fsExecutor) report(cmd string) {
 		mode = "[RUN]"
 	}
 	msg := fmt.Sprintf("%s %s\n", mode, cmd)
-	f.ctx.Report().Write([]byte(msg))
+	f.log.Log([]byte(msg))
 }

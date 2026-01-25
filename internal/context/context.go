@@ -2,6 +2,7 @@ package context
 
 import (
 	"io"
+	"orca/internal/logger"
 	"orca/model/config"
 	"orca/model/policy"
 )
@@ -10,22 +11,19 @@ var _ WithRoot = (*Context)(nil)
 var _ WithConfig = (*Context)(nil)
 var _ WithPolicy = (*Context)(nil)
 var _ WithColor = (*Context)(nil)
-var _ WithOutput = (*Context)(nil)
-var _ WithReport = (*Context)(nil)
+var _ WithLog = (*Context)(nil)
 
 type Context struct {
 	root   *withRoot
 	config *withConfig
 	policy *withPolicy
 	color  *withColor
-	output *withOutput
-	report *withReport
+	log    *withLog
 }
 
 func New() Context {
 	return Context{}
 }
-
 
 func (c Context) WithRoot(root string) Context {
 	c.root = newWithRoot(root)
@@ -46,20 +44,16 @@ func (c Context) WithPolicy(p policy.ExecPolicy) Context {
 	return c
 }
 
-func (c Context) WithOutput(w io.Writer) Context {
-	c.output = &withOutput{out: w}
-	return c
-}
-
-func (c Context) WithReport(w io.Writer) Context {
-	c.report = &withReport{out: w}
-	return c
-}
-
 func (c Context) WithColor(w io.Writer) Context {
 	c.color = &withColor{enabled: isTTY(w)}
 	return c
 }
+
+func (c Context) WithLog(l logger.LogLevel, o io.Writer) Context {
+	c.log = &withLog{logLevel: l, out: o}
+	return c
+}
+
 func (c *Context) Root() string {
 	return c.root.Root()
 }
@@ -83,9 +77,10 @@ func (c *Context) Colored() bool {
 	return c.color.Colored()
 }
 
-func (c *Context) Output() io.Writer {
-	return c.output.out
+func (c *Context) LogLevel() logger.LogLevel {
+	return c.log.LogLevel()
 }
-func (c *Context) Report() io.Writer {
-	return c.report.out
+
+func (c *Context) LogTarget() io.Writer {
+	return c.log.out
 }

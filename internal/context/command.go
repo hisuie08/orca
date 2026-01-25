@@ -8,22 +8,18 @@ import (
 )
 
 type CommandContext interface {
-	WithOutput
-	WithReport
 	WithRoot
+	WithLog
 }
 
 func BuildBaseContext(cmd cobra.Command, opt option.BaseOption) CommandContext {
 	ctx := New().
-		WithOutput(GetWriter(cmd.OutOrStdout(), !opt.Silent)).
-		WithReport(GetWriter(cmd.OutOrStdout(), !opt.Silent, opt.Debug)).
 		WithRoot(opt.Root)
 	return &ctx
 }
 
 func FromCommandCtx(ctx CommandContext) Context {
-	c := New().WithRoot(ctx.Root()).WithOutput(ctx.Output()).
-		WithReport(ctx.Report())
+	c := New().WithRoot(ctx.Root()).WithLog(ctx.LogLevel(), ctx.LogTarget())
 	return c
 }
 

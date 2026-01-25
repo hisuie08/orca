@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"orca/errs"
 	"orca/internal/context"
+	"orca/internal/logger"
 	"os/exec"
 )
 
@@ -16,17 +17,19 @@ type executor interface {
 
 type execContext interface {
 	context.WithPolicy
-	context.WithReport
+	context.WithLog
 }
 
 var _ executor = (*dockerExecutor)(nil)
 
 func NewExecutor(ctx execContext) executor {
-	return &dockerExecutor{ctx: ctx}
+	l := logger.New(ctx.LogTarget(), ctx.LogLevel()).Init(logger.LogNormal)
+	return &dockerExecutor{ctx: ctx, log: l}
 }
 
 type dockerExecutor struct {
 	ctx execContext
+	log logger.Logger
 }
 
 func (d *dockerExecutor) ComposeUp(composeFile string) ([]byte, error) {
@@ -57,7 +60,7 @@ func (d *dockerExecutor) CreateVolume(name string, opt ...string) ([]byte, error
 func (d *dockerExecutor) run(cmd *exec.Cmd) ([]byte, error) {
 	mode := "[DRY-RUN]"
 	msg := fmt.Sprintf("%s %s\n", mode, cmd.String())
-	defer d.ctx.Report().Write([]byte(msg))
+	defer d.log.Log([]byte(msg))
 	if d.ctx.Policy().AllowSideEffect() {
 		mode = "[RUN]"
 		out, err := cmd.CombinedOutput()

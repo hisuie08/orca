@@ -15,7 +15,7 @@ type Docker interface {
 
 type execContext interface{
 	context.WithPolicy
-	context.WithReport
+	context.WithLog
 }
 
 func NewDocker(p execContext) Docker {
