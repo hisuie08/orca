@@ -25,13 +25,13 @@ func fakeMap() compose.ComposeMap {
 	}}
 }
 func fakeCtx(volume *string, network bool) overlayContext {
-	ctx := context.New().WithConfig(&config.ResolvedConfig{
-		Volume:  config.ResolvedVolume{VolumeRoot: volume},
-		Network: config.ResolvedNetwork{Enabled: network, Name: netName}})
+	ctx := context.New().WithConfig(&config.OrcaConfig{
+		Volume:  config.VolumeConfig{VolumeRoot: volume},
+		Network: config.NetworkConfig{Enabled: network, Name: netName}})
 	return &ctx
 }
 
-func fakePlan(cfg config.ResolvedConfig) ([]plan.VolumePlan, plan.NetworkPlan) {
+func fakePlan(cfg config.OrcaConfig) ([]plan.VolumePlan, plan.NetworkPlan) {
 	vp := []plan.VolumePlan{{UsedBy: []plan.VolumeRef{
 		{Compose: cRef, Key: vRef}}, Type: plan.VolumeExternal}}
 	np := plan.NetworkPlan{SharedName: cfg.Network.Name,

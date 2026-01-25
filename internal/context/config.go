@@ -3,14 +3,13 @@ package context
 import "orca/model/config"
 
 type WithConfig interface {
-	Config() *config.ResolvedConfig
+	Config() *config.OrcaConfig
 }
 
 type withConfig struct {
-	config *config.ResolvedConfig
+	config *config.OrcaConfig
 }
 
-
-func (w withConfig) Config() *config.ResolvedConfig {
+func (w withConfig) Config() *config.OrcaConfig {
 	return w.config
 }

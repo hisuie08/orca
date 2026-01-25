@@ -29,7 +29,7 @@ func (c Context) WithRoot(root string) Context {
 	c.root = newWithRoot(root)
 	return c
 }
-func (c Context) WithConfig(cfg *config.ResolvedConfig) Context {
+func (c Context) WithConfig(cfg *config.OrcaConfig) Context {
 	if cfg == nil {
 		panic("ResolvedConfig must not be nil")
 	}
@@ -65,7 +65,7 @@ func (c *Context) OrcaYamlFile() string {
 	return c.root.OrcaYamlFile()
 }
 
-func (c *Context) Config() *config.ResolvedConfig {
+func (c *Context) Config() *config.OrcaConfig {
 	return c.config.Config()
 }
 

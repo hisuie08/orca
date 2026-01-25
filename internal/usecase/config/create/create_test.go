@@ -6,6 +6,7 @@ import (
 	"orca/internal/executor"
 	"orca/internal/inspector"
 	"orca/internal/logger"
+	"orca/model/config"
 	"orca/model/policy"
 	"testing"
 )
@@ -27,7 +28,7 @@ func TestCreateConfig(t *testing.T) {
 			fi := inspector.NewFilesystem()
 			fe := executor.NewFilesystem(&ctx)
 			_, err := (&creator{ctx: &ctx, fe: fe, fi: fi}).
-				CreateConfig("", false)
+				Create(config.CfgOption{}, false)
 			written, err := fi.Files(dir)
 			if err != nil {
 				t.Error(err)

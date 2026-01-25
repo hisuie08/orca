@@ -11,8 +11,8 @@ type LoadConfigContext interface {
 	context.WithRoot
 }
 
-func LoadConfig(ctx LoadConfigContext) (*config.ResolvedConfig, error) {
-	return load.LoadConfig(ctx)
+func Load(ctx LoadConfigContext) (*config.OrcaConfig, error) {
+	return load.Load(ctx)
 }
 
 type CreateCfgContext interface {
@@ -21,6 +21,6 @@ type CreateCfgContext interface {
 	context.WithLog
 }
 
-func CreateConfig(ctx CreateCfgContext, name string, force bool) (string, error) {
-	return create.ConfigCreator(ctx).CreateConfig(name, force)
+func Create(ctx CreateCfgContext, opt config.CfgOption, force bool) (*config.OrcaConfig, error) {
+	return create.ConfigCreator(ctx).Create(opt, force)
 }
