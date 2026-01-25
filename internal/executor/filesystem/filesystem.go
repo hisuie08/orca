@@ -35,6 +35,7 @@ func NewExecutor(ctx execContext) *fsExecutor {
 
 func (f *fsExecutor) WriteFile(path string, data []byte) error {
 	// create dir to path if not exist
+	defer f.report(fmt.Sprintf("%s: %s", "create file", path))
 	dir := filepath.Dir(path)
 	if dir != "." {
 		if err := f.createDir(dir, 0o755); err != nil {
@@ -45,18 +46,20 @@ func (f *fsExecutor) WriteFile(path string, data []byte) error {
 }
 
 func (f *fsExecutor) CreateDir(path string) error {
+	defer f.report(fmt.Sprintf("%s: %s", "create dir", path))
 	return f.createDir(path, 0o755)
 }
 
 func (f *fsExecutor) RemoveFile(path string) error {
+	defer f.report(fmt.Sprintf("%s: %s", "remove file", path))
 	return f.removeFile(path)
 }
 func (f *fsExecutor) RemoveDir(path string) error {
+	defer f.report(fmt.Sprintf("%s: %s", "remove dir", path))
 	return f.removeDir(path)
 }
 
 func (f *fsExecutor) writeFile(path string, content []byte, perm fs.FileMode) error {
-	f.report(fmt.Sprintf("%s: %s", "create file", path))
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.WriteFile(path, content, perm); err != nil {
 			return &errs.FileError{Path: path, Err: err}
@@ -66,7 +69,6 @@ func (f *fsExecutor) writeFile(path string, content []byte, perm fs.FileMode) er
 }
 
 func (f *fsExecutor) createDir(path string, perm fs.FileMode) error {
-	f.report(fmt.Sprintf("%s: %s", "create dir", path))
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.MkdirAll(path, perm); err != nil {
 			return &errs.FileError{Path: path, Err: err}
@@ -76,8 +78,6 @@ func (f *fsExecutor) createDir(path string, perm fs.FileMode) error {
 }
 
 func (f *fsExecutor) removeFile(path string) error {
-	f.report(fmt.Sprintf("%s: %s", "remove file", path))
-
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.Remove(path); err != nil {
 			return &errs.FileError{Path: path, Err: err}
@@ -86,7 +86,6 @@ func (f *fsExecutor) removeFile(path string) error {
 	return nil
 }
 func (f *fsExecutor) removeDir(path string) error {
-	f.report(fmt.Sprintf("%s: %s", "remove dir", path))
 	if f.ctx.Policy().AllowSideEffect() {
 		if err := os.RemoveAll(path); err != nil {
 			return &errs.FileError{Path: path, Err: err}
