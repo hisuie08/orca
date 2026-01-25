@@ -17,7 +17,7 @@ var _ Creator = (*creator)(nil)
 type createContext interface {
 	context.WithRoot
 	context.WithPolicy
-	context.WithReport
+	context.WithLog
 }
 type Creator interface {
 	CreateConfig(string, bool) (string, error)
