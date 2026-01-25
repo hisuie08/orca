@@ -2,7 +2,9 @@ package context
 
 import (
 	"io"
-	"orca/cmd/option"
+	"orca/cmd/baseflag"
+	"orca/internal/logger"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -12,9 +14,23 @@ type CommandContext interface {
 	WithLog
 }
 
-func BuildBaseContext(cmd cobra.Command, opt option.BaseOption) CommandContext {
-	ctx := New().
-		WithRoot(opt.Root)
+func BuildCommandCtx(cmd cobra.Command) CommandContext {
+	wd, err := os.Getwd()
+	if err != nil {
+		panic("can't get working directory")
+	}
+	silent, _ := cmd.Flags().GetBool(baseflag.Silent)
+	debug, _ := cmd.Flags().GetBool(baseflag.Debug)
+	logLevel := func() logger.LogLevel {
+		if silent {
+			return logger.LogSilent
+		} else if debug {
+			return logger.LogDebug
+		} else {
+			return logger.LogNormal
+		}
+	}()
+	ctx := New().WithRoot(wd).WithLog(logLevel, cmd.OutOrStdout())
 	return &ctx
 }
 
