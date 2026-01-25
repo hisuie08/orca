@@ -29,7 +29,7 @@ type fsExecutor struct {
 }
 
 func NewExecutor(ctx execContext) *fsExecutor {
-	l := logger.New(ctx.LogTarget(), ctx.LogLevel()).Init(logger.LogNormal)
+	l := logger.New(ctx.LogTarget(), ctx.LogLevel())
 	return &fsExecutor{ctx: ctx, log: l}
 }
 
@@ -101,5 +101,5 @@ func (f *fsExecutor) report(cmd string) {
 		mode = "[RUN]"
 	}
 	msg := fmt.Sprintf("%s %s\n", mode, cmd)
-	f.log.Log([]byte(msg))
+	f.log.Log(logger.LogNormal, []byte(msg))
 }

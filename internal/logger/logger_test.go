@@ -19,8 +19,8 @@ func TestCompareLogLevel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			lg := New(new(bytes.Buffer), tt.lp).Init(tt.ll)
-			l := lg.chkPolicy()
+			lg := New(new(bytes.Buffer), tt.lp)
+			l := lg.chkPolicy(tt.ll)
 			if tt.willLog != l {
 				t.Errorf("expected %t but got %t", tt.willLog, l)
 			}

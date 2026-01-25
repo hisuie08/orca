@@ -23,7 +23,7 @@ type execContext interface {
 var _ executor = (*dockerExecutor)(nil)
 
 func NewExecutor(ctx execContext) executor {
-	l := logger.New(ctx.LogTarget(), ctx.LogLevel()).Init(logger.LogNormal)
+	l := logger.New(ctx.LogTarget(), ctx.LogLevel())
 	return &dockerExecutor{ctx: ctx, log: l}
 }
 
@@ -60,7 +60,7 @@ func (d *dockerExecutor) CreateVolume(name string, opt ...string) ([]byte, error
 func (d *dockerExecutor) run(cmd *exec.Cmd) ([]byte, error) {
 	mode := "[DRY-RUN]"
 	msg := fmt.Sprintf("%s %s\n", mode, cmd.String())
-	defer d.log.Log([]byte(msg))
+	defer d.log.Log(logger.LogNormal, []byte(msg))
 	if d.ctx.Policy().AllowSideEffect() {
 		mode = "[RUN]"
 		out, err := cmd.CombinedOutput()

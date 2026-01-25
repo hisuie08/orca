@@ -19,20 +19,15 @@ type logger interface {
 type Logger struct {
 	out       io.Writer
 	logPolicy LogLevel
-	logLevel  LogLevel
 }
 func New(o io.Writer,lp LogLevel)Logger{
 	return Logger{out:o, logPolicy: lp}
 }
-func (l Logger) Init(lv LogLevel) Logger {
-	l.logLevel = lv
-	return l
+func (l *Logger) chkPolicy(lv LogLevel) bool {
+	return l.logPolicy >= lv
 }
-func (l *Logger) chkPolicy() bool {
-	return l.logPolicy >= l.logLevel
-}
-func (l *Logger) Log(p []byte) {
-	if l.chkPolicy() {
+func (l *Logger) Log(lv LogLevel,p []byte) {
+	if l.chkPolicy(lv) {
 		l.out.Write(p)
 	}
 }
