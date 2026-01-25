@@ -2,30 +2,33 @@ package option
 
 import (
 	"orca/cmd/baseflag"
+	"orca/internal/logger"
 	"os"
 
 	"github.com/spf13/cobra"
 )
 
 type BaseOption struct {
-	Silent bool
-	Debug  bool
-	Root   string
+	LogLevel logger.LogLevel
+	Root     string
 }
 
-func NewBaseOption(cmd cobra.Command) (BaseOption, error) {
+func NewBaseOption(cmd cobra.Command) BaseOption {
 	wd, err := os.Getwd()
 	if err != nil {
-		return BaseOption{}, err
+		panic("can't get working directory")
 	}
-	silent, err := cmd.Flags().GetBool(baseflag.Silent)
-	if err != nil {
-		return BaseOption{}, err
-	}
-	debug, err := cmd.Flags().GetBool(baseflag.Debug)
-	if err != nil {
-		return BaseOption{}, err
-	}
+	silent, _ := cmd.Flags().GetBool(baseflag.Silent)
+	debug, _ := cmd.Flags().GetBool(baseflag.Debug)
+	logLevel := func() logger.LogLevel {
+		if silent {
+			return logger.LogSilent
+		} else if debug {
+			return logger.LogDebug
+		} else {
+			return logger.LogNormal
+		}
+	}()
 
-	return BaseOption{Root: wd, Silent: silent, Debug: debug}, nil
+	return BaseOption{Root: wd, LogLevel: logLevel}
 }

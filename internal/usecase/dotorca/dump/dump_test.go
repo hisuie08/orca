@@ -1,13 +1,14 @@
 package dump
 
 import (
+	"bytes"
 	"orca/internal/context"
 	"orca/internal/inspector"
+	"orca/internal/logger"
 	"orca/model/compose"
 	"orca/model/config"
 	"orca/model/plan"
 	"orca/model/policy"
-	"os"
 	"path/filepath"
 	"testing"
 )
@@ -30,7 +31,7 @@ func TestDumpCompose(t *testing.T) {
 			tmpdir := t.TempDir()
 			ctx := context.New().WithRoot(tmpdir).
 				WithConfig(&config.ResolvedConfig{}).
-				WithPolicy(tt.p).WithReport(os.Stdout)
+				WithPolicy(tt.p).WithLog(logger.LogDebug, new(bytes.Buffer))
 			dumper := DotOrcaDumper(&ctx, false)
 			got, err := dumper.DumpComposes(cm)
 			if len(got) != tt.wantWritten {
@@ -70,7 +71,7 @@ func TestDumpPlan(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.New().WithRoot(t.TempDir()).
 				WithConfig(&config.ResolvedConfig{}).
-				WithPolicy(tt.policy).WithReport(os.Stdout)
+				WithPolicy(tt.policy).WithLog(logger.LogDebug, new(bytes.Buffer))
 			dumper := DotOrcaDumper(&ctx, false)
 			path, err := dumper.DumpPlan(pl)
 			if err != nil {
@@ -96,7 +97,7 @@ func TestForceDump(t *testing.T) {
 		t.Run(tC.name, func(t *testing.T) {
 			ctx := context.New().WithRoot(t.TempDir()).
 				WithConfig(&config.ResolvedConfig{}).
-				WithPolicy(policy.Real).WithReport(os.Stdout)
+				WithPolicy(policy.Real).WithLog(logger.LogDebug, new(bytes.Buffer))
 			dumper := DotOrcaDumper(&ctx, tC.force)
 			cm := compose.ComposeMap{"a": &compose.ComposeSpec{}}
 			// first dump

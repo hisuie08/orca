@@ -25,7 +25,7 @@ type Dumper interface {
 type dumpContext interface {
 	context.WithRoot
 	context.WithPolicy
-	context.WithReport
+	context.WithLog
 }
 
 type dumper struct {
