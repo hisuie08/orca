@@ -27,8 +27,11 @@ func TestCreateConfig(t *testing.T) {
 				WithLog(logger.LogDebug, new(bytes.Buffer))
 			fi := inspector.NewFilesystem()
 			fe := executor.NewFilesystem(&ctx)
-			_, err := (&creator{ctx: &ctx, fe: fe, fi: fi}).
-				Create(config.CfgOption{}, false)
+			c := &creator{ctx: &ctx, fe: fe, fi: fi}
+			cfg := c.Create(config.CfgOption{})
+			if err := c.Write(cfg, true); err != nil {
+				t.Error(err)
+			}
 			written, err := fi.Files(dir)
 			if err != nil {
 				t.Error(err)

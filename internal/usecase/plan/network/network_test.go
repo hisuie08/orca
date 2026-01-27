@@ -18,8 +18,8 @@ func (f *fakeDockerInspector) NetworkExists(name string) bool {
 	return name == f.Exists
 }
 func fakeNetCtx(name string, enabled bool) NetworkPlanContext {
-	n := config.ResolvedNetwork{Name: name, Enabled: enabled, Internal: false}
-	ctx := context.New().WithConfig(&config.ResolvedConfig{Network: n})
+	n := config.NetworkConfig{Name: name, Enabled: enabled, Internal: false}
+	ctx := context.New().WithConfig(&config.OrcaConfig{Network: n})
 	return &ctx
 }
 func Test_CreateOrNot(t *testing.T) {

@@ -21,6 +21,18 @@ type CreateCfgContext interface {
 	context.WithLog
 }
 
-func Create(ctx CreateCfgContext, opt config.CfgOption, force bool) (*config.OrcaConfig, error) {
-	return create.ConfigCreator(ctx).Create(opt, force)
+type WriteOption struct {
+	NoCreate bool
+	Force    bool
+}
+
+func Create(ctx CreateCfgContext, opt config.CfgOption) *config.OrcaConfig {
+	return create.ConfigCreator(ctx).Create(opt)
+}
+
+func Write(ctx CreateCfgContext, cfg *config.OrcaConfig, opt WriteOption) error {
+	if opt.NoCreate {
+		return nil
+	}
+	return create.ConfigCreator(ctx).Write(cfg, opt.Force)
 }

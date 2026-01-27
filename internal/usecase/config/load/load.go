@@ -1,9 +1,10 @@
 package load
 
 import (
+	"orca/errs"
 	"orca/internal/context"
 	"orca/internal/inspector"
-	"orca/internal/usecase/config/internal"
+	"orca/internal/usecase/config/create"
 	"orca/model/config"
 	"path/filepath"
 
@@ -14,7 +15,7 @@ type LoadConfigContext interface {
 	context.WithRoot
 }
 
-func LoadConfig(ctx LoadConfigContext) (*config.ResolvedConfig, error) {
+func Load(ctx LoadConfigContext) (*config.OrcaConfig, error) {
 	return loadConfig(ctx, inspector.NewFilesystem())
 }
 
@@ -24,18 +25,16 @@ type fsInspector interface {
 
 func loadConfig(ctx LoadConfigContext,
 	fi fsInspector) (
-	*config.ResolvedConfig, error) {
+	*config.OrcaConfig, error) {
 	path := ctx.OrcaYamlFile()
 	data, err := fi.Read(path)
 	if err != nil {
-		return nil, err
+		return nil, &errs.FileError{Path: path, Err: err}
 	}
-	cfg := &config.OrcaConfig{
-		Volume:  &config.VolumeConfig{},
-		Network: &config.NetworkConfig{},
-	}
+	name := filepath.Base(ctx.Root())
+	cfg := create.NewConfig(config.CfgOption{Name: name})
 	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, err
 	}
-	return internal.Resolve(cfg, filepath.Base(ctx.Root())), nil
+	return cfg, nil
 }

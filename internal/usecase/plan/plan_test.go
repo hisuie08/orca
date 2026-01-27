@@ -12,9 +12,9 @@ import (
 func TestBuildOrcaPlan(t *testing.T) {
 	root := t.TempDir()
 	ctx := context.New().WithRoot(root).
-		WithConfig(&config.ResolvedConfig{Name: "test",
-			Volume:  config.ResolvedVolume{VolumeRoot: &root},
-			Network: config.ResolvedNetwork{Name: "test_net", Enabled: true},
+		WithConfig(&config.OrcaConfig{Name: "test",
+			Volume:  config.VolumeConfig{VolumeRoot: &root},
+			Network: config.NetworkConfig{Name: "test_net", Enabled: true},
 		})
 	cm := compose.ComposeMap{"b": &compose.ComposeSpec{},
 		"a": &compose.ComposeSpec{}}

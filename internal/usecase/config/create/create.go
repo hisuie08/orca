@@ -1,12 +1,14 @@
 package create
 
 import (
+	"fmt"
 	"io/fs"
 	"orca/errs"
 	"orca/internal/context"
 	"orca/internal/executor"
 	"orca/internal/inspector"
 	"orca/model/config"
+	"path/filepath"
 
 	"github.com/creasty/defaults"
 	"gopkg.in/yaml.v3"
@@ -20,7 +22,8 @@ type createContext interface {
 	context.WithLog
 }
 type Creator interface {
-	CreateConfig(string, bool) (string, error)
+	Create(config.CfgOption) *config.OrcaConfig
+	Write(*config.OrcaConfig, bool) error
 }
 
 type creator struct {
@@ -34,27 +37,45 @@ func ConfigCreator(ctx createContext) Creator {
 		fe: executor.NewFilesystem(ctx)}
 }
 
-func (c *creator) CreateConfig(clusterName string, force bool) (string, error) {
-	if c.fi.FileExists(c.ctx.OrcaYamlFile()) {
-		if !force {
-			return "", &errs.FileError{Path: c.ctx.OrcaYamlFile(), Err: fs.ErrExist}
-		}
-	}
-	cfg := makeConfig(clusterName)
-	b, err := yaml.Marshal(cfg)
-	if err != nil {
-		return "", err
-	}
-	return c.ctx.OrcaYamlFile(), c.fe.WriteFile(c.ctx.OrcaYamlFile(), b)
+func (c *creator) Create(opt config.CfgOption) *config.OrcaConfig {
+	return NewConfig(opt)
 }
 
-func makeConfig(name string) *config.OrcaConfig {
-	cfg := &config.OrcaConfig{
-		Volume:  &config.VolumeConfig{},
-		Network: &config.NetworkConfig{},
+func (c *creator) Write(cfg *config.OrcaConfig, force bool) error {
+	if c.fi.FileExists(c.ctx.OrcaYamlFile()) {
+		if !force {
+			return &errs.FileError{Path: c.ctx.OrcaYamlFile(), Err: fs.ErrExist}
+		}
 	}
-	if name != "" {
-		cfg.Name = &name
+	b, err := yaml.Marshal(cfg)
+	if err != nil {
+		return err
+	}
+	return c.fe.WriteFile(c.ctx.OrcaYamlFile(), b)
+}
+
+func NewConfig(c config.CfgOption) *config.OrcaConfig {
+	cfg := &config.OrcaConfig{
+		Name: c.Name,
+		Volume: config.VolumeConfig{
+			VolumeRoot: func() *string {
+				if c.Volume.Path != "" {
+					if path, err := filepath.Abs(c.Volume.Path); err == nil {
+						return &path
+					}
+				}
+				return nil
+			}(),
+			EnsurePath: c.Volume.EnsurePath},
+		Network: config.NetworkConfig{
+			Name: func() string {
+				if c.Network.Name != "" {
+					return c.Network.Name
+				}
+				return fmt.Sprintf("%s_network", c.Name)
+			}(),
+			Enabled:  c.Network.Enabled,
+			Internal: c.Network.Internal},
 	}
 	defaults.Set(cfg)
 	return cfg

@@ -41,7 +41,7 @@ func buildNetworkPlan(
 	return np
 }
 
-func buildAction(net compose.CollectedNetwork, cfg config.ResolvedNetwork,
+func buildAction(net compose.CollectedNetwork, cfg config.NetworkConfig,
 ) (plan.NetworkAction, bool) {
 	action := plan.NetworkAction{}
 	action.Target = plan.NetworkRef{

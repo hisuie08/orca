@@ -23,8 +23,8 @@ func (f *fakeDockerInspector) BindExists(dir string) bool {
 
 // TestNilRoot 以外のテストで使うContext
 func fakeVolCtx(root string, ensurePath bool) VolumePlanContext {
-	ctx := context.New().WithConfig(&config.ResolvedConfig{
-		Volume: config.ResolvedVolume{
+	ctx := context.New().WithConfig(&config.OrcaConfig{
+		Volume: config.VolumeConfig{
 			VolumeRoot: &root, EnsurePath: ensurePath}})
 	return &ctx
 }
@@ -179,12 +179,12 @@ func TestAggregation(t *testing.T) {
 func TestNilRoot(t *testing.T) {
 	// VolumeRoot nil → panic
 	nilRoot := context.New().WithConfig(
-		&config.ResolvedConfig{Volume: config.ResolvedVolume{
+		&config.OrcaConfig{Volume: config.VolumeConfig{
 			VolumeRoot: nil, EnsurePath: true}})
 	// VolumeRoot "" → panic
 	es := ""
 	emptyRoot := context.New().WithConfig(
-		&config.ResolvedConfig{Volume: config.ResolvedVolume{
+		&config.OrcaConfig{Volume: config.VolumeConfig{
 			VolumeRoot: &es, EnsurePath: true}})
 	tests := []struct {
 		name string
