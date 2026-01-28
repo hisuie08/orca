@@ -4,9 +4,7 @@ import (
 	"orca/errs"
 	"orca/internal/context"
 	"orca/internal/inspector"
-	"orca/internal/usecase/config/create"
 	"orca/model/config"
-	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -31,10 +29,12 @@ func loadConfig(ctx LoadConfigContext,
 	if err != nil {
 		return nil, &errs.FileError{Path: path, Err: err}
 	}
-	name := filepath.Base(ctx.Root())
-	cfg := create.NewConfig(config.CfgOption{Name: name})
+	cfg := &config.OrcaConfig{}
 	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, err
+	}
+	if cfg.Name == "" {
+		return nil, errs.ErrInvalidConfig
 	}
 	return cfg, nil
 }
