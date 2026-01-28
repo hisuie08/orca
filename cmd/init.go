@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"orca/internal/context"
-	initprocess "orca/internal/process/init"
+	pinit "orca/internal/process/init"
 	"os"
 	"path/filepath"
 
@@ -10,7 +10,7 @@ import (
 )
 
 func newInitCommand() *cobra.Command {
-	var opt initprocess.InitOption
+	var opt pinit.InitOption
 
 	cmd := &cobra.Command{
 		Use:   "init [name]",
@@ -29,8 +29,8 @@ func newInitCommand() *cobra.Command {
 			}
 			// Process 呼び出し
 			ctx := context.BuildCommandCtx(*cmd)
-			proc := initprocess.New()
-			return proc.Run(ctx, opt)
+			proc := pinit.New(ctx)
+			return proc.Run(opt)
 		},
 	}
 
