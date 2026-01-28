@@ -9,11 +9,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type LoadConfigContext interface {
+type loadCfgContext interface {
 	context.WithRoot
 }
 
-func Load(ctx LoadConfigContext) (*config.OrcaConfig, error) {
+func Load(ctx loadCfgContext) (*config.OrcaConfig, error) {
 	return loadConfig(ctx, inspector.NewFilesystem())
 }
 
@@ -21,7 +21,7 @@ type fsInspector interface {
 	Read(string) ([]byte, error)
 }
 
-func loadConfig(ctx LoadConfigContext,
+func loadConfig(ctx loadCfgContext,
 	fi fsInspector) (
 	*config.OrcaConfig, error) {
 	path := ctx.OrcaYamlFile()
