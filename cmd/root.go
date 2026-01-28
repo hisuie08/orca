@@ -19,11 +19,14 @@ func Execute() {
 	if err == nil {
 		os.Exit(0)
 	}
-	silent, e := RootCmd.Flags().GetBool(baseflag.Silent)
-	if e != nil {
-		silent = false
-	}
-	exitCode := internal.HandleError(e, silent)
+	silent := func() bool {
+		if s, e := RootCmd.Flags().GetBool(baseflag.Silent); e != nil {
+			return false
+		} else {
+			return s
+		}
+	}()
+	exitCode := internal.HandleError(err, silent)
 	os.Exit(exitCode)
 }
 
