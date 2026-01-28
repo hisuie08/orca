@@ -6,6 +6,7 @@ import (
 	"orca/errs"
 	"orca/internal/context"
 	"orca/internal/logger"
+	"orca/model/policy/log"
 	"os"
 	"path/filepath"
 )
@@ -29,7 +30,7 @@ type fsExecutor struct {
 }
 
 func NewExecutor(ctx execContext) *fsExecutor {
-	l := logger.New(ctx.LogTarget(), ctx.LogLevel())
+	l := logger.New(ctx)
 	return &fsExecutor{ctx: ctx, log: l}
 }
 
@@ -100,5 +101,5 @@ func (f *fsExecutor) report(cmd string) {
 		mode = "[RUN]"
 	}
 	msg := fmt.Sprintf("%s %s\n", mode, cmd)
-	f.log.Log(logger.LogDebug, []byte(msg))
+	f.log.Log(log.LogDebug, []byte(msg))
 }

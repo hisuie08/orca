@@ -5,9 +5,9 @@ import (
 	"orca/internal/context"
 	"orca/internal/executor"
 	"orca/internal/inspector"
-	"orca/internal/logger"
 	"orca/model/config"
 	"orca/model/policy"
+	"orca/model/policy/log"
 	"testing"
 )
 
@@ -24,7 +24,7 @@ func TestCreateConfig(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			dir := t.TempDir()
 			ctx := context.New().WithRoot(dir).WithPolicy(tC.policy).
-				WithLog(logger.LogDebug, new(bytes.Buffer))
+				WithLog(log.LogDebug, new(bytes.Buffer))
 			fi := inspector.NewFilesystem()
 			fe := executor.NewFilesystem(&ctx)
 			c := &creator{ctx: &ctx, fe: fe, fi: fi}

@@ -2,9 +2,9 @@ package context
 
 import (
 	"io"
-	"orca/internal/logger"
 	"orca/model/config"
 	"orca/model/policy"
+	"orca/model/policy/log"
 )
 
 var _ WithRoot = (*Context)(nil)
@@ -49,7 +49,7 @@ func (c Context) WithColor(w io.Writer) Context {
 	return c
 }
 
-func (c Context) WithLog(l logger.LogLevel, o io.Writer) Context {
+func (c Context) WithLog(l log.LogLevel, o io.Writer) Context {
 	c.log = &withLog{logLevel: l, out: o}
 	return c
 }
@@ -77,7 +77,7 @@ func (c *Context) Colored() bool {
 	return c.color.Colored()
 }
 
-func (c *Context) LogLevel() logger.LogLevel {
+func (c *Context) LogLevel() log.LogLevel {
 	return c.log.LogLevel()
 }
 

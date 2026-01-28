@@ -2,7 +2,6 @@ package create
 
 import (
 	"fmt"
-	"io/fs"
 	"orca/errs"
 	"orca/internal/context"
 	"orca/internal/executor"
@@ -44,7 +43,7 @@ func (c *creator) Create(opt config.CfgOption) *config.OrcaConfig {
 func (c *creator) Write(cfg *config.OrcaConfig, force bool) error {
 	if c.fi.FileExists(c.ctx.OrcaYamlFile()) {
 		if !force {
-			return &errs.FileError{Path: c.ctx.OrcaYamlFile(), Err: fs.ErrExist}
+			return errs.ErrAlreadyInitialized
 		}
 	}
 	b, err := yaml.Marshal(cfg)

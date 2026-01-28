@@ -2,20 +2,20 @@ package context
 
 import (
 	"io"
-	"orca/internal/logger"
+	"orca/model/policy/log"
 )
 
 type WithLog interface {
-	LogLevel() logger.LogLevel
+	LogLevel() log.LogLevel
 	LogTarget() io.Writer
 }
 
 type withLog struct {
-	logLevel logger.LogLevel
+	logLevel log.LogLevel
 	out      io.Writer
 }
 
-func (l *withLog) LogLevel() logger.LogLevel {
+func (l *withLog) LogLevel() log.LogLevel {
 	return l.logLevel
 }
 

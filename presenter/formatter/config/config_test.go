@@ -6,12 +6,12 @@ import (
 )
 
 func TestFmtConfig(t *testing.T) {
-	cfg := config.ResolvedConfig{
+	cfg := config.OrcaConfig{
 		Name: "myorca",
-		Network: config.ResolvedNetwork{
+		Network: config.NetworkConfig{
 			Enabled: true, Name: "my-network", Internal: false,
 		},
-		Volume: config.ResolvedVolume{
+		Volume: config.VolumeConfig{
 			VolumeRoot: nil,
 			EnsurePath: false,
 		},
