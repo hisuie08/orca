@@ -1,9 +1,7 @@
-/*
-Copyright © 2025 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
+	"orca/internal/context"
 	initprocess "orca/internal/process/init"
 	"os"
 	"path/filepath"
@@ -29,38 +27,35 @@ func newInitCommand() *cobra.Command {
 			} else {
 				opt.Name = filepath.Base(wd)
 			}
-			ctx, err := BuildBaseContext(cmd)
 			// Process 呼び出し
+			ctx := context.BuildCommandCtx(*cmd)
 			proc := initprocess.New()
 			return proc.Run(ctx, opt)
 		},
 	}
 
 	// --- flags ---
-
-	cmd.Flags().BoolVar(&opt.NoCreate, "nocreate", false, "Do not create orca.yml")
-	cmd.Flags().BoolVar(&opt.Force, "force", false, "Overwrite existing orca.yml")
-
-	cmd.Flags().StringVar(&opt.Volume.Path, "volume", "", "Volume path")
-	cmd.Flags().BoolVar(&opt.Volume.EnsurePath, "ensure-volume-path", false, "Ensure volume path exists")
-
-	cmd.Flags().BoolVar(&opt.Network.Enabled, "enable-network", false, "Enable network")
-	cmd.Flags().StringVar(&opt.Network.Name, "network-name", "", "Shared network name")
-	cmd.Flags().BoolVar(&opt.Network.Internal, "network-internal", false, "Make network internal")
+	const (
+		NoCreate        = "nocreate"
+		Force           = "force"
+		Volume          = "volume"
+		EnsureVolume    = "ensure-volume"
+		EnableNetwork   = "enable-network"
+		NetworkName     = "network-name"
+		NetworkInternal = "network-internal"
+	)
+	cmd.Flags().BoolVar(&opt.NoCreate, NoCreate, false, "Do not create orca.yml")
+	cmd.Flags().BoolVar(&opt.Force, Force, false, "Overwrite existing orca.yml")
+	// TODO: フラグで初期化オプションを指定可能にする
+	// cmd.Flags().StringVar(&opt.Volume.Path, Volume, "", "Volume path")
+	// cmd.Flags().BoolVar(&opt.Volume.EnsurePath, EnsureVolume, false, "Ensure volume path exists")
+	// cmd.Flags().BoolVar(&opt.Network.Enabled, EnableNetwork, false, "Enable network")
+	// cmd.Flags().StringVar(&opt.Network.Name, NetworkName, "", "Shared network name")
+	// cmd.Flags().BoolVar(&opt.Network.Internal, NetworkInternal, false, "Make network internal")
 
 	return cmd
 }
 
 func init() {
-	rootCmd.AddCommand(newInitCommand())
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	RootCmd.AddCommand(newInitCommand())
 }
