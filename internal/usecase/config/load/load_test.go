@@ -5,32 +5,36 @@ import (
 	"testing"
 )
 
-type fakeInspector struct{}
+const fakeYaml string = `name: test
+volume:
+    volume_root: null
+    ensure_path: true
+network:
+    enabled: true
+    internal: false
+    name: test_network
+`
+
+type fakeInspector struct{ content string }
 
 func (f *fakeInspector) Read(string) ([]byte, error) {
-	return []byte{}, nil
+	return []byte(f.content), nil
 }
 func TestLoadConfig(t *testing.T) {
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
+		name    string
 		fi      fsInspector
 		wantErr bool
 	}{
-		// TODO: Add test cases.
-		{"test", &fakeInspector{}, false},
+		{"test", &fakeInspector{content: fakeYaml}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.New().WithRoot(tt.name)
 			_, gotErr := loadConfig(&ctx, tt.fi)
-			if gotErr != nil {
-				if !tt.wantErr {
-					t.Errorf("LoadConfig() failed: %v", gotErr)
-				}
-				return
+			if gotErr != nil && !tt.wantErr {
+				t.Errorf("LoadConfig() failed: %v", gotErr)
 			}
-
 		})
 	}
 }
