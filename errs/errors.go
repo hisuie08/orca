@@ -9,6 +9,8 @@ var (
 	ErrAlreadyInitialized = errdef.ErrAlreadyInitialized
 	ErrNotInitialized     = errdef.ErrNotInitialized
 
+	ErrInvalidConfig = errdef.ErrInvalidConfig
+
 	ErrPlanNotBuilt = errdef.ErrPlanNotBuilt
 	ErrPlanDirty    = errdef.ErrPlanDirty
 

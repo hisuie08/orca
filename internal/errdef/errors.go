@@ -8,8 +8,9 @@ var (
 	ErrAlreadyInitialized = errors.New("orca already initialized")
 	ErrNotInitialized     = errors.New("orca not initialized")
 
-	ErrPlanNotBuilt = errors.New("plan not built")
-	ErrPlanDirty    = errors.New("plan is out of date")
+	ErrInvalidConfig = errors.New("invalid orca config")
+	ErrPlanNotBuilt  = errors.New("plan not built")
+	ErrPlanDirty     = errors.New("plan is out of date")
 
 	ErrDryRunViolation = errors.New("operation violates dry-run")
 
@@ -18,6 +19,6 @@ var (
 
 	ErrExternalDependency = errors.New("external dependency failed")
 	ErrFileOperation      = errors.New("file operation failed")
-	
+
 	TestErr = errors.New("test error")
 )
