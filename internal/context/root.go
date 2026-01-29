@@ -8,6 +8,7 @@ import (
 type WithRoot interface {
 	Root() string
 	OrcaDir() string
+	OrcaPlanFile() string
 	OrcaYamlFile() string
 }
 
@@ -37,4 +38,8 @@ func (w *withRoot) OrcaDir() string {
 
 func (w *withRoot) OrcaYamlFile() string {
 	return filepath.Join(w.root, "orca.yml")
+}
+
+func (w *withRoot) OrcaPlanFile() string {
+	return filepath.Join(w.root, "plan.yml")
 }

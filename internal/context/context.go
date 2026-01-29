@@ -64,7 +64,9 @@ func (c *Context) OrcaDir() string {
 func (c *Context) OrcaYamlFile() string {
 	return c.root.OrcaYamlFile()
 }
-
+func (c *Context)OrcaPlanFile()string{
+	return c.root.OrcaPlanFile()
+}
 func (c *Context) Config() *config.OrcaConfig {
 	return c.config.Config()
 }
