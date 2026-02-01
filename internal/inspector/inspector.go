@@ -1,8 +1,8 @@
 package inspector
 
 import (
-	"orca/internal/inspector/docker"
-	"orca/internal/inspector/filesystem"
+	"orca/internal/inspector/internal/docker"
+	"orca/internal/inspector/internal/filesystem"
 	"orca/model/compose"
 )
 

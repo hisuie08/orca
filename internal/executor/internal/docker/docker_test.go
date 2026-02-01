@@ -27,11 +27,11 @@ func (f *fakeExecutor) ComposeDown(name string) ([]byte, error) {
 	return f.runFake(cmd)
 }
 func (f *fakeExecutor) CreateNetwork(name string, opts ...string) ([]byte, error) {
-	cmd := strings.Join(append([]string{"docker", "network", "create", name}, opts...), " ")
+	cmd := strings.Join(append(append([]string{"docker", "network", "create"}, opts...), name), " ")
 	return f.runFake(cmd)
 }
 func (f *fakeExecutor) CreateVolume(name string, opts ...string) ([]byte, error) {
-	cmd := strings.Join(append([]string{"docker", "volume", "create", name}, opts...), " ")
+	cmd := strings.Join(append(append([]string{"docker", "volume", "create"}, opts...), name), " ")
 	return f.runFake(cmd)
 }
 

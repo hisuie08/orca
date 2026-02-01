@@ -2,8 +2,8 @@ package executor
 
 import (
 	"orca/internal/context"
-	"orca/internal/executor/docker"
-	"orca/internal/executor/filesystem"
+	"orca/internal/executor/internal/docker"
+	"orca/internal/executor/internal/filesystem"
 )
 
 type Docker interface {
@@ -13,7 +13,7 @@ type Docker interface {
 	CreateVolume(string, ...string) ([]byte, error)
 }
 
-type execContext interface{
+type execContext interface {
 	context.WithPolicy
 	context.WithLog
 }
