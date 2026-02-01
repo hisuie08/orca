@@ -27,7 +27,7 @@ func BuildCommandCtx(cmd cobra.Command) CommandContext {
 		if silent {
 			return log.LogSilent
 		} else if debug {
-			return log.LogDebug
+			return log.LogDetail
 		} else {
 			return log.LogNormal
 		}

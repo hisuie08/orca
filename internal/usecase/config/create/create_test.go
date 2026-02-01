@@ -24,7 +24,7 @@ func TestCreateConfig(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			dir := t.TempDir()
 			ctx := context.New().WithRoot(dir).WithPolicy(tC.policy).
-				WithLog(log.LogDebug, new(bytes.Buffer))
+				WithLog(log.LogDetail, new(bytes.Buffer))
 			fi := inspector.NewFilesystem()
 			fe := executor.NewFilesystem(&ctx)
 			c := &creator{ctx: &ctx, fe: fe, fi: fi}

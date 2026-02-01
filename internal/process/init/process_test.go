@@ -15,7 +15,7 @@ import (
 
 func fakeCtx(root string) initProcessContext {
 	ctx := context.New().WithRoot(root).WithPolicy(policy.Real).
-		WithLog(log.LogDebug, new(bytes.Buffer))
+		WithLog(log.LogDetail, new(bytes.Buffer))
 	return &ctx
 }
 

@@ -25,13 +25,13 @@ type execContext interface {
 var _ executor = (*fsExecutor)(nil)
 
 type fsExecutor struct {
-	ctx execContext
-	log logger.Logger
+	ctx    execContext
+	logger logger.Logger
 }
 
 func NewExecutor(ctx execContext) *fsExecutor {
 	l := logger.New(ctx)
-	return &fsExecutor{ctx: ctx, log: l}
+	return &fsExecutor{ctx: ctx, logger: l}
 }
 
 func (f *fsExecutor) WriteFile(path string, data []byte) error {
@@ -101,5 +101,5 @@ func (f *fsExecutor) report(cmd string) {
 		mode = "[RUN]"
 	}
 	msg := fmt.Sprintf("%s %s\n", mode, cmd)
-	f.log.Log(log.LogDebug, []byte(msg))
+	f.logger.Log(log.LogDetail, []byte(msg))
 }
