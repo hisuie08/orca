@@ -46,14 +46,14 @@ func (d *dockerExecutor) ComposeDown(composeFile string) ([]byte, error) {
 
 // docker network create <name> [opt...]
 func (d *dockerExecutor) CreateNetwork(name string, opt ...string) ([]byte, error) {
-	c := append([]string{"network", "create", name}, opt...)
+	c := append(append([]string{"network", "create"}, opt...), name)
 	cmd := exec.Command("docker", c...)
 	return d.run(cmd)
 }
 
 // docker volume create <name> [opt...]
 func (d *dockerExecutor) CreateVolume(name string, opt ...string) ([]byte, error) {
-	c := append([]string{"volume", "create", name}, opt...)
+	c := append(append([]string{"volume", "create"}, opt...), name)
 	cmd := exec.Command("docker", c...)
 	return d.run(cmd)
 }
