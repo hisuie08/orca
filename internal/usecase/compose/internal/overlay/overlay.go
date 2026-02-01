@@ -2,8 +2,8 @@ package overlay
 
 import (
 	"orca/internal/context"
-	"orca/internal/usecase/compose/overlay/network"
-	"orca/internal/usecase/compose/overlay/volume"
+	"orca/internal/usecase/compose/internal/overlay/network"
+	"orca/internal/usecase/compose/internal/overlay/volume"
 	"orca/model/compose"
 	"orca/model/plan"
 )

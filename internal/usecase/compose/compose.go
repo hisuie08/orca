@@ -2,8 +2,8 @@ package compose
 
 import (
 	"orca/internal/context"
-	"orca/internal/usecase/compose/getall"
-	"orca/internal/usecase/compose/overlay"
+	"orca/internal/usecase/compose/internal/getall"
+	"orca/internal/usecase/compose/internal/overlay"
 	"orca/model/compose"
 	"orca/model/plan"
 )
