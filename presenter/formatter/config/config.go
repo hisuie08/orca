@@ -20,7 +20,7 @@ network:
     name: {{.Network.Name}}
 `
 
-func FmtConfig(r config.ResolvedConfig) string {
+func FmtConfig(r config.OrcaConfig) string {
 	b := bytes.NewBuffer([]byte{})
 	tmpl, err := template.New("config").Parse(orcayamltmpl)
 	if err != nil {
