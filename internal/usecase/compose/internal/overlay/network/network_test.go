@@ -2,6 +2,7 @@ package network
 
 import (
 	"orca/model/compose"
+	"orca/model/config"
 	"orca/model/plan"
 	"testing"
 )
@@ -26,7 +27,7 @@ func fakeNetworkPlan(s string, a plan.NetworkActionType, c, k string) plan.Netwo
 }
 func TestOverlayNetwork(t *testing.T) {
 	tests := []struct {
-		name string
+		name        string
 		composename string
 		key         string
 		action      plan.NetworkActionType
@@ -40,7 +41,7 @@ func TestOverlayNetwork(t *testing.T) {
 		c := fakeNetworkCompose(tt.composename, tt.key, "")
 		p := fakeNetworkPlan(netname, tt.action, tt.composename, tt.key)
 		t.Run(tt.name, func(t *testing.T) {
-			OverlayNetwork(c, p)
+			OverlayNetwork(config.OrcaConfig{}, c, p)
 			switch tt.action {
 			case plan.NetworkOverrideDefault:
 				n := c[tt.composename].Networks[tt.key]
@@ -66,7 +67,7 @@ func TestMultipleCompose(t *testing.T) {
 		"default": &compose.NetworkSpec{Name: "othernetwork"},
 	}}
 	p := fakeNetworkPlan("shared", plan.NetworkOverrideDefault, c, k)
-	OverlayNetwork(composes, p)
+	OverlayNetwork(config.OrcaConfig{}, composes, p)
 	if composes[c].Networks[k].Name != "shared" {
 		t.Fatal("override failed")
 	}
@@ -79,7 +80,7 @@ func TestEmptyPlan(t *testing.T) {
 	c, k, n := "a", "default", ""
 	composes := fakeNetworkCompose(c, k, n)
 	p := plan.NetworkPlan{SharedName: "shared", Actions: []plan.NetworkAction{}, Create: true}
-	OverlayNetwork(composes, p)
+	OverlayNetwork(config.OrcaConfig{}, composes, p)
 	if composes[c].Networks[k].Name != "" {
 		t.Fatal("Unexpected compose was overwritten")
 	}

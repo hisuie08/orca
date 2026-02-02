@@ -2,6 +2,7 @@ package volume
 
 import (
 	"orca/model/compose"
+	"orca/model/config"
 	"orca/model/plan"
 	"testing"
 
@@ -76,7 +77,7 @@ func TestVolumeOverlay(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cm := fakeComposeMap()
 			vps := []plan.VolumePlan{tt.vp}
-			OverlayVolume(cm, vps)
+			OverlayVolume(config.OrcaConfig{}, cm, vps)
 			result := cm[refCompose].Volumes[refKey]
 			diff := deep.Equal(result, &tt.want)
 			if len(diff) != 0 {
@@ -106,7 +107,7 @@ func TestMultipleUsed(t *testing.T) {
 					Name: volName, DriverOpts: map[string]string{},
 					Labels: map[string]string{}}}}}
 	}()
-	OverlayVolume(cm, []plan.VolumePlan{vp})
+	OverlayVolume(config.OrcaConfig{}, cm, []plan.VolumePlan{vp})
 	if !cm["a"].Volumes["b"].External || !cm["c"].Volumes["d"].External {
 		t.Error("multiple overlay failed")
 	}

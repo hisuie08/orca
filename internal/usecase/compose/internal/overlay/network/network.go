@@ -2,10 +2,11 @@ package network
 
 import (
 	"orca/model/compose"
+	"orca/model/config"
 	"orca/model/plan"
 )
 
-func OverlayNetwork(cm compose.ComposeMap,
+func OverlayNetwork(cfg config.OrcaConfig, cm compose.ComposeMap,
 	np plan.NetworkPlan) {
 	for _, a := range np.Actions {
 		if np.SharedName == "" {

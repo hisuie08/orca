@@ -30,12 +30,12 @@ func ComposeOverlayer(ctx overlayContext, cm compose.ComposeMap) *overlayer {
 
 func (o *overlayer) OverlayVolume(vps []plan.VolumePlan) {
 	if o.ctx.Config().Volume.VolumeRoot != nil {
-		volume.OverlayVolume(o.cm, vps)
+		volume.OverlayVolume(*o.ctx.Config(), o.cm, vps)
 	}
 }
 
 func (o *overlayer) OverlayNetwork(np plan.NetworkPlan) {
 	if o.ctx.Config().Network.Enabled {
-		network.OverlayNetwork(o.cm, np)
+		network.OverlayNetwork(*o.ctx.Config(),o.cm, np)
 	}
 }

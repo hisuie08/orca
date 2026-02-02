@@ -2,11 +2,13 @@ package volume
 
 import (
 	"maps"
+	"orca/internal/consts/label"
 	"orca/model/compose"
+	"orca/model/config"
 	"orca/model/plan"
 )
 
-func OverlayVolume(cm compose.ComposeMap, vps []plan.VolumePlan) {
+func OverlayVolume(cfg config.OrcaConfig, cm compose.ComposeMap, vps []plan.VolumePlan) {
 	for _, vp := range vps {
 		for _, u := range vp.UsedBy {
 			spec := cm[u.Compose].Volumes[u.Key]
@@ -23,6 +25,8 @@ func OverlayVolume(cm compose.ComposeMap, vps []plan.VolumePlan) {
 			if overlay.Labels == nil {
 				overlay.Labels = map[string]string{}
 			}
+			overlay.Labels[label.LabelCluster] = cfg.Name
+			overlay.Labels[label.LabelVolType] = string(vp.Type)
 			switch vp.Type {
 			case plan.VolumeExternal:
 				// external
@@ -34,7 +38,7 @@ func OverlayVolume(cm compose.ComposeMap, vps []plan.VolumePlan) {
 				overlay.External = true
 				overlay.Driver = ""
 				overlay.DriverOpts = map[string]string{}
-				overlay.Labels["orca.volume.shared.bind"] = vp.BindPath
+				overlay.Labels[label.LabelVolShareBind] = vp.BindPath
 			case plan.VolumeLocal:
 				// local local bind
 				overlay.External = false
