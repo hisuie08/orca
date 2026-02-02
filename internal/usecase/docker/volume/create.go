@@ -19,14 +19,20 @@ type dockerExecutor interface {
 
 func CreateVolume(ctx createVolContext, vp plan.VolumePlan) {
 	de := executor.NewDocker(ctx)
-	createVolume(ctx, vp, de)
+	// shared volumeだけorcaが自前で作る
+	// それ以外はdockerがcomposeから作るか、external
+	if !vp.Exists && vp.Type == plan.VolumeShared {
+		createVolume(ctx, vp, de)
+	}
+
 }
 
-func buildOption(vp plan.VolumePlan) []string {
-	return []string{"-o type=none", "-o o=bind",
-		fmt.Sprintf("-o device=%s", vp.BindPath)}
-}
 func createVolume(ctx createVolContext, vp plan.VolumePlan, de dockerExecutor) {
-	opts := append(buildOption(vp), VolumeLabel(*ctx.Config(), vp)...)
+	opts := []string{}
+	if vp.BindPath != "" {
+		opts = append(opts, "-o type=none", "-o o=bind",
+			fmt.Sprintf("-o device=%s", vp.BindPath))
+	}
+	opts = append(opts, VolumeLabel(*ctx.Config(), vp)...)
 	de.CreateVolume(vp.Name, opts...)
 }
