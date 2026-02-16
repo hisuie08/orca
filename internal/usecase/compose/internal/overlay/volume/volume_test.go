@@ -1,11 +1,11 @@
 package volume
 
 import (
+	"orca/internal/consts/label"
 	"orca/model/compose"
 	"orca/model/config"
 	"orca/model/plan"
 	"testing"
-
 	"github.com/go-test/deep"
 )
 
@@ -40,7 +40,7 @@ func TestVolumeOverlay(t *testing.T) {
 				External:   true,
 				Driver:     "",
 				DriverOpts: map[string]string{},
-				Labels:     map[string]string{"testlabel": "testvalue"},
+				Labels:     map[string]string{},
 				Name:       volName}},
 		{
 			name: "shared",
@@ -53,9 +53,7 @@ func TestVolumeOverlay(t *testing.T) {
 				External:   true,
 				Driver:     "",
 				DriverOpts: map[string]string{},
-				Labels: map[string]string{"testlabel": "testvalue",
-					"orca.volume.shared.bind": "/path/to/bind",
-				},
+				Labels: map[string]string{},
 				Name: volName}},
 		{
 			name: "local",
@@ -70,14 +68,17 @@ func TestVolumeOverlay(t *testing.T) {
 				DriverOpts: map[string]string{
 					"type": "none", "o": "bind",
 					"device": "/path/to/bind"},
-				Labels: map[string]string{"testlabel": "testvalue"},
+				Labels: map[string]string{
+					label.LabelCluster: "test-cluster",
+					label.LabelVolType: string(plan.VolumeLocal),
+					"testlabel": "testvalue"},
 				Name:   volName}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cm := fakeComposeMap()
 			vps := []plan.VolumePlan{tt.vp}
-			OverlayVolume(config.OrcaConfig{}, cm, vps)
+			OverlayVolume(config.OrcaConfig{Name: "test-cluster"}, cm, vps)
 			result := cm[refCompose].Volumes[refKey]
 			diff := deep.Equal(result, &tt.want)
 			if len(diff) != 0 {
