@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type CommandCapabilities interface {
+type CommandCapability interface {
 	WithRoot
 	WithLog
 	WithPolicy
 }
 
-func BuildCommandCaps(cmd cobra.Command) CommandCapabilities {
+func BuildCommandCaps(cmd cobra.Command) CommandCapability {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic("can't get working directory")
@@ -43,7 +43,7 @@ func BuildCommandCaps(cmd cobra.Command) CommandCapabilities {
 	return &caps
 }
 
-func FromCommandCaps(caps CommandCapabilities) Capability {
+func FromCommandCaps(caps CommandCapability) Capability {
 	c := New().WithRoot(caps.Root()).WithPolicy(caps.Policy()).
 		WithLog(caps.LogLevel(), caps.LogTarget())
 	return c

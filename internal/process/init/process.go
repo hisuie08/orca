@@ -15,15 +15,15 @@ type InitOption struct {
 }
 
 type initProcessCapability interface {
-	capability.CommandCapabilities
+	capability.CommandCapability
 }
 
 type InitProcess struct {
-	caps   capability.CommandCapabilities
+	caps   capability.CommandCapability
 	logger logger.Logger
 }
 
-func New(c capability.CommandCapabilities) *InitProcess {
+func New(c capability.CommandCapability) *InitProcess {
 	return &InitProcess{caps: c, logger: logger.New(c)}
 }
 

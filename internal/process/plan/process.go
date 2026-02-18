@@ -17,17 +17,17 @@ type PlanOption struct {
 	Force bool
 }
 type planProcessCapability interface {
-	capability.CommandCapabilities
+	capability.CommandCapability
 	capability.WithConfig
 	capability.WithColor
 }
 
 type Process struct {
-	caps   capability.CommandCapabilities
+	caps   capability.CommandCapability
 	logger logger.Logger
 }
 
-func New(c capability.CommandCapabilities) *Process {
+func New(c capability.CommandCapability) *Process {
 	return &Process{caps: c, logger: logger.New(c)}
 }
 
