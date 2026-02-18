@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	pinit "orca/internal/process/init"
 	"os"
 	"path/filepath"
@@ -28,8 +28,8 @@ func newInitCommand() *cobra.Command {
 				opt.Name = filepath.Base(wd)
 			}
 			// Process 呼び出し
-			ctx := context.BuildCommandCtx(*cmd)
-			proc := pinit.New(ctx)
+			caps := capability.BuildCommandCaps(*cmd)
+			proc := pinit.New(caps)
 			return proc.Run(opt)
 		},
 	}

@@ -1,7 +1,7 @@
 package overlay
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/usecase/compose/internal/overlay/network"
 	"orca/internal/usecase/compose/internal/overlay/volume"
 	"orca/model/compose"
@@ -15,27 +15,27 @@ type composeOverlayer interface {
 	OverlayNetwork(plan.NetworkPlan)
 }
 
-type overlayContext interface {
-	context.WithConfig
+type overlayCapability interface {
+	capability.WithConfig
 }
 
 type overlayer struct {
-	ctx overlayContext
-	cm  compose.ComposeMap
+	caps overlayCapability
+	cm   compose.ComposeMap
 }
 
-func ComposeOverlayer(ctx overlayContext, cm compose.ComposeMap) *overlayer {
-	return &overlayer{cm: cm, ctx: ctx}
+func ComposeOverlayer(caps overlayCapability, cm compose.ComposeMap) *overlayer {
+	return &overlayer{cm: cm, caps: caps}
 }
 
 func (o *overlayer) OverlayVolume(vps []plan.VolumePlan) {
-	if o.ctx.Config().Volume.VolumeRoot != nil {
-		volume.OverlayVolume(*o.ctx.Config(), o.cm, vps)
+	if o.caps.Config().Volume.VolumeRoot != nil {
+		volume.OverlayVolume(*o.caps.Config(), o.cm, vps)
 	}
 }
 
 func (o *overlayer) OverlayNetwork(np plan.NetworkPlan) {
-	if o.ctx.Config().Network.Enabled {
-		network.OverlayNetwork(*o.ctx.Config(),o.cm, np)
+	if o.caps.Config().Network.Enabled {
+		network.OverlayNetwork(*o.caps.Config(), o.cm, np)
 	}
 }

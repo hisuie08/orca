@@ -1,7 +1,7 @@
 package load
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"testing"
 )
 
@@ -30,8 +30,8 @@ func TestLoadConfig(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.New().WithRoot(tt.name)
-			_, gotErr := loadConfig(&ctx, tt.fi)
+			caps := capability.New().WithRoot(tt.name)
+			_, gotErr := loadConfig(&caps, tt.fi)
 			if gotErr != nil && !tt.wantErr {
 				t.Errorf("LoadConfig() failed: %v", gotErr)
 			}

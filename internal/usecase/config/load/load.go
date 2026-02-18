@@ -2,29 +2,29 @@ package load
 
 import (
 	"orca/errs"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/inspector"
 	"orca/model/config"
 
 	"gopkg.in/yaml.v3"
 )
 
-type loadCfgContext interface {
-	context.WithRoot
+type loadCfgCapability interface {
+	capability.WithRoot
 }
 
-func Load(ctx loadCfgContext) (*config.OrcaConfig, error) {
-	return loadConfig(ctx, inspector.NewFilesystem())
+func Load(caps loadCfgCapability) (*config.OrcaConfig, error) {
+	return loadConfig(caps, inspector.NewFilesystem())
 }
 
 type fsInspector interface {
 	Read(string) ([]byte, error)
 }
 
-func loadConfig(ctx loadCfgContext,
+func loadConfig(caps loadCfgCapability,
 	fi fsInspector) (
 	*config.OrcaConfig, error) {
-	path := ctx.OrcaYamlFile()
+	path := caps.OrcaYamlFile()
 	data, err := fi.Read(path)
 	if err != nil {
 		return nil, &errs.FileError{Path: path, Err: err}

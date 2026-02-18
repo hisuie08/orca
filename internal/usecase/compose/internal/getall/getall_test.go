@@ -3,7 +3,7 @@ package getall
 import (
 	"errors"
 	"orca/errs"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/errdef"
 	"orca/model/compose"
 	"testing"
@@ -74,11 +74,11 @@ func TestGetALLCompose_Success(t *testing.T) {
 	}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.New().WithRoot(fakeRoot)
+			caps := capability.New().WithRoot(fakeRoot)
 			fs := &fakeFSInspector{DirsMap: map[string][]string{
 				fakeRoot: tt.dirs}}
 			docker := &fakeDockerInspector{ComposeMap: tt.composes}
-			result, err := getAllCompose(&ctx, docker, fs)
+			result, err := getAllCompose(&caps, docker, fs)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -102,12 +102,12 @@ func TestGetAllCompose_HasError(t *testing.T) {
 			Err: errors.New("docker down")}}}
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.New().WithRoot(fakeRoot)
+			caps := capability.New().WithRoot(fakeRoot)
 			fs := &fakeFSInspector{DirsMap: map[string][]string{
 				fakeRoot: {fakeRoot + "/a"}}, Err: tt.fErr}
 			docker := &fakeDockerInspector{
 				ErrMap: map[string]error{fakeRoot + "/a": tt.dErr}}
-			_, err := getAllCompose(&ctx, docker, fs)
+			_, err := getAllCompose(&caps, docker, fs)
 			if err == nil {
 				t.Fatal("expected error, got nil")
 			}

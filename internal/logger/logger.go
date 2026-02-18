@@ -3,12 +3,12 @@ package logger
 import (
 	"fmt"
 	"io"
-	"orca/internal/context"
+	"orca/internal/capability"
 	. "orca/model/policy/log"
 )
 
-type logContext interface {
-	context.WithLog
+type logCapability interface {
+	capability.WithLog
 }
 type logger interface {
 	Log([]byte)
@@ -19,8 +19,8 @@ type Logger struct {
 	logPolicy LogLevel
 }
 
-func New(ctx logContext) Logger {
-	return Logger{out: ctx.LogTarget(), logPolicy: ctx.LogLevel()}
+func New(caps logCapability) Logger {
+	return Logger{out: caps.LogTarget(), logPolicy: caps.LogLevel()}
 }
 func (l *Logger) chkPolicy(lv LogLevel) bool {
 	return l.logPolicy >= lv

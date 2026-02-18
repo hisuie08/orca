@@ -3,7 +3,7 @@ package create
 import (
 	"fmt"
 	"orca/errs"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/executor"
 	"orca/internal/inspector"
 	"orca/model/config"
@@ -15,10 +15,10 @@ import (
 
 var _ Creator = (*creator)(nil)
 
-type createContext interface {
-	context.WithRoot
-	context.WithPolicy
-	context.WithLog
+type createCapability interface {
+	capability.WithRoot
+	capability.WithPolicy
+	capability.WithLog
 }
 type Creator interface {
 	Create(config.CfgOption) *config.OrcaConfig
@@ -26,14 +26,14 @@ type Creator interface {
 }
 
 type creator struct {
-	ctx createContext
-	fe  executor.FileSystem
-	fi  inspector.FileSystem
+	caps createCapability
+	fe   executor.FileSystem
+	fi   inspector.FileSystem
 }
 
-func ConfigCreator(ctx createContext) Creator {
-	return &creator{ctx: ctx, fi: inspector.NewFilesystem(),
-		fe: executor.NewFilesystem(ctx)}
+func ConfigCreator(caps createCapability) Creator {
+	return &creator{caps: caps, fi: inspector.NewFilesystem(),
+		fe: executor.NewFilesystem(caps)}
 }
 
 func (c *creator) Create(opt config.CfgOption) *config.OrcaConfig {
@@ -41,7 +41,7 @@ func (c *creator) Create(opt config.CfgOption) *config.OrcaConfig {
 }
 
 func (c *creator) Write(cfg *config.OrcaConfig, force bool) error {
-	if c.fi.FileExists(c.ctx.OrcaYamlFile()) {
+	if c.fi.FileExists(c.caps.OrcaYamlFile()) {
 		if !force {
 			return errs.ErrAlreadyInitialized
 		}
@@ -50,7 +50,7 @@ func (c *creator) Write(cfg *config.OrcaConfig, force bool) error {
 	if err != nil {
 		return err
 	}
-	return c.fe.WriteFile(c.ctx.OrcaYamlFile(), b)
+	return c.fe.WriteFile(c.caps.OrcaYamlFile(), b)
 }
 
 func NewConfig(c config.CfgOption) *config.OrcaConfig {

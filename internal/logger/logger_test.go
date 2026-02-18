@@ -2,7 +2,7 @@ package logger
 
 import (
 	"bytes"
-	"orca/internal/context"
+	"orca/internal/capability"
 	. "orca/model/policy/log"
 	"testing"
 )
@@ -21,8 +21,8 @@ func TestCompareLogLevel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.desc, func(t *testing.T) {
-			ctx := context.New().WithLog(tt.lp, new(bytes.Buffer))
-			lg := New(&ctx)
+			caps := capability.New().WithLog(tt.lp, new(bytes.Buffer))
+			lg := New(&caps)
 			l := lg.chkPolicy(tt.ll)
 			if tt.willLog != l {
 				t.Errorf("expected %t but got %t", tt.willLog, l)

@@ -1,7 +1,7 @@
 package volume
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/model/compose"
 	"orca/model/config"
 	"orca/model/plan"
@@ -21,12 +21,12 @@ func (f *fakeDockerInspector) BindExists(dir string) bool {
 	return dir == f.BindPath
 }
 
-// TestNilRoot 以外のテストで使うContext
-func fakeVolCtx(root string, ensurePath bool) VolumePlanContext {
-	ctx := context.New().WithConfig(&config.OrcaConfig{
+// TestNilRoot 以外のテストで使うCapability
+func fakeVolCaps(root string, ensurePath bool) VolumePlanCapability {
+	caps := capability.New().WithConfig(&config.OrcaConfig{
 		Volume: config.VolumeConfig{
 			VolumeRoot: &root, EnsurePath: ensurePath}})
-	return &ctx
+	return &caps
 }
 
 // テスト用ボリュームビルダー
@@ -121,9 +121,9 @@ func TestType(t *testing.T) {
 		{name: "local", cv: caseLocal, want: plan.VolumeLocal},
 	}
 	for _, tt := range tests {
-		ctx := fakeVolCtx("testroot", true)
+		caps := fakeVolCaps("testroot", true)
 		t.Run("want "+tt.name, func(t *testing.T) {
-			pl := buildVolumePlan(ctx, tt.cv, di)
+			pl := buildVolumePlan(caps, tt.cv, di)
 			for _, p := range pl {
 				if p.Type != tt.want {
 					t.Fatalf("volumes should be %s; %#v", tt.want, p)
@@ -156,10 +156,10 @@ func TestAggregation(t *testing.T) {
 			UsedBy: map[string]int{"a_vol": 1, "b_vol": 1}}},
 	}
 	for _, tt := range tests {
-		ctx := fakeVolCtx("testroot", true)
+		caps := fakeVolCaps("testroot", true)
 		di := &fakeDockerInspector{}
 		t.Run(tt.name, func(t *testing.T) {
-			pl := buildVolumePlan(ctx, tt.cv, di)
+			pl := buildVolumePlan(caps, tt.cv, di)
 			wq := tt.want.Quantity
 			lenpl := len(pl)
 			t.Log(wq, lenpl)
@@ -178,19 +178,19 @@ func TestAggregation(t *testing.T) {
 }
 func TestNilRoot(t *testing.T) {
 	// VolumeRoot nil → panic
-	nilRoot := context.New().WithConfig(
+	nilRoot := capability.New().WithConfig(
 		&config.OrcaConfig{Volume: config.VolumeConfig{
 			VolumeRoot: nil, EnsurePath: true}})
 	// VolumeRoot "" → panic
 	es := ""
-	emptyRoot := context.New().WithConfig(
+	emptyRoot := capability.New().WithConfig(
 		&config.OrcaConfig{Volume: config.VolumeConfig{
 			VolumeRoot: &es, EnsurePath: true}})
 	tests := []struct {
 		name string
-		ctx  VolumePlanContext
+		caps VolumePlanCapability
 	}{
-		{name: "nil root", ctx: &nilRoot}, {name: "empty root", ctx: &emptyRoot}}
+		{name: "nil root", caps: &nilRoot}, {name: "empty root", caps: &emptyRoot}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			defer func() {
@@ -200,7 +200,7 @@ func TestNilRoot(t *testing.T) {
 				}
 
 			}()
-			buildVolumePlan(tt.ctx, []compose.CollectedVolume{}, di)
+			buildVolumePlan(tt.caps, []compose.CollectedVolume{}, di)
 		})
 	}
 }
@@ -228,8 +228,8 @@ func TestBind(t *testing.T) {
 		// orca set default volume root <VolumeRoot>/<volume_name>
 		"c_vol": {path: filepath.Join(fakeRoot, "c_vol"), needMkdir: true},
 	}
-	ctx := fakeVolCtx(fakeRoot, true)
-	pl := buildVolumePlan(ctx, cv, di)
+	caps := fakeVolCaps(fakeRoot, true)
+	pl := buildVolumePlan(caps, cv, di)
 	for _, p := range pl {
 		w := want[p.Name]
 		if p.BindPath != w.path {

@@ -1,29 +1,29 @@
 package compose
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/usecase/compose/internal/getall"
 	"orca/internal/usecase/compose/internal/overlay"
 	"orca/model/compose"
 	"orca/model/plan"
 )
 
-type GetAllComposeContext interface {
-	context.WithRoot
+type GetAllComposeCapability interface {
+	capability.WithRoot
 }
 
-func GetAllCompose(ctx GetAllComposeContext) (compose.ComposeMap, error) {
-	return getall.GetAllCompose(ctx)
+func GetAllCompose(caps GetAllComposeCapability) (compose.ComposeMap, error) {
+	return getall.GetAllCompose(caps)
 }
 
-type OverlayContext interface {
-	context.WithConfig
+type OverlayCapability interface {
+	capability.WithConfig
 }
 type overlayer interface {
 	OverlayVolume([]plan.VolumePlan)
 	OverlayNetwork(plan.NetworkPlan)
 }
 
-func ComposeOverlayer(ctx OverlayContext, cm compose.ComposeMap) overlayer {
-	return overlay.ComposeOverlayer(ctx, cm)
+func ComposeOverlayer(caps OverlayCapability, cm compose.ComposeMap) overlayer {
+	return overlay.ComposeOverlayer(caps, cm)
 }

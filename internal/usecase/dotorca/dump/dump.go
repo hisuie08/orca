@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/fs"
 	"orca/errs"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/executor"
 	"orca/internal/inspector"
 	"orca/model/compose"
@@ -22,24 +22,24 @@ type Dumper interface {
 	DumpPlan(plan.OrcaPlan) (string, error)
 }
 
-type dumpContext interface {
-	context.WithRoot
-	context.WithPolicy
-	context.WithLog
+type dumpCapability interface {
+	capability.WithRoot
+	capability.WithPolicy
+	capability.WithLog
 }
 
 type dumper struct {
-	ctx   dumpContext
+	caps  dumpCapability
 	force bool
 	fi    inspector.FileSystem
 	fe    executor.FileSystem
 }
 
-func DotOrcaDumper(ctx dumpContext, force bool) *dumper {
-	return &dumper{ctx: ctx,
+func DotOrcaDumper(caps dumpCapability, force bool) *dumper {
+	return &dumper{caps: caps,
 		force: force,
 		fi:    inspector.NewFilesystem(),
-		fe:    executor.NewFilesystem(ctx),
+		fe:    executor.NewFilesystem(caps),
 	}
 }
 func (d *dumper) DumpComposes(cm compose.ComposeMap) ([]string, error) {
@@ -52,7 +52,7 @@ func (d *dumper) DumpComposes(cm compose.ComposeMap) ([]string, error) {
 	for _, name := range names {
 		spec := cm[name]
 		filename := fmt.Sprintf("compose.%s.yml", name)
-		path := filepath.Join(d.ctx.OrcaDir(), filename)
+		path := filepath.Join(d.caps.OrcaDir(), filename)
 		data, err := yaml.Marshal(spec)
 		if err != nil {
 			return written, err
@@ -66,7 +66,7 @@ func (d *dumper) DumpComposes(cm compose.ComposeMap) ([]string, error) {
 }
 
 func (d *dumper) DumpPlan(pl plan.OrcaPlan) (string, error) {
-	path := filepath.Join(d.ctx.OrcaDir(), "plan.yml")
+	path := filepath.Join(d.caps.OrcaDir(), "plan.yml")
 	data, err := yaml.Marshal(pl)
 	if err != nil {
 		return "", err

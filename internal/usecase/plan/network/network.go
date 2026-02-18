@@ -1,20 +1,20 @@
 package network
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/inspector"
 	"orca/model/compose"
 	"orca/model/config"
 	"orca/model/plan"
 )
 
-type NetworkPlanContext interface {
-	context.WithConfig
+type NetworkPlanCapability interface {
+	capability.WithConfig
 }
 
-func BuildNetworkPlan(ctx NetworkPlanContext,
+func BuildNetworkPlan(caps NetworkPlanCapability,
 	cn []compose.CollectedNetwork) plan.NetworkPlan {
-	return buildNetworkPlan(ctx, cn, inspector.NewDocker())
+	return buildNetworkPlan(caps, cn, inspector.NewDocker())
 }
 
 type dockerInspector interface {
@@ -22,10 +22,10 @@ type dockerInspector interface {
 }
 
 func buildNetworkPlan(
-	ctx NetworkPlanContext,
+	caps NetworkPlanCapability,
 	cn []compose.CollectedNetwork,
 	di dockerInspector) plan.NetworkPlan {
-	cfg := ctx.Config().Network
+	cfg := caps.Config().Network
 	np := plan.NetworkPlan{Actions: []plan.NetworkAction{}}
 	if !cfg.Enabled {
 		return np

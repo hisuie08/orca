@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	planprocess "orca/internal/process/plan"
 
 	"github.com/spf13/cobra"
@@ -13,8 +13,8 @@ func newPlanCommand() *cobra.Command {
 		Use:   "plan",
 		Short: "orcaがcomposeを管理する際変更される箇所を出力",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := context.BuildCommandCtx(*cmd)
-			proc := planprocess.New(ctx)
+			caps := capability.BuildCommandCaps(*cmd)
+			proc := planprocess.New(caps)
 			return proc.Run(opt)
 		},
 	}

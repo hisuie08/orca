@@ -1,7 +1,7 @@
 package plan
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/model/compose"
 	"orca/model/config"
 	"slices"
@@ -11,14 +11,14 @@ import (
 // 子関数を束ねるだけなので最小限のIOチェックのみ
 func TestBuildOrcaPlan(t *testing.T) {
 	root := t.TempDir()
-	ctx := context.New().WithRoot(root).
+	caps := capability.New().WithRoot(root).
 		WithConfig(&config.OrcaConfig{Name: "test",
 			Volume:  config.VolumeConfig{VolumeRoot: &root},
 			Network: config.NetworkConfig{Name: "test_net", Enabled: true},
 		})
 	cm := compose.ComposeMap{"b": &compose.ComposeSpec{},
 		"a": &compose.ComposeSpec{}}
-	got := BuildOrcaPlan(&ctx, cm)
+	got := BuildOrcaPlan(&caps, cm)
 	if len(got.ComposeDirs) != 2 || got.ComposeDirs[0] != "a" ||
 		got.ComposeDirs[1] != "b" {
 		t.Errorf("unexpected ComposeDirs: %#v", got.ComposeDirs)

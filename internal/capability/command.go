@@ -1,4 +1,4 @@
-package context
+package capability
 
 import (
 	"orca/cmd/baseflag"
@@ -9,13 +9,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type CommandContext interface {
+type CommandCapabilities interface {
 	WithRoot
 	WithLog
 	WithPolicy
 }
 
-func BuildCommandCtx(cmd cobra.Command) CommandContext {
+func BuildCommandCaps(cmd cobra.Command) CommandCapabilities {
 	wd, err := os.Getwd()
 	if err != nil {
 		panic("can't get working directory")
@@ -38,13 +38,13 @@ func BuildCommandCtx(cmd cobra.Command) CommandContext {
 		}
 		return policy.Real
 	}()
-	ctx := New().WithRoot(wd).WithPolicy(plcy).
+	caps := New().WithRoot(wd).WithPolicy(plcy).
 		WithLog(logLevel, cmd.OutOrStdout())
-	return &ctx
+	return &caps
 }
 
-func FromCommandCtx(ctx CommandContext) Context {
-	c := New().WithRoot(ctx.Root()).WithPolicy(ctx.Policy()).
-		WithLog(ctx.LogLevel(), ctx.LogTarget())
+func FromCommandCaps(caps CommandCapabilities) Capability {
+	c := New().WithRoot(caps.Root()).WithPolicy(caps.Policy()).
+		WithLog(caps.LogLevel(), caps.LogTarget())
 	return c
 }

@@ -1,24 +1,24 @@
 package dotorca
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/usecase/dotorca/dump"
 	"orca/model/compose"
 	"orca/model/plan"
 )
 
 // .orca/
-type DumpContext interface {
-	context.WithRoot
-	context.WithPolicy
-	context.WithLog
+type DumpCapability interface {
+	capability.WithRoot
+	capability.WithPolicy
+	capability.WithLog
 }
 
 func DumpComposes(
-	ctx DumpContext, cm compose.ComposeMap, force bool) ([]string, error) {
-	return dump.DotOrcaDumper(ctx, force).DumpComposes(cm)
+	caps DumpCapability, cm compose.ComposeMap, force bool) ([]string, error) {
+	return dump.DotOrcaDumper(caps, force).DumpComposes(cm)
 }
 
-func DumpPlan(ctx DumpContext, pl plan.OrcaPlan, force bool) (string, error) {
-	return dump.DotOrcaDumper(ctx, force).DumpPlan(pl)
+func DumpPlan(caps DumpCapability, pl plan.OrcaPlan, force bool) (string, error) {
+	return dump.DotOrcaDumper(caps, force).DumpPlan(pl)
 }

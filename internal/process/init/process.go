@@ -2,7 +2,7 @@ package pinit
 
 import (
 	"fmt"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/logger"
 	"orca/internal/usecase/config"
 	. "orca/model/config"
@@ -14,28 +14,28 @@ type InitOption struct {
 	config.WriteOption
 }
 
-type initProcessContext interface {
-	context.CommandContext
+type initProcessCapability interface {
+	capability.CommandCapabilities
 }
 
 type InitProcess struct {
-	ctx    context.CommandContext
+	caps   capability.CommandCapabilities
 	logger logger.Logger
 }
 
-func New(c context.CommandContext) *InitProcess {
-	return &InitProcess{ctx: c, logger: logger.New(c)}
+func New(c capability.CommandCapabilities) *InitProcess {
+	return &InitProcess{caps: c, logger: logger.New(c)}
 }
 
 func (p *InitProcess) Run(opt InitOption) error {
-	ctx := p.ctx
-	return p.run(ctx, opt)
+	caps := p.caps
+	return p.run(caps, opt)
 }
 
-func (p *InitProcess) run(ctx initProcessContext, opt InitOption) error {
+func (p *InitProcess) run(caps initProcessCapability, opt InitOption) error {
 	p.logger.Logln(log.LogNormal, "initializing orca cluster")
-	cfg := config.Create(ctx, opt.CfgOption)
-	if err := config.Write(ctx, cfg, opt.WriteOption); err != nil {
+	cfg := config.Create(caps, opt.CfgOption)
+	if err := config.Write(caps, cfg, opt.WriteOption); err != nil {
 		return err
 	}
 	p.logger.Logln(log.LogNormal, fmt.Sprintf("cluster %s was initialized", opt.Name))

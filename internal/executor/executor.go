@@ -1,7 +1,7 @@
 package executor
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/executor/internal/docker"
 	"orca/internal/executor/internal/filesystem"
 )
@@ -13,12 +13,12 @@ type Docker interface {
 	CreateVolume(string, ...string) ([]byte, error)
 }
 
-type execContext interface {
-	context.WithPolicy
-	context.WithLog
+type execCapability interface {
+	capability.WithPolicy
+	capability.WithLog
 }
 
-func NewDocker(p execContext) Docker {
+func NewDocker(p execCapability) Docker {
 	return docker.NewExecutor(p)
 }
 
@@ -29,6 +29,6 @@ type FileSystem interface {
 	RemoveDir(path string) error
 }
 
-func NewFilesystem(p execContext) FileSystem {
+func NewFilesystem(p execCapability) FileSystem {
 	return filesystem.NewExecutor(p)
 }

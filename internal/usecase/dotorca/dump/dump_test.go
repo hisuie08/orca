@@ -2,7 +2,7 @@ package dump
 
 import (
 	"bytes"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/inspector"
 	"orca/model/compose"
 	"orca/model/config"
@@ -29,24 +29,24 @@ func TestDumpCompose(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cm := compose.ComposeMap{"a": &compose.ComposeSpec{}}
 			tmpdir := t.TempDir()
-			ctx := context.New().WithRoot(tmpdir).
+			caps := capability.New().WithRoot(tmpdir).
 				WithConfig(&config.OrcaConfig{}).
 				WithPolicy(tt.p).WithLog(log.LogDetail, new(bytes.Buffer))
-			dumper := DotOrcaDumper(&ctx, false)
+			dumper := DotOrcaDumper(&caps, false)
 			got, err := dumper.DumpComposes(cm)
 			if len(got) != tt.wantWritten {
 				t.Errorf("expected written 1 but got %d", len(got))
 			}
 			if tt.p == policy.Real {
 				fi := inspector.NewFilesystem()
-				files, fe := fi.Files(ctx.OrcaDir())
+				files, fe := fi.Files(caps.OrcaDir())
 				if fe != nil {
 					t.Fatal(fe)
 				}
 				if len(files) != tt.wantFiles {
 					t.Errorf("%d files in dirs", len(files))
 				}
-				if got[0] != filepath.Join(ctx.OrcaDir(), "compose.a.yml") {
+				if got[0] != filepath.Join(caps.OrcaDir(), "compose.a.yml") {
 					t.Errorf("unexpected path: %s", got[0])
 				}
 			}
@@ -69,10 +69,10 @@ func TestDumpPlan(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ctx := context.New().WithRoot(t.TempDir()).
+			caps := capability.New().WithRoot(t.TempDir()).
 				WithConfig(&config.OrcaConfig{}).
 				WithPolicy(tt.policy).WithLog(log.LogDetail, new(bytes.Buffer))
-			dumper := DotOrcaDumper(&ctx, false)
+			dumper := DotOrcaDumper(&caps, false)
 			path, err := dumper.DumpPlan(pl)
 			if err != nil {
 				t.Error(err)
@@ -95,10 +95,10 @@ func TestForceDump(t *testing.T) {
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
-			ctx := context.New().WithRoot(t.TempDir()).
+			caps := capability.New().WithRoot(t.TempDir()).
 				WithConfig(&config.OrcaConfig{}).
 				WithPolicy(policy.Real).WithLog(log.LogDetail, new(bytes.Buffer))
-			dumper := DotOrcaDumper(&ctx, tC.force)
+			dumper := DotOrcaDumper(&caps, tC.force)
 			cm := compose.ComposeMap{"a": &compose.ComposeSpec{}}
 			// first dump
 			if _, err := dumper.DumpComposes(cm); err != nil {

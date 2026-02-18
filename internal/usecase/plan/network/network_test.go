@@ -1,7 +1,7 @@
 package network
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/model/compose"
 	"orca/model/config"
 	"orca/model/plan"
@@ -17,10 +17,10 @@ type fakeDockerInspector struct {
 func (f *fakeDockerInspector) NetworkExists(name string) bool {
 	return name == f.Exists
 }
-func fakeNetCtx(name string, enabled bool) NetworkPlanContext {
+func fakeNetCaps(name string, enabled bool) NetworkPlanCapability {
 	n := config.NetworkConfig{Name: name, Enabled: enabled, Internal: false}
-	ctx := context.New().WithConfig(&config.OrcaConfig{Network: n})
-	return &ctx
+	caps := capability.New().WithConfig(&config.OrcaConfig{Network: n})
+	return &caps
 }
 func Test_CreateOrNot(t *testing.T) {
 	tests := []struct {
@@ -36,7 +36,7 @@ func Test_CreateOrNot(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := buildNetworkPlan(
-				fakeNetCtx(tt.name, tt.enabled),
+				fakeNetCaps(tt.name, tt.enabled),
 				[]compose.CollectedNetwork{},
 				&fakeDockerInspector{Exists: tt.exists})
 			// Create = enabled && !exists
@@ -70,7 +70,7 @@ func TestActionType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := buildNetworkPlan(
-				fakeNetCtx(netname, true),
+				fakeNetCaps(netname, true),
 				[]compose.CollectedNetwork{tt.network},
 				&fakeDockerInspector{})
 			if tt.name == "no-op" {

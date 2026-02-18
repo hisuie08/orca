@@ -2,7 +2,7 @@ package pinit
 
 import (
 	"bytes"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/inspector"
 	"orca/internal/usecase/config"
 	. "orca/model/config"
@@ -13,10 +13,10 @@ import (
 	"testing"
 )
 
-func fakeCtx(root string) initProcessContext {
-	ctx := context.New().WithRoot(root).WithPolicy(policy.Real).
+func fakeCaps(root string) initProcessCapability {
+	caps := capability.New().WithRoot(root).WithPolicy(policy.Real).
 		WithLog(log.LogDetail, new(bytes.Buffer))
-	return &ctx
+	return &caps
 }
 
 func TestCreateOrNocreate(t *testing.T) {
@@ -31,11 +31,11 @@ func TestCreateOrNocreate(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			root := t.TempDir()
-			ctx := fakeCtx(root)
-			New(ctx).Run(InitOption{
+			caps := fakeCaps(root)
+			New(caps).Run(InitOption{
 				CfgOption:   CfgOption{Name: filepath.Base(root)},
 				WriteOption: config.WriteOption{NoCreate: tC.nocreate}})
-			exist := inspector.NewFilesystem().FileExists(ctx.OrcaYamlFile())
+			exist := inspector.NewFilesystem().FileExists(caps.OrcaYamlFile())
 			if exist != tC.expected {
 				t.Errorf("files in root expected %t but found %t",
 					tC.expected, exist)

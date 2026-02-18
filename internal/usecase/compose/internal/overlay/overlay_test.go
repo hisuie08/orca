@@ -1,7 +1,7 @@
 package overlay
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/model/compose"
 	"orca/model/config"
 	"orca/model/plan"
@@ -24,11 +24,11 @@ func fakeMap() compose.ComposeMap {
 			nRef: &compose.NetworkSpec{Name: cRef + "_net"}},
 	}}
 }
-func fakeCtx(volume *string, network bool) overlayContext {
-	ctx := context.New().WithConfig(&config.OrcaConfig{
+func fakeCaps(volume *string, network bool) overlayCapability {
+	caps := capability.New().WithConfig(&config.OrcaConfig{
 		Volume:  config.VolumeConfig{VolumeRoot: volume},
 		Network: config.NetworkConfig{Enabled: network, Name: netName}})
-	return &ctx
+	return &caps
 }
 
 func fakePlan(cfg config.OrcaConfig) ([]plan.VolumePlan, plan.NetworkPlan) {
@@ -43,17 +43,17 @@ func fakePlan(cfg config.OrcaConfig) ([]plan.VolumePlan, plan.NetworkPlan) {
 func TestOverlay(t *testing.T) {
 	testCases := []struct {
 		name string
-		ctx  overlayContext
+		caps overlayCapability
 		want func(compose.ComposeMap) bool
 	}{
-		{name: "network_and_volume_enabled", ctx: fakeCtx(&volRoot, true),
+		{name: "network_and_volume_enabled", caps: fakeCaps(&volRoot, true),
 			want: func(nm compose.ComposeMap) bool {
 				nv := nm[cRef].Volumes[vRef]
 				nn := nm[cRef].Networks[nRef]
 				return nv.External && nv.Driver == "" &&
 					nn.Name == netName && nn.External
 			}},
-		{name: "network_and_volume_disabled", ctx: fakeCtx(nil, false),
+		{name: "network_and_volume_disabled", caps: fakeCaps(nil, false),
 			want: func(nm compose.ComposeMap) bool {
 				nv := nm[cRef].Volumes[vRef]
 				nn := nm[cRef].Networks[nRef]
@@ -64,8 +64,8 @@ func TestOverlay(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			cm := fakeMap()
-			o := ComposeOverlayer(tt.ctx, cm)
-			vps, np := fakePlan(*tt.ctx.Config())
+			o := ComposeOverlayer(tt.caps, cm)
+			vps, np := fakePlan(*tt.caps.Config())
 			o.OverlayNetwork(np)
 			o.OverlayVolume(vps)
 			if !tt.want(cm) {

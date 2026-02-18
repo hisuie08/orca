@@ -4,7 +4,7 @@ Copyright © 2026 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/logger"
 	"orca/internal/usecase/config"
 	"orca/model/policy/log"
@@ -19,9 +19,9 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Reads and displays the current orca.yml",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.BuildCommandCtx(*cmd)
-		out := logger.New(ctx)
-		cfg, err := config.Load(ctx)
+		caps := capability.BuildCommandCaps(*cmd)
+		out := logger.New(caps)
+		cfg, err := config.Load(caps)
 		if err != nil {
 			return err
 		}

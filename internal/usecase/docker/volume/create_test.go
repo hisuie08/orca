@@ -37,15 +37,15 @@ func Test_createVolume(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		ctx createVolContext
-		vp  plan.VolumePlan
-		de  dockerExecutor
+		caps createVolCapability
+		vp   plan.VolumePlan
+		de   dockerExecutor
 	}{
 		// TODO: Add test cases.
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			createVolume(tt.ctx, tt.vp, tt.de)
+			createVolume(tt.caps, tt.vp, tt.de)
 		})
 	}
 }

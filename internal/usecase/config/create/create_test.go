@@ -2,7 +2,7 @@ package create
 
 import (
 	"bytes"
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/executor"
 	"orca/internal/inspector"
 	"orca/model/config"
@@ -23,11 +23,11 @@ func TestCreateConfig(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			dir := t.TempDir()
-			ctx := context.New().WithRoot(dir).WithPolicy(tC.policy).
+			caps := capability.New().WithRoot(dir).WithPolicy(tC.policy).
 				WithLog(log.LogDetail, new(bytes.Buffer))
 			fi := inspector.NewFilesystem()
-			fe := executor.NewFilesystem(&ctx)
-			c := &creator{ctx: &ctx, fe: fe, fi: fi}
+			fe := executor.NewFilesystem(&caps)
+			c := &creator{caps: &caps, fe: fe, fi: fi}
 			cfg := c.Create(config.CfgOption{})
 			if err := c.Write(cfg, true); err != nil {
 				t.Error(err)

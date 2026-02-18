@@ -1,20 +1,20 @@
 package volume
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/inspector"
 	"orca/model/compose"
 	"orca/model/plan"
 	"path/filepath"
 )
 
-type VolumePlanContext interface {
-	context.WithConfig
+type VolumePlanCapability interface {
+	capability.WithConfig
 }
 
-func BuildVolumePlan(ctx VolumePlanContext,
+func BuildVolumePlan(caps VolumePlanCapability,
 	cv []compose.CollectedVolume) []plan.VolumePlan {
-	return buildVolumePlan(ctx, cv, inspector.NewDocker())
+	return buildVolumePlan(caps, cv, inspector.NewDocker())
 }
 
 type dockerInspector interface {
@@ -28,10 +28,10 @@ VolumeRoot が nil または空文字列の場合、orca は volume 管理を無
 volume 管理を有効にするには、明示的に 非空の VolumeRoot を指定する必要がある
 */
 func buildVolumePlan(
-	ctx VolumePlanContext,
+	caps VolumePlanCapability,
 	cv []compose.CollectedVolume,
 	di dockerInspector) []plan.VolumePlan {
-	cfg := ctx.Config().Volume
+	cfg := caps.Config().Volume
 	plans := []plan.VolumePlan{}
 	if !cfg.Enabled() {
 		panic("BuildVolumePlan called while volume management is disabled (VolumeRoot is nil)")

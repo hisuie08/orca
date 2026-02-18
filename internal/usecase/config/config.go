@@ -1,24 +1,24 @@
 package config
 
 import (
-	"orca/internal/context"
+	"orca/internal/capability"
 	"orca/internal/usecase/config/create"
 	"orca/internal/usecase/config/load"
 	"orca/model/config"
 )
 
-type LoadConfigContext interface {
-	context.WithRoot
+type LoadConfigCapability interface {
+	capability.WithRoot
 }
 
-func Load(ctx LoadConfigContext) (*config.OrcaConfig, error) {
-	return load.Load(ctx)
+func Load(caps LoadConfigCapability) (*config.OrcaConfig, error) {
+	return load.Load(caps)
 }
 
-type CreateCfgContext interface {
-	context.WithRoot
-	context.WithPolicy
-	context.WithLog
+type CreateCfgCapability interface {
+	capability.WithRoot
+	capability.WithPolicy
+	capability.WithLog
 }
 
 type WriteOption struct {
@@ -26,13 +26,13 @@ type WriteOption struct {
 	Force    bool
 }
 
-func Create(ctx CreateCfgContext, opt config.CfgOption) *config.OrcaConfig {
-	return create.ConfigCreator(ctx).Create(opt)
+func Create(caps CreateCfgCapability, opt config.CfgOption) *config.OrcaConfig {
+	return create.ConfigCreator(caps).Create(opt)
 }
 
-func Write(ctx CreateCfgContext, cfg *config.OrcaConfig, opt WriteOption) error {
+func Write(caps CreateCfgCapability, cfg *config.OrcaConfig, opt WriteOption) error {
 	if opt.NoCreate {
 		return nil
 	}
-	return create.ConfigCreator(ctx).Write(cfg, opt.Force)
+	return create.ConfigCreator(caps).Write(cfg, opt.Force)
 }
