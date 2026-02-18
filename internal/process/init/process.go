@@ -1,6 +1,7 @@
 package pinit
 
 import (
+	"fmt"
 	"orca/internal/context"
 	"orca/internal/logger"
 	"orca/internal/usecase/config"
@@ -37,5 +38,6 @@ func (p *InitProcess) run(ctx initProcessContext, opt InitOption) error {
 	if err := config.Write(ctx, cfg, opt.WriteOption); err != nil {
 		return err
 	}
+	p.logger.Logln(log.LogNormal, fmt.Sprintf("cluster %s was initialized", opt.Name))
 	return nil
 }
