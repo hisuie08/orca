@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"fmt"
 	"orca/errs"
 	"orca/model/compose"
 	"os/exec"
@@ -57,11 +58,11 @@ func (d *inspector) Compose(dir string) (*compose.ComposeSpec, error) {
 	o, err := d.runDocker(cmd)
 	if err != nil {
 		// config が生成できない = compose が無い or 無効
-		return nil, errs.ErrComposeNotFound
+		return nil, fmt.Errorf("compose not found: %w", errs.ErrComposeNotFound)
 	}
 	spec := &compose.ComposeSpec{}
 	if err := yaml.Unmarshal(o, spec); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("compose %s is invalid: %w", dir, err)
 	}
 	return spec, nil
 }

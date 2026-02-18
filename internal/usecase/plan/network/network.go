@@ -56,7 +56,6 @@ func buildAction(net compose.CollectedNetwork, cfg config.NetworkConfig,
 	case net.Ref.Key != "default" && net.Spec.Name == cfg.Name:
 		// 名前が競合するnetworkはcomposeから削除
 		action.ActionType = plan.NetworkRemoveConflict
-
 	}
 	return action, action.ActionType != ""
 }

@@ -7,11 +7,11 @@ import (
 	"os"
 )
 
-func HandleError(err error,silent bool)int{
-switch {
+func HandleError(err error, silent bool) int {
+	switch {
 	case errors.Is(err, errs.ErrAlreadyInitialized):
 		if !silent {
-			fmt.Fprintln(os.Stderr, "このディレクトリは既に初期化されています")
+			fmt.Fprintln(os.Stderr, "このディレクトリで orca.yml は既に存在しています")
 			fmt.Fprintln(os.Stderr, "--force オプションで再生成してください")
 		}
 		return 0
