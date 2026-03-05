@@ -30,7 +30,6 @@ func NewExecutor(caps execCapability) executor {
 
 type dockerExecutor struct {
 	caps execCapability
-	execCapability
 	log  logger.Logger
 }
 

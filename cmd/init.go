@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"orca/internal/capability"
 	pinit "orca/internal/process/init"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -29,7 +32,10 @@ func newInitCommand() *cobra.Command {
 			}
 			// Process 呼び出し
 			caps := capability.BuildCommandCaps(*cmd)
-			proc := pinit.New(caps)
+			ctx, stop := signal.NotifyContext(
+				context.Background(), os.Interrupt, syscall.SIGTERM)
+			defer stop()
+			proc := pinit.New(ctx, caps)
 			return proc.Run(opt)
 		},
 	}

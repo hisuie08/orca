@@ -1,6 +1,7 @@
 package pinit
 
 import (
+	"context"
 	"fmt"
 	"orca/internal/capability"
 	"orca/internal/logger"
@@ -23,7 +24,7 @@ type InitProcess struct {
 	logger logger.Logger
 }
 
-func New(c capability.CommandCapability) *InitProcess {
+func New(ctx context.Context, c capability.CommandCapability) *InitProcess {
 	return &InitProcess{caps: c, logger: logger.New(c)}
 }
 

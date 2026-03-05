@@ -32,7 +32,7 @@ func TestCreateOrNocreate(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			root := t.TempDir()
 			caps := fakeCaps(root)
-			New(caps).Run(InitOption{
+			New(t.Context(), caps).Run(InitOption{
 				CfgOption:   CfgOption{Name: filepath.Base(root)},
 				WriteOption: config.WriteOption{NoCreate: tC.nocreate}})
 			exist := inspector.NewFilesystem().FileExists(caps.OrcaYamlFile())
