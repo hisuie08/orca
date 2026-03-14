@@ -12,8 +12,8 @@ func pRow(cols []string, widths []int) string {
 	for i, c := range cols {
 		vis := formatter.VisibleLen(c)
 		pad := max(widths[i]-vis, 0)
-		result = append(result, fmt.Sprintf("%s", c), 
-		strings.Repeat(" ", pad), "  ")
+		result = append(result, fmt.Sprintf("%s", c),
+			strings.Repeat(" ", pad), "  ")
 	}
 	result = append(result, fmt.Sprintf("\n"))
 	return strings.Join(result, "")
