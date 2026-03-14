@@ -1,0 +1,31 @@
+name: customCompose
+services:
+  test3:
+    build: .
+    volumes:
+      - tempfsVol:/tempfs
+      - sharedvol:/shared
+      - defvol:/defvol
+    networks:
+      - orca
+  test3_:
+    build: .
+    volumes:
+      - tempfsVol:/tempfs
+      - sharedvol:/shared
+      - defvol:/defvol
+volumes:
+  tempfsVol:
+    driver: "local"
+    driver_opts:
+      type: tempfs
+  sharedvol:
+    name: "customShare"
+  defvol:
+
+networks:
+  orca:
+    name: orcanet
+  default:
+    name: main
+    external: true

@@ -1,4 +1,2 @@
-testdata/
-orca*.yml
 build/*
 ignorefile

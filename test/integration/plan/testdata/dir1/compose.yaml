@@ -1,0 +1,13 @@
+services:
+  test1:
+    build: .
+    volumes:
+      - defaultVol:/default
+
+volumes:
+  defaultVol:
+
+# 事前定義デフォルト
+networks:
+  default:
+    name: "custom"

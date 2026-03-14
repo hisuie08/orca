@@ -1,0 +1,18 @@
+services:
+  test2:
+    build: .
+    volumes:
+      - namedVol:/named
+      - bindVol:/bind
+
+volumes:
+  # カスタム名が指定されているボリューム
+  namedVol:
+    name: "volName"
+  bindVol:
+    driver: "local"
+    # バインド先が存在しないボリューム
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: /testdata/volume

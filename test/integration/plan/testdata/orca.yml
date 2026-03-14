@@ -1,0 +1,8 @@
+name: myorca
+volume:
+    volume_root: ./volume
+    ensure_path: true
+network:
+    enabled: true
+    internal: false
+    name: null

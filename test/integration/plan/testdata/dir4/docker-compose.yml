@@ -1,0 +1,12 @@
+services:
+  test4:
+    build: .
+    volumes:
+      - externalVol:/external
+      - shareVol:/sharev
+
+volumes:
+  externalVol:
+    external: true
+  shareVol:
+    name: "customShare"
